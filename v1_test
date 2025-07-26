@@ -1,9 +1,21 @@
 # app.py
-from flask import Flask, request, jsonify, abort
+
+import sys
 from uuid import uuid4
 from datetime import time
+from flask import Flask, request, jsonify, abort
 
 app = Flask(__name__)
+
+# If running inside Google Colab, enable ngrok tunneling
+if 'google.colab' in sys.modules:
+    try:
+        from flask_ngrok import run_with_ngrok
+        run_with_ngrok(app)
+    except ImportError:
+        # flask-ngrok not installed; you can install via:
+        # !pip install flask-ngrok
+        pass
 
 # In-memory stores
 USERS = {}        # user_id -> { "name": ... }
@@ -46,11 +58,11 @@ def add_timeslot(event_id):
     for field in ("day", "start", "end"):
         if field not in data:
             abort(400, f"Missing '{field}'")
-    ts_id = str(uuid4())
     start = parse_time(data["start"])
     end = parse_time(data["end"])
     if start >= end:
         abort(400, "Start time must be before end time")
+    ts_id = str(uuid4())
     event["timeslots"][ts_id] = {
         "day": data["day"],
         "start": data["start"],
@@ -75,7 +87,7 @@ def assign_to_slot(ts_id):
 @app.route("/calendar", methods=["GET"])
 def view_calendar():
     """Return all events, slots and which users signed up."""
-    cal = []
+    calendar = []
     for eid, ev in EVENTS.items():
         ev_entry = {
             "event_id": eid,
@@ -83,19 +95,21 @@ def view_calendar():
             "timeslots": []
         }
         for ts_id, ts in ev["timeslots"].items():
+            assigned = [
+                {"user_id": u, "name": USERS[u]["name"]}
+                for u in ASSIGNMENTS.get(ts_id, [])
+            ]
             ev_entry["timeslots"].append({
                 "timeslot_id": ts_id,
                 "day": ts["day"],
                 "start": ts["start"],
                 "end": ts["end"],
-                "assigned_users": [
-                    {"user_id": u, "name": USERS[u]["name"]}
-                    for u in ASSIGNMENTS[ts_id]
-                ]
+                "assigned_users": assigned
             })
-        cal.append(ev_entry)
-    return jsonify(cal), 200
+        calendar.append(ev_entry)
+    return jsonify(calendar), 200
 
 
 if __name__ == "__main__":
-    app.run(debug=True)
+    # Listen on all interfaces, port 5000
+    app.run(host="0.0.0.0", port=5000, debug=True)
