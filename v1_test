@@ -1,4 +1,4 @@
-# app.py
+# pyschic-tribble.py
 
 import sys
 from uuid import uuid4
