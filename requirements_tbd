@@ -43,3 +43,19 @@ gunicorn>=20.1
 pytest>=7.1
 black>=22.10
 isort>=5.10
+
+
+Please choose the above libraries/repos based upon the chosen framework (Flask vs. FastAPI vs. Django) and database. 
+These libraries will give you:
+
+a) RFC 5545-compliant calendar I/O
+
+b) Robust date/time and recurrence support
+
+c) Secure encryption, token handling, and password hashing
+
+d) Shortlink creation for shareable invites
+
+e) User session/JWT-based auth and email notifications
+
+f) Environment management, testing, and deployment tooling
