@@ -1,0 +1,92 @@
+Python Dependencies for Psychic-Tribble (i.e. interactive calendar app) 
+
+Below is a comprehensive list of Python libraries (with corresponding GitHub repos) you’ll likely need for:
+
+Core calendar functionality
+
+Web/backend framework
+
+Encryption and security
+
+Shareable shortlink generation
+
+User authentication & authorization
+
+Email notifications
+
+Utilities (env management, testing, formatting)
+
+You can include these in your requirements.txt or install via pip at the top of your project.
+
+1. Web Framework & API
+Flask — lightweight WSGI framework • GitHub: https://github.com/pallets/flask • PyPI: Flask>=2.0
+
+Flask-RESTful — build REST APIs on Flask • GitHub: https://github.com/flask-restful/flask-restful • PyPI: Flask-RESTful>=0.3.9
+
+FastAPI — high-performance ASGI framework (optional) • GitHub: https://github.com/tiangolo/fastapi • PyPI: fastapi>=0.85
+
+Uvicorn — ASGI server (for FastAPI) • GitHub: https://github.com/encode/uvicorn • PyPI: uvicorn>=0.18
+
+2. Database & ORM
+SQLAlchemy — core ORM and SQL toolkit • GitHub: https://github.com/sqlalchemy/sqlalchemy • PyPI: SQLAlchemy>=1.4
+
+Flask-SQLAlchemy — SQLAlchemy integration for Flask • GitHub: https://github.com/pallets/flask-sqlalchemy • PyPI: Flask-SQLAlchemy>=2.5
+
+Alembic — database migrations for SQLAlchemy • GitHub: https://github.com/sqlalchemy/alembic • PyPI: alembic>=1.7
+
+psycopg2-binary — PostgreSQL driver (or choose mysqlclient) • PyPI: psycopg2-binary>=2.9
+
+3. Calendar & Date-Time
+icalendar — iCalendar RFC 5545 parsing/generation • GitHub: https://github.com/collective/icalendar • PyPI: icalendar>=4.0
+
+ics.py — alternative iCal generator/parser • GitHub: https://github.com/C4ptAINCrunch/ics.py • PyPI: ics>=0.8
+
+python-dateutil — recurrence rules, parsing • GitHub: https://github.com/dateutil/dateutil • PyPI: python-dateutil>=2.8
+
+pytz — timezone database (or stdlib zoneinfo for Python 3.9+) • GitHub: https://github.com/stub42/pytz • PyPI: pytz>=2022.1
+
+4. Authentication & Authorization
+Flask-Login — session-based user management • GitHub: https://github.com/maxcountryman/flask-login • PyPI: Flask-Login>=0.6
+
+Flask-JWT-Extended — JWT for RESTful auth • GitHub: https://github.com/vimalloc/flask-jwt-extended • PyPI: Flask-JWT-Extended>=4.4
+
+PyJWT — encode/decode JSON Web Tokens • GitHub: https://github.com/jpadilla/pyjwt • PyPI: PyJWT>=2.4
+
+passlib — secure password hashing (bcrypt, argon2) • GitHub: https://github.com/pallets/passlib • PyPI: passlib[bcrypt,argon2]>=1.7
+
+5. Encryption & Security
+cryptography — high-level cryptographic recipes • GitHub: https://github.com/pyca/cryptography • PyPI: cryptography>=38.0
+
+itsdangerous — URL-safe data signing (tokens, links) • GitHub: https://github.com/pallets/itsdangerous • PyPI: itsdangerous>=2.1
+
+python-jose — JOSE (JWT/JWE/JWS) implementation (optional) • GitHub: https://github.com/mpdavis/python-jose • PyPI: python-jose>=3.3
+
+6. Shortlink & Identifier Generation
+hashids — generate short, unique, non-sequential IDs • GitHub: https://github.com/hashids/hashids-python • PyPI: hashids>=1.3
+
+shortuuid — concise UUIDs • GitHub: https://github.com/skorokithakis/shortuuid • PyPI: shortuuid>=1.0
+
+nanoid — URL-friendly unique string generator • GitHub: https://github.com/puyuan/py-nanoid • PyPI: nanoid>=0.7
+
+7. Email & Notifications
+Flask-Mail — SMTP integration for Flask • GitHub: https://github.com/mattupstate/flask-mail • PyPI: Flask-Mail>=0.9
+
+aiosmtplib — async SMTP client (for FastAPI) • GitHub: https://github.com/cole/aiosmtplib • PyPI: aiosmtplib>=1.1
+
+email-validator — validate email addresses • GitHub: https://github.com/JoshData/python-email-validator • PyPI: email-validator>=1.2
+
+8. API & Data Validation
+pydantic — data parsing & validation (FastAPI) • GitHub: https://github.com/samuelcolvin/pydantic • PyPI: pydantic>=1.10
+
+marshmallow — schema-based (de)serialization • GitHub: https://github.com/marshmallow-code/marshmallow • PyPI: marshmallow>=3.14
+
+9. Utilities & DevOps
+python-dotenv — load .env configurations • GitHub: https://github.com/theskumar/python-dotenv • PyPI: python-dotenv>=0.20
+
+requests / httpx — HTTP clients for external APIs • GitHub: https://github.com/psf/requests (PyPI: requests>=2.28) • GitHub: https://github.com/encode/httpx (PyPI: httpx>=0.24)
+
+gunicorn — production WSGI server (for Flask) • GitHub: https://github.com/benoitc/gunicorn • PyPI: gunicorn>=20.1
+
+pytest — testing framework • GitHub: https://github.com/pytest-dev/pytest • PyPI: pytest>=7.1
+
+black / isort — code formatting & import sorting • GitHub: https://github.com/psf/black (PyPI: black>=22.10) • GitHub: https://github.com/PyCQA/isort (PyPI: isort>=5.10)
