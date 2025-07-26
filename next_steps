@@ -1,10 +1,11 @@
-# Next Steps
-Persist to SQLite/PostgreSQL via SQLAlchemy
+# next steps --> potential additions/enhancements
 
-JWT-based user authentication
+a) Persist to SQLite/PostgreSQL via SQLAlchemy
 
-Recurring-event support (e.g. “every Mon/Wed/Fri”)
+b) JWT-based user authentication
 
-Conflict checks (prevent overlapping assignments)
+c) Recurring-event support (e.g. “every Mon/Wed/Fri”)
 
-A React or Vue front end that visualizes the calendar grid.
+d) Conflict checks (prevent overlapping assignments)
+
+e) A React or Vue front end that visualizes the calendar grid.
