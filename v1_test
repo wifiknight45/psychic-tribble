@@ -1,0 +1,101 @@
+# app.py
+from flask import Flask, request, jsonify, abort
+from uuid import uuid4
+from datetime import time
+
+app = Flask(__name__)
+
+# In-memory stores
+USERS = {}        # user_id -> { "name": ... }
+EVENTS = {}       # event_id -> { "name": ..., "timeslots": { ts_id: {...} }}
+ASSIGNMENTS = {}  # ts_id -> set(user_ids)
+
+
+def parse_time(tstr):
+    """Expect HH:MM in 24h format"""
+    h, m = map(int, tstr.split(":"))
+    return time(hour=h, minute=m)
+
+
+@app.route("/users", methods=["POST"])
+def create_user():
+    data = request.get_json()
+    if not data or "name" not in data:
+        abort(400, "Must supply 'name'")
+    uid = str(uuid4())
+    USERS[uid] = {"name": data["name"]}
+    return jsonify({"user_id": uid}), 201
+
+
+@app.route("/events", methods=["POST"])
+def create_event():
+    data = request.get_json()
+    if not data or "name" not in data:
+        abort(400, "Must supply 'name'")
+    eid = str(uuid4())
+    EVENTS[eid] = {"name": data["name"], "timeslots": {}}
+    return jsonify({"event_id": eid}), 201
+
+
+@app.route("/events/<event_id>/timeslots", methods=["POST"])
+def add_timeslot(event_id):
+    event = EVENTS.get(event_id)
+    if not event:
+        abort(404, "Event not found")
+    data = request.get_json()
+    for field in ("day", "start", "end"):
+        if field not in data:
+            abort(400, f"Missing '{field}'")
+    ts_id = str(uuid4())
+    start = parse_time(data["start"])
+    end = parse_time(data["end"])
+    if start >= end:
+        abort(400, "Start time must be before end time")
+    event["timeslots"][ts_id] = {
+        "day": data["day"],
+        "start": data["start"],
+        "end": data["end"],
+    }
+    ASSIGNMENTS[ts_id] = set()
+    return jsonify({"timeslot_id": ts_id}), 201
+
+
+@app.route("/timeslots/<ts_id>/assign", methods=["POST"])
+def assign_to_slot(ts_id):
+    if ts_id not in ASSIGNMENTS:
+        abort(404, "Timeslot not found")
+    data = request.get_json()
+    uid = data.get("user_id")
+    if uid not in USERS:
+        abort(404, "User not found")
+    ASSIGNMENTS[ts_id].add(uid)
+    return jsonify({"message": "Assigned successfully"}), 200
+
+
+@app.route("/calendar", methods=["GET"])
+def view_calendar():
+    """Return all events, slots and which users signed up."""
+    cal = []
+    for eid, ev in EVENTS.items():
+        ev_entry = {
+            "event_id": eid,
+            "name": ev["name"],
+            "timeslots": []
+        }
+        for ts_id, ts in ev["timeslots"].items():
+            ev_entry["timeslots"].append({
+                "timeslot_id": ts_id,
+                "day": ts["day"],
+                "start": ts["start"],
+                "end": ts["end"],
+                "assigned_users": [
+                    {"user_id": u, "name": USERS[u]["name"]}
+                    for u in ASSIGNMENTS[ts_id]
+                ]
+            })
+        cal.append(ev_entry)
+    return jsonify(cal), 200
+
+
+if __name__ == "__main__":
+    app.run(debug=True)
