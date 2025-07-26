@@ -1,0 +1,12 @@
+# Project Structure and Patterns
+As the app grows, we shall eventually use the following schema:
+
+app.py or __init__.py for application factory
+
+routes.py for URL handlers
+
+models.py for database schemas
+
+templates/ for Jinja2 HTML files
+
+static/ for CSS, JavaScript, images
