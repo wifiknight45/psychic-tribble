@@ -1,5 +1,7 @@
 # Project Structure and Patterns
+
 updated 26july2025
+
 pyschic_tribble/
 ├── app.py
 ├── models.py
