@@ -39,7 +39,7 @@ Extensions such as RFC 5546 (iCalendar grouping), RFC 7986 (additional component
 Practical Implementation Tips
 In Python, libraries like icalendar or ics.py parse and generate RFC 5545 data structures.
 
-For recurrence rules (RRULE), use libraries such as dateutil.rrule to construct or interpret repeating events per Section 3.3.10.
+For recurrence rules (RRULE), use libraries such as dateutil.rrule to construct or interpret repeating events per Section 3.3.10. 
 
 To serve calendars over the web, set Content-Type: text/calendar; charset=utf-8 and stream .ics files or implement CalDAV endpoints.
 
