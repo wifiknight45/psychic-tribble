@@ -4,6 +4,7 @@ Scheduling API Backend (MVP)
 A minimal Flask-based backend for creating users, events, timeslots, and signing users up for those timeslots. This MVP is designed to run in any Python environment—local Debian/ParrotOS, Google Colab (with optional ngrok tunneling), or Docker—and serves as the foundation for a future mobile app and desktop/web interface.
 
 Table of Contents
+
 I. Overview
 
 II. Architecture & Data Model
@@ -100,7 +101,8 @@ bash
 pip install flask
 # Optional for Google Colab
 pip install flask-ngrok
-Running the Application
+
+V. Running the Application
 Local / Live-USB Debian (ParrotOS)
 bash
 export FLASK_APP=app.py
@@ -120,10 +122,10 @@ bash
 !python psychic-tribble.py
 If flask-ngrok is installed, the script will automatically open a public URL.
 
-API Endpoints
+VI. API Endpoints
 All endpoints consume and return JSON. The base URL defaults to http://localhost:5000 (or the ngrok URL in Colab).
 
-Create User
+VII. Create User
 URL: POST /users
 
 Body:
@@ -214,20 +216,22 @@ json
     ]
   }
 ]
+
 Detailed Workflow
-Create a user
+
+VII. Create a user
 
 POST to /users
 
 Server validates name field, generates UUID, stores in USERS.
 
-Create an event
+VIII. Create an event
 
 POST to /events
 
 Server validates name, generates UUID, stores event skeleton in EVENTS.
 
-Add timeslot
+IX. Add timeslot
 
 POST to /events/<event_id>/timeslots
 
@@ -239,7 +243,7 @@ Enforce start < end.
 
 Generate a timeslot UUID, save under the event, initialize empty assignment set.
 
-Assign user to timeslot
+X. Assign user to timeslot
 
 POST to /timeslots/<ts_id>/assign
 
@@ -247,15 +251,16 @@ Validate timeslot and user existence.
 
 Add user ID into ASSIGNMENTS[ts_id].
 
-View calendar
+XI. View calendar
 
+XII. Detailed Workflow
 GET /calendar
 
 Iterate all events, timeslots, and assignments.
 
 Build a JSON structure combining event details with assigned user names.
 
-Sample Requests & Responses
+XIII. Sample Requests & Responses
 Below is a quick curl walkthrough:
 
 bash
@@ -283,37 +288,37 @@ curl -X POST localhost:5000/timeslots/<TS_ID>/assign \
 curl localhost:5000/calendar
 Replace <EVENT_ID>, <TS_ID>, <USER_ID> with the UUIDs returned by earlier calls.
 
-Scaling & Next Steps
-Persistent Storage
+XIV. Scaling & Next Steps
+a) Persistent Storage
 
-Migrate from in-memory dicts to a relational database (PostgreSQL/MySQL) or NoSQL (MongoDB).
+b) Migrate from in-memory dicts to a relational database (PostgreSQL/MySQL) or NoSQL (MongoDB).
 
-Use SQLAlchemy or a similar ORM for data modeling and migrations.
+c) Use SQLAlchemy or a similar ORM for data modeling and migrations.
 
-Authentication & Authorization
+d) Authentication & Authorization
 
-Integrate JWT or OAuth2 for user sign-up/login.
+e) Integrate JWT or OAuth2 for user sign-up/login.
 
-Protect endpoints so only authenticated clients can create/assign.
+f) Protect endpoints so only authenticated clients can create/assign.
 
 Web & Mobile Frontend
 
-Build a React/Next.js or Vue.js web dashboard for interactive scheduling.
+a) Build a React/Next.js or Vue.js web dashboard for interactive scheduling.
 
-Use React Native or Flutter for mobile apps.
+b) Use React Native or Flutter for mobile apps.
 
 Deployment & Scaling
 
-Containerize with Docker.
+a) Containerize with Docker.
 
-Orchestrate with Kubernetes for high availability.
+b) Orchestrate with Kubernetes for high availability.
 
-Use a WSGI server (Gunicorn/uWSGI) behind NGINX.
+c) Use a WSGI server (Gunicorn/uWSGI) behind NGINX.
 
 Real-time Updates
 
-Add WebSocket support (e.g., Flask-SocketIO) for live calendar pushes.
+a) Add WebSocket support (e.g., Flask-SocketIO) for live calendar pushes.
 
-Implement notifications (email, SMS, push) on new assignments.
+b) Implement notifications (email, SMS, push) on new assignments.
 
-This README captures the MVP logic, API contract, and next-step blueprint for growing into a full-featured scheduling platform across mobile, desktop, and web.
+This README was designed to capture the Minimum Viable Product (aka MVP) logic, API contract, and next-step blueprint for growing the app (codenamed "psychic-tribble" aka "psychic-tribble.py") into a full-featured scheduling platform across mobile, desktop, and web interfaces etc. 
