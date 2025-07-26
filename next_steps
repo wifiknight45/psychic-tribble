@@ -1,0 +1,10 @@
+# Next Steps
+Persist to SQLite/PostgreSQL via SQLAlchemy
+
+JWT-based user authentication
+
+Recurring-event support (e.g. “every Mon/Wed/Fri”)
+
+Conflict checks (prevent overlapping assignments)
+
+A React or Vue front end that visualizes the calendar grid.
