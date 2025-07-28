@@ -1,5 +1,5 @@
 RFC 5545: Internet Calendaring and Scheduling Core Object Specification
-RFC 5545 is the IETF standard that defines the iCalendar data format for representing and exchanging calendaring and scheduling information such as events, to-dos, journal entries, and free/busy data. Published in September 2009, it’s a Standards Track document that obsoletes the earlier RFC 2445, updating and clarifying the core object model for calendar interoperability.
+RFC 5545 is the IETF standard that defines the iCalendar data format for representing and exchanging calendaring and scheduling information such as events, to-dos, journal entries, and free/busy data. Published in September 2009, it’s a Standards Track document that obsoletes the earlier RFC 2445, updating and clarifying the core object model for calendar interoperability. 
 
 Key Features and Structure
 The top-level object is the VCALENDAR component, which begins with BEGIN:VCALENDAR and ends with END:VCALENDAR.
