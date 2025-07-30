@@ -2,330 +2,231 @@ Top Calendar Apps: Downloads, Pricing, and Technical Insights
 When building an interactive calendar app, especially one that spans web, desktop, and mobile—understanding the market leaders, their adoption figures, pricing models, and core features is critical. Below is a comprehensive breakdown of the top calendar applications, organized into:
 
 a) Popular consumer and enterprise offerings
-
 b) Key download/install metrics
-
 c) Subscription and pricing tiers
-
 d) Core technical features and integrations
 
-1. Google Calendar
+Google Calendar
 Downloads/Installs
-
 Android (Google Play): 1B + installs
-
 iOS (App Store): Top-10 productivity app
 
 Pricing
-
 Free: All core features (event creation, multiple calendars, sharing)
 
-Google Workspace Business Starter: $6/user/mo
-
-Business Standard: $12/user/mo
-
-Business Plus: $18/user/mo
+Subscription tiers
+I.   Google Workspace Business Starter: $6/user/mo
+II.  Business Standard:                $12/user/mo
+III. Business Plus:                    $18/user/mo
 
 Core Technical Features
+1) Syncs via CalDAV and REST APIs
+2) Natural-language event creation
+3) Gmail-powered auto-events (flights, reservations)
+4) Native Google Meet integration
+5) OAuth2-secure calendar sharing
+6) Webhooks for push notifications
 
-Syncs via CalDAV and REST APIs
-
-Natural-language event creation
-
-Gmail-powered auto-events (flights, reservations)
-
-Native Google Meet integration
-
-OAuth2-secure calendar sharing
-
-Webhooks for push notifications
-
-Why It Matters
-
+keypoints
 Ubiquitous in consumer and enterprise spaces
-
 Backbone for many scheduling automations (Zapier, IFTTT)
 
-2. Apple Calendar
+Apple Calendar
 Downloads/Installs
-
 Pre-installed on every iOS/macOS device (estimated 1.5B active devices worldwide)
 
 Pricing
-
-Free on iPhone, iPad, Mac, Apple Watch, iCloud.com
+Free on Apple iOS device ecosystem--> iPhone, iPad, Mac, Apple Watch, iCloud.com
 
 Core Technical Features
+1) iCloud-backed CalDAV and ICS support
+2) Deep Siri integration for voice-driven event creation
+3) “Time to Leave” travel-time alerts
+4) Shared family/group calendars
+5) End-to-end encryption via iCloud
 
-iCloud-backed CalDAV and ICS support
+keypoints
+**Default calendar for the Apple ecosystem**
+**High adoption among iOS/macOS users; zero friction**
 
-Deep Siri integration for voice-driven event creation
-
-“Time to Leave” travel-time alerts
-
-Shared family/group calendars
-
-End-to-end encryption via iCloud
-
-Why It Matters
-
-Default calendar for the Apple ecosystem
-
-High adoption among iOS/macOS users; zero friction
-
-3. Microsoft Outlook Calendar
+Microsoft Outlook Calendar
 Downloads/Installs
-
 Android (Google Play): 100M + installs
-
 Windows 10/11: Native UWP app
 
 Pricing
-
 Free: Basic email + calendar on Outlook.com
 
-Microsoft 365 Business Basic: $6/user/mo
-
-Business Standard: $12.50/user/mo
-
-Microsoft 365 Business Premium: $22/user/mo
+SUBSCRIPTION TIERS
+I.   Microsoft 365 Business Basic:    $6.00/user/mo
+III. Business Standard:              $12.50/user/mo
+IV.  Microsoft 365 Business Premium: $22.00/user/mo
 
 Core Technical Features
+1) EWS (Exchange Web Services) & Microsoft Graph APIs
+2) Scheduling Assistant with availability search
+3) Auto-room/resource booking
+4) Teams meeting integration via Graph
+5) Enterprise-grade security and compliance (GDPR, SOC)
 
-EWS (Exchange Web Services) & Microsoft Graph APIs
+keypoints
+**Enterprise standard for Outlook/Exchange shops**
+**Tight Windows + Office integration**
 
-Scheduling Assistant with availability search
-
-Auto-room/resource booking
-
-Teams meeting integration via Graph
-
-Enterprise-grade security and compliance (GDPR, SOC)
-
-Why It Matters
-
-Enterprise standard for Outlook/Exchange shops
-
-Tight Windows + Office integration
-
-4. Calendly
+Calendly
 Downloads/Installs
-
 Android (Google Play): 500K + installs
-
 Web: 10M+ users have scheduled via Calendly links
 
 Pricing
-
 Free: One event type, basic calendar integrations
 
-Essentials: $8/seat/mo (billed annually)
-
-Professional: $12/seat/mo
-
-Teams: $16/seat/mo
+SUBSCRIPTION TIERS
+Essentials:   $8.00/seat/mo (billed annually at $96.00 not incl appl taxes or fees)
+Professional: $12.00/seat/mo or $144.00 per annum  
+Teams:        $16.00/seat/mo or $192.00 per annum
 
 Core Technical Features
+1) Bi-directional Google/Microsoft calendar sync
+2) Round-robin & group event distribution
+3) Customizable scheduling pages (HTML/CSS skins)
+4) Webhooks & REST API for embedding and automations
+5) Zapier, Salesforce, HubSpot connectors
 
-Bi-directional Google/Microsoft calendar sync
+keypoints
+**de-facto standard for external appointment booking**
+**minimal front-end footprint—just a scheduling link**
 
-Round-robin & group event distribution
-
-Customizable scheduling pages (HTML/CSS skins)
-
-Webhooks & REST API for embedding and automations
-
-Zapier, Salesforce, HubSpot connectors
-
-Why It Matters
-
-De-facto standard for external appointment booking
-
-Minimal front-end footprint—just a scheduling link
-
-5. Fantastical
+Fantastical
 Downloads/Installs
-
 iOS/macOS App Store: 1M+ downloads
 
 Pricing
-
 Free: Basic calendar views, reminders
 
-Premium: $4.75/user/mo (billed annually)
+Subscription
+I. Premium:   $4.75/user/mo (billed annually at $57.00 not incl appl taxes or fees)
 
 Core Technical Features
+1) Natural-language parsing (e.g., “Lunch w/ Taylor at 1”).
+2) Bundled Fantastical API for dev integrations
+3) Customizable calendar sets and widgets
+4) Weather integration via Dark Sky API
+5) iCloud, Google, Exchange sync
 
-Natural-language parsing (e.g., “Lunch w/ Taylor at 1”).
+keypoints
+**unmatched UI/UX on Apple platforms**
+**Heavy focus on friction-free event creation**
 
-Bundled Fantastical API for dev integrations
-
-Customizable calendar sets and widgets
-
-Weather integration via Dark Sky API
-
-iCloud, Google, Exchange sync
-
-Why It Matters
-
-Unmatched UI/UX on Apple platforms
-
-Heavy focus on friction-free event creation
-
-6. Any.do
+Any.do
 Downloads/Installs
-
 Android: 10M+ installs
-
 iOS: 5M+ installs
 
 Pricing
-
 Free: Tasks + basic calendar view
 
-Premium: $4.99/user/mo
-
-Teams: $4.99/user/mo
+SUBSCRIPTION TIERS
+Premium: $4.99/user/mo OR $59.88 per annum
+Teams: $4.99/user/mo OR 59.88 per annum
 
 Core Technical Features
+1) Unified tasks — calendar in one view
+2) NLP for reminder creation (via WhatsApp)
+3) Location-based and time-based notifications
+4) Two-way Google Calendar sync
+5) REST API for task/calendar CRUD operations
 
-Unified tasks — calendar in one view
+keypoints
+**appeals to users who want tasks and events under one roof**
+**clean mobile-first interface**
 
-NLP for reminder creation (via WhatsApp)
-
-Location-based and time-based notifications
-
-Two-way Google Calendar sync
-
-REST API for task/calendar CRUD operations
-
-Why It Matters
-
-Appeals to users who want tasks and events under one roof
-
-Clean mobile-first interface
-
-7. Clockwise
+Clockwise
 Downloads/Installs
-
 Android/iOS: ~100K installs
 
 Pricing
-
 Free: Individual focus time blocks, basic analytics
 
-Pro: $8/user/mo
-
+SUBSCRIPTION TIERS
+Pro: $8.00/user/mo
 Enterprise: Custom
 
 Core Technical Features
+1) AI-driven meeting placement to safeguard “focus time”
+2) Slack integration for status syncing
+3) Shared team “smart calendars” via API
+4) Data-driven insights for workplace efficiency
 
-AI-driven meeting placement to safeguard “focus time”
+keypoints
+**focuses on workstation productivity and deep work alignment**
+Growing traction in remote/hybrid environments**
 
-Slack integration for status syncing
-
-Shared team “smart calendars” via API
-
-Data-driven insights for workplace efficiency
-
-Why It Matters
-
-Focuses on workstation productivity and deep work alignment
-
-Growing traction in remote/hybrid environments
-
-8. Reclaim.ai
+Reclaim.ai
 Downloads/Installs
-
 Web-only scheduling — >50K users
 
 Pricing
-
 Free: Basic auto-scheduling
 
-Team: $8/user/mo
-
+SUBSCRIPTION TIER
+Team: $8.00/user/mo
 Business: Custom
 
 Core Technical Features
+1) AI scheduling across personal + team calendars
+2) Habit, meal, break auto-scheduling blocks
+3) Bi-directional sync via Google Calendar API
+4) Slack bot and REST endpoints
 
-AI scheduling across personal + team calendars
+keypoints
+**fully automated calendar management**
+**popular with knowledge workers looking to eliminate manual planning**
 
-Habit, meal, break auto-scheduling blocks
-
-Bi-directional sync via Google Calendar API
-
-Slack bot and REST endpoints
-
-Why It Matters
-
-Fully automated calendar management
-
-Popular with knowledge workers looking to eliminate manual planning
-
-9. Doodle
+Doodle
 Downloads/Installs
-
 Android: 1M+ installs
-
 Web: Millions of poll participants monthly
 
 Pricing
-
 Free: Basic group polls
 
-Pro: $6.95/user/mo
-
-Team: $8.95/user/mo (min. 2 seats)
-
-Enterprise: Custom
+SUBSCRIPTION TIERS
+I. Pro: $6.95/user/mo
+II. Team: $8.95/user/mo (min. 2 seats)
+III. Enterprise: Custom
 
 Core Technical Features
+1) poll-based multi-participant availability discovery
+2) booking pages for external users
+3) calendar integrations (ICal, Google, Outlook)
+4) API for embedding polls in custom portals
 
-Poll-based multi-participant availability discovery
+keypoints
+**Simplifies scheduling large, cross-team gatherings**
+**Polling paradigm reduces email ping-pong**
 
-Booking pages for external users
-
-Calendar integrations (ICal, Google, Outlook)
-
-API for embedding polls in custom portals
-
-Why It Matters
-
-Simplifies scheduling large, cross-team gatherings
-
-Polling paradigm reduces email ping-pong
-
-10. ClickUp Calendar
+ClickUp Calendar
 Downloads/Installs
-
 Android: 500K+ installs
-
 Web: Integrated in ClickUp’s 5M+ user base
 
 Pricing
-
 Free Forever: Unlimited tasks, 100MB storage
 
-Unlimited: $7/user/mo
-
-Business: $12/user/mo
-
-Enterprise: Custom
+SUBSCRIPTION TIERS
+I.   Unlimited: $7.00/user/mo
+II.  Business: $12.00/user/mo
+III. Enterprise: Custom
 
 Core Technical Features
+1) two-way Google/Outlook sync
+2) drag-n-drop tasks onto calendar view
+3) API for task scheduling automation
+4) embeddable calendar widgets
 
-Two-way Google/Outlook sync
-
-Drag-n-drop tasks onto calendar view
-
-API for task scheduling automation
-
-Embeddable calendar widgets
-
-Why It Matters
-
-Great for teams that need project management + scheduling in one tool
+keypoints
+ideal for teams that need project management + scheduling in one tool
 
 Core Feature Takeaways for relative to our MVP
 Real-Time Sync Implement CalDAV/WebDAV or provider-specific REST APIs (Google, Microsoft, Apple) with bi-directional syncing and push notifications.
