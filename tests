@@ -1,0 +1,3 @@
+tests/test_users.py
+tests/test_events.py
+tests/test_timeslots.pyy
