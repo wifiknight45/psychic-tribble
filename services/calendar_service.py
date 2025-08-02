@@ -20,4 +20,3 @@ class CalendarService:
     def create_calendar_event(self, user_id, event_payload):
         # TODO: implement external create
         pass
-v
