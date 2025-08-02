@@ -1,7 +1,9 @@
 import os
 import logging
-from fastapi import FastAPI, HTTPException, Depends
+
+from fastapi import FastAPI, HTTPException, Depends, Request
 from fastapi.middleware.cors import CORSMiddleware
+from fastapi.responses import JSONResponse
 from sqlalchemy import create_engine
 from sqlalchemy.orm import sessionmaker, Session
 
@@ -19,13 +21,16 @@ DB_URL      = os.getenv("DATABASE_URL", f"sqlite:///./{ENV}.db")
 APP_TITLE   = "Psychic Tribble"
 APP_VERSION = "1.0.0"
 
-logging.basicConfig(level=logging.DEBUG if ENV == "development" else logging.INFO)
+logging.basicConfig(
+    level=logging.DEBUG if ENV == "development" else logging.INFO,
+    format="%(asctime)s [%(levelname)s] %(name)s: %(message)s"
+)
 logger = logging.getLogger("uvicorn.error")
 
 # -----------------------------------------------------------------------------
 # 2. Database Setup (SQLAlchemy)
 # -----------------------------------------------------------------------------
-engine     = create_engine(DB_URL, connect_args={"check_same_thread": False})
+engine       = create_engine(DB_URL, connect_args={"check_same_thread": False})
 SessionLocal = sessionmaker(autocommit=False, autoflush=False, bind=engine)
 
 def get_db() -> Session:
@@ -49,10 +54,10 @@ app = FastAPI(
 # -----------------------------------------------------------------------------
 app.add_middleware(
     CORSMiddleware,
-    allow_origins=["*"],             # tighten in prod
+    allow_origins=["*"],       # tighten in production!
     allow_credentials=True,
     allow_methods=["*"],
-    allow_headers=["*"]
+    allow_headers=["*"],
 )
 
 # -----------------------------------------------------------------------------
@@ -62,6 +67,7 @@ app.add_middleware(
 async def health_check():
     return {"status": "ok"}
 
+
 @app.get("/", include_in_schema=False)
 async def root():
     return {"message": f"Welcome to {APP_TITLE} v{APP_VERSION}"}
@@ -70,11 +76,12 @@ async def root():
 # 6. Exception Handlers
 # -----------------------------------------------------------------------------
 @app.exception_handler(404)
-async def not_found(request, exc):
+async def not_found(request: Request, exc):
     return JSONResponse({"detail": "Resource not found"}, status_code=404)
 
+
 @app.exception_handler(500)
-async def server_error(request, exc):
+async def server_error(request: Request, exc):
     logger.error(f"Server error: {exc}")
     return JSONResponse({"detail": "Internal server error"}, status_code=500)
 
@@ -114,6 +121,7 @@ app.include_router(
 # -----------------------------------------------------------------------------
 if __name__ == "__main__":
     import uvicorn
+
     uvicorn.run(
         "app:app",
         host="0.0.0.0",
@@ -121,3 +129,4 @@ if __name__ == "__main__":
         reload=(ENV == "development"),
         log_level="debug" if ENV == "development" else "info"
     )
+
