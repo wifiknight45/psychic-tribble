@@ -1,0 +1,25 @@
+pyschic_tribble/
+├── __init__.py           # package metadata
+├── config.py             # environment-driven settings
+├── app.py                # FastAPI/FastAPI-based entrypoint
+├── models.py
+├── schemas.py
+├── utils.py
+├── services/
+│   ├── __init__.py
+│   ├── user_service.py
+│   ├── event_service.py
+│   ├── timeslot_service.py
+│   └── calendar_service.py
+├── routes/
+│   ├── __init__.py
+│   ├── users.py
+│   ├── events.py
+│   ├── timeslots.py
+│   └── calendar.py
+├── requirements.txt
+├── Dockerfile
+├── .env.example
+└── tests/
+    └── test_app.py
+
