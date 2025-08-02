@@ -1,4 +1,4 @@
-pyschic_tribble/
+psychic_tribble/
 ├── __init__.py           # package metadata
 ├── config.py             # environment-driven settings
 ├── app.py                # FastAPI/FastAPI-based entrypoint
