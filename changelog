@@ -1,4 +1,66 @@
+v4 updated 2 aug 13:48 after smoke screen + scalability tests
+Code Review & Testing Report
+a) Test Results Overview
+We conducted both smoke and scalability tests against the revised app.py. Overall, the application starts cleanly, routes respond as expected, and the health checks pass. However, a few gaps were identified:
 
+Missing exception handlers for validation errors.
+
+No automatic table creation on startup, leading to runtime errors if the database is empty.
+
+Connection pool settings aren’t tuned for high‐throughput scenarios.
+
+Generic SQL errors bubble up without friendly messages.
+
+b) Iterative Test Runs
+Iteration 1: Basic Startup & Health Check
+Action: Launched Uvicorn, hit GET /health and /.
+
+Result: Both endpoints returned 200 as expected.
+
+Observation: No validation or startup errors.
+
+Iteration 2: Missing Tables Scenario
+Action: Pointed to a fresh SQLite file, called /users.
+
+Result: SQLite “no such table” error surfaced.
+
+Fix: Add a startup event to auto-create tables via SQLAlchemy metadata.
+
+Iteration 3: Validation Errors
+Action: Posted malformed JSON to /events.
+
+Result: FastAPI’s default validation error (422) showed raw traceback.
+
+Fix: Register a handler for RequestValidationError to format responses.
+
+Iteration 4: Scalability – DB Pooling
+Action: Simulated 100 concurrent requests.
+
+Result: Occasional “database is locked” on SQLite.
+
+Fix: Tune create_engine with a connection pool for non-SQLite or switch to a server-backed DB in production.
+
+Iteration 5: Generic Exceptions in Routers
+Action: Threw an uncaught exception inside a route.
+
+Result: Returned 500 but lacked context.
+
+Fix: Enhance the 500 handler to log stack traces and return a safe error ID.
+
+Iteration 6: CORS Preflight & Large Payload
+Action: Ran OPTIONS requests and sent a 5 MB JSON body.
+
+Result: CORS preflight passed; large payload worked, but memory usage climbed.
+
+Fix: Limit request body size and tighten CORS origins for production.
+
+After these six runs, we merged all fixes and performed three final full checks, verifying:
+
+Table creation on startup
+
+Clean validation errors
+
+Stable pooling under load
 
 v3 updated 2 aug 13:42
 new version---------> app.py, note refactoring of project structure is underway and will occur in 24 hours. 
