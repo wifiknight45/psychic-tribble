@@ -1,4 +1,4 @@
-i. tests/test_users.py
+# i. tests/test_users.py
 import pytest
 from flask import Response
 
@@ -34,7 +34,7 @@ def test_create_user_missing_name(client):
     error = response.get_json().get("error")
     assert "name" in error
 
-ii. tests/test_events.py
+# ii. tests/test_events.py
 import pytest
 from flask import Response
 
@@ -66,7 +66,7 @@ def test_create_event_missing_name(client):
     response: Response = client.post("/events", json={})
     assert response.status_code == 400
 
-iii. tests/test_timeslots.pyy
+# iii. tests/test_timeslots.pyy
 import pytest
 from flask import Response
 
