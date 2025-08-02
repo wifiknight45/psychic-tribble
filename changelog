@@ -1,3 +1,53 @@
+
+v5 2 aug 2025 13:52
+Alembic Migrations on Startup
+
+Added alembic.config.Config and alembic.command.upgrade in an @app.on_event("startup") hook to automatically run migrations against the current alembic.ini configuration.
+
+Environment-Driven Migration Config
+
+Introduced a new ALEMBIC_INI environment variable (defaulting to alembic.ini) so you can point to different Alembic configs per environment.
+
+Hardened CORS Settings
+
+Pulled CORS_ORIGINS from settings or environment, defaulting to a production domain if none provided.
+
+Restricted allowed methods to only the HTTP verbs your API needs.
+
+Locked down allowed headers to Authorization and Content-Type.
+
+Added a max_age to reduce preflight overhead.
+
+Rate-Limiting with SlowAPI
+
+Integrated slowapi.Limiter using get_remote_address as the key.
+
+Applied default limits (RATE_LIMITS from settings or env).
+
+Installed SlowAPIMiddleware and registered the RateLimitExceeded handler for clean 429 responses.
+
+Request-Size Limiting
+
+Set max_request_size on the FastAPI app (with a default of 10 MB via MAX_BODY_SIZE).
+
+Enhanced Exception Handling
+
+Custom handler for RequestValidationError to log payload issues and return structured 422 details.
+
+Generic HTTPException handler to respect exception status codes.
+
+Catch-all Exception handler that logs full tracebacks with a generated error_id for easier log correlation.
+
+Database Engine & Session Improvements
+
+Tuned create_engine() with pool_pre_ping=True and conditional connect_args for SQLite.
+
+Wrapped the get_db() generator to catch SQLAlchemyError and return a friendly 500 via HTTPException.
+
+Configurable Rate Limits & Origins
+
+Exposed RATE_LIMITS and CORS_ORIGINS as environment-or-settings values so production can tighten them without code changes.
+
 v4 updated 2 aug 13:48 after smoke screen + scalability tests
 Code Review & Testing Report
 a) Test Results Overview
