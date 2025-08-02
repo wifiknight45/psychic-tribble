@@ -29,10 +29,11 @@ Installation
 Clone the repository
 
 bash
-git clone https://github.com/your-org/psychic-tribble.git
-cd psychic-tribble
-Create and activate a virtual environment
+git clone https://github.com/wifiknigh45/psychic-tribble.git
 
+cd psychic-tribble
+
+Create and activate a virtual environment
 bash
 python -m venv .venv
 source .venv/bin/activate
@@ -40,6 +41,7 @@ Install dependencies
 
 bash
 pip install -r requirements.txt
+
 Configuration
 Configuration is managed via environment variables (or a .env file). Defaults are shown in parentheses:
 
@@ -65,11 +67,12 @@ Alembic is configured to run on application startup. Make sure your alembic.ini 
 bash
 # on startup, FastAPI will automatically execute:
 alembic upgrade head
-To generate a new migration after model changes:
 
+To generate a new migration after model changes:
 bash
 alembic revision --autogenerate -m "Your migration message"
 alembic upgrade head
+
 CI/CD Pipelines
 A GitHub Actions workflow is included under .github/workflows/ci.yml. It runs:
 
