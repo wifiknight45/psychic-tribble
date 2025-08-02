@@ -1,4 +1,39 @@
 
+
+v3 updated 2 aug 13:42
+new version---------> app.py, note refactoring of project structure is underway and will occur in 24 hours. 
+
+Renamed DB_URL to DATABASE_URL and centralized all environment-derived settings (ENV, DEBUG, HOST, PORT, CORS_ALLOW_ORIGINS) at the top for easier configuration.
+
+Introduced a DEBUG constant based on PYTT_ENV to drive logging levels and Uvicorn’s reload behavior.
+
+Added HOST and PORT constants sourced from environment variables, replacing hard-coded Uvicorn parameters.
+
+Reorganized the FastAPI setup into an application factory function create_app():
+
+Moved instantiation of FastAPI inside create_app().
+
+Encapsulated middleware, routes, and exception handlers within the factory.
+
+Swapped plain dict returns for JSONResponse with explicit status_code in the health-check and root endpoints.
+
+Consolidated CORS settings into a single CORS_ALLOW_ORIGINS constant and tightened middleware configuration comments.
+
+Corrected import paths from pyschic_tribble to psychic_tribble for consistency.
+
+Added a docstring to get_db() to clarify its role and ensure proper session teardown.
+
+Reordered and grouped all app.include_router() calls under the factory to keep related setup code together.
+
+Cleaned up logging setup:
+
+Unified logging.basicConfig() parameters.
+
+Obtained the uvicorn.error logger explicitly for server-side error logs.
+
+Streamlined the Uvicorn entry-point block for local development, leveraging the newly defined constants and DEBUG flag.
+
+
 v2 updates 1 aug 2025 20:54 
 
 Added
