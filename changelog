@@ -1,0 +1,49 @@
+
+v2 updates 1 aug 2025 20:54 
+
+Added
+FastAPI framework Switched from Flask to FastAPI, leveraging its built-in async support, automatic OpenAPI docs, and data validation.
+
+Configuration via environment variables
+
+PYTT_ENV controls development vs. production mode.
+
+DATABASE_URL (defaulting to a SQLite file) drives SQLAlchemy connection strings.
+
+Structured logging Configured Python’s logging for DEBUG in development and INFO in production, integrating with Uvicorn’s logger.
+
+SQLAlchemy integration
+
+Created engine, SessionLocal and get_db dependency for per-request DB sessions.
+
+Enables clean transaction management and easy dependency injection.
+
+CORS middleware Added CORSMiddleware to allow cross-origin requests (locked down later for production).
+
+Health check & root endpoints
+
+GET /health returns status ok.
+
+GET / returns a welcome message with the app title and version.
+
+Global exception handlers
+
+404 handler returns JSON { "detail": "Resource not found" }.
+
+500 handler logs the error and returns JSON { "detail": "Internal server error" }.
+
+Router registration
+
+Included users, events, timeslots, and calendar routers under /users, /events, /timeslots, /calendar.
+
+Applied tags for automatic grouping in the generated OpenAPI docs.
+
+Injected the get_db dependency at the router level for consistent session access.
+
+Uvicorn startup entrypoint Configured uvicorn.run with hot-reload in development, dynamic port binding via PORT, and log-level toggled by environment.
+
+Changed
+Reorganized project structure to align with FastAPI best practices (separating configuration, DB setup, routers, and middleware).
+
+Notes
+Future improvements: tighten CORS origins, add request-validation schemas (Pydantic), and integrate calendar APIs or ICS export functionality.
