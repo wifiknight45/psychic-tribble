@@ -1,25 +1,55 @@
 psychic_tribble/
-├── __init__.py           # package metadata
-├── config.py             # environment-driven settings
-├── app.py                # FastAPI/FastAPI-based entrypoint
-├── models.py
-├── schemas.py
-├── utils.py
-├── services/
+├── psychic_tribble/
 │   ├── __init__.py
-│   ├── user_service.py
-│   ├── event_service.py
-│   ├── timeslot_service.py
-│   └── calendar_service.py
-├── routes/
-│   ├── __init__.py
-│   ├── users.py
-│   ├── events.py
-│   ├── timeslots.py
-│   └── calendar.py
+│   ├── main.py
+│   ├── config/
+│   │   ├── __init__.py
+│   │   └── settings.py
+│   ├── api/
+│   │   └── v1/
+│   │       ├── __init__.py
+│   │       ├── users.py
+│   │       ├── events.py
+│   │       ├── timeslots.py
+│   │       └── calendar.py
+│   ├── core/
+│   │   ├── __init__.py
+│   │   ├── app.py
+│   │   └── utils.py
+│   ├── services/
+│   │   ├── __init__.py
+│   │   ├── user_service.py
+│   │   ├── event_service.py
+│   │   ├── timeslot_service.py
+│   │   └── calendar_service.py
+│   ├── db/
+│   │   ├── __init__.py
+│   │   ├── session.py
+│   │   ├── models.py
+│   │   └── migrations/
+│   └── schemas.py
+├── static/
+│   ├── css/
+│   │   └── style.css
+│   ├── js/
+│   │   └── app.js
+│   └── images/
+├── templates/
+│   └── base.html
+├── tests/
+│   ├── api/
+│   │   └── v1/
+│   │       ├── test_users.py
+│   │       ├── test_events.py
+│   │       ├── test_timeslots.py
+│   │       └── test_calendar.py
+│   ├── core/
+│   │   └── test_utils.py
+│   ├── services/
+│   │   └── test_user_service.py
+│   ├── db/
+│   │   └── test_models.py
+│   └── conftest.py
 ├── requirements.txt
 ├── Dockerfile
-├── .env.example
-└── tests/
-    └── test_app.py
-
+└── .env.example
