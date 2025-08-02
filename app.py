@@ -6,12 +6,22 @@ from fastapi import FastAPI, Depends, Request, HTTPException
 from fastapi.exceptions import RequestValidationError
 from fastapi.middleware.cors import CORSMiddleware
 from fastapi.responses import JSONResponse
-from sqlalchemy import create_engine, event
+
+from sqlalchemy import create_engine
 from sqlalchemy.exc import SQLAlchemyError
 from sqlalchemy.orm import sessionmaker, Session
 
+from alembic.config import Config as AlembicConfig
+from alembic import command
+
+from slowapi import Limiter
+from slowapi.errors import RateLimitExceeded
+from slowapi.middleware import SlowAPIMiddleware
+from slowapi.util import get_remote_address
+from slowapi.errors import _rate_limit_exceeded_handler
+
 from config import settings
-from psychic_tribble.db.base import Base  # SQLAlchemy declarative base
+from psychic_tribble.db.base import Base
 from psychic_tribble.routes.users import users_router
 from psychic_tribble.routes.events import events_router
 from psychic_tribble.routes.timeslots import timeslots_router
@@ -22,15 +32,19 @@ from psychic_tribble.routes.calendar import calendar_router
 # -----------------------------------------------------------------------------
 ENV = os.getenv("PYTT_ENV", "development")
 DEBUG = ENV == "development"
-APP_TITLE = "Psychic Tribble"
+
+APP_TITLE   = "Psychic Tribble"
 APP_VERSION = "1.0.0"
 
 HOST = os.getenv("HOST", "0.0.0.0")
 PORT = int(os.getenv("PORT", 8000))
-DATABASE_URL = os.getenv("DATABASE_URL", f"sqlite:///./{ENV}.db")
 
-# CORS
-CORS_ORIGINS = settings.CORS_ORIGINS if hasattr(settings, "CORS_ORIGINS") else ["*"]
+DATABASE_URL = os.getenv("DATABASE_URL", f"sqlite:///./{ENV}.db")
+ALEMBIC_INI  = os.getenv("ALEMBIC_INI", "alembic.ini")
+
+# CORS origins & rate limits come from config or env
+CORS_ORIGINS = getattr(settings, "CORS_ORIGINS", [])
+RATE_LIMITS  = getattr(settings, "RATE_LIMITS", ["100/minute"])
 MAX_BODY_SIZE = int(os.getenv("MAX_BODY_SIZE", 10 * 1024 * 1024))  # 10 MB
 
 logging.basicConfig(
@@ -46,12 +60,12 @@ engine = create_engine(
     DATABASE_URL,
     echo=DEBUG,
     pool_pre_ping=True,
-    connect_args={"check_same_thread": False} if "sqlite" in DATABASE_URL else {}
+    connect_args={"check_same_thread": False} if DATABASE_URL.startswith("sqlite") else {}
 )
 SessionLocal = sessionmaker(autocommit=False, autoflush=False, bind=engine)
 
 def get_db() -> Session:
-    """Yield a database session and ensure it's closed."""
+    """Yield a database session and ensure proper teardown."""
     db = SessionLocal()
     try:
         yield db
@@ -69,29 +83,45 @@ def create_app() -> FastAPI:
         title=APP_TITLE,
         version=APP_VERSION,
         debug=DEBUG,
+        # built-in max request size (Starlette 0.27+)
         max_request_size=MAX_BODY_SIZE
     )
 
-    # Create tables on startup
+    # -----------------------------------------------------------------------------
+    # Run Alembic migrations on startup
+    # -----------------------------------------------------------------------------
     @app.on_event("startup")
-    def on_startup():
-        logger.info("Creating database tables (if not exist)")
-        Base.metadata.create_all(bind=engine)
+    def run_migrations():
+        logger.info("Running Alembic migrations (head)")
+        alembic_cfg = AlembicConfig(ALEMBIC_INI)
+        command.upgrade(alembic_cfg, "head")
 
-    # CORS Middleware
+    # -----------------------------------------------------------------------------
+    # CORS Middleware (hardened for prod)
+    # -----------------------------------------------------------------------------
     app.add_middleware(
         CORSMiddleware,
-        allow_origins=CORS_ORIGINS,
+        allow_origins=CORS_ORIGINS or ["https://yourdomain.com"],
         allow_credentials=True,
-        allow_methods=["*"],
-        allow_headers=["*"],
-        max_age=3600
+        allow_methods=["GET", "POST", "PUT", "PATCH", "DELETE", "OPTIONS"],
+        allow_headers=["Authorization", "Content-Type"],
+        max_age=600,
     )
 
+    # -----------------------------------------------------------------------------
+    # Rate Limiting Middleware
+    # -----------------------------------------------------------------------------
+    limiter = Limiter(key_func=get_remote_address, default_limits=RATE_LIMITS)
+    app.state.limiter = limiter
+    app.add_middleware(SlowAPIMiddleware)
+    app.add_exception_handler(RateLimitExceeded, _rate_limit_exceeded_handler)
+
+    # -----------------------------------------------------------------------------
     # Exception Handlers
+    # -----------------------------------------------------------------------------
     @app.exception_handler(RequestValidationError)
     async def validation_exception_handler(request: Request, exc: RequestValidationError):
-        logger.warning("Validation error: %s", exc.errors())
+        logger.warning("Validation error on %s: %s", request.url, exc.errors())
         return JSONResponse(
             status_code=422,
             content={"detail": exc.errors()}
@@ -109,28 +139,31 @@ def create_app() -> FastAPI:
     async def server_error(request: Request, exc: Exception):
         error_id = os.urandom(8).hex()
         tb = traceback.format_exc()
-        logger.error("Error ID %s: %s\n%s", error_id, str(exc), tb)
+        logger.error("Error ID %s on %s: %s\n%s", error_id, request.url, str(exc), tb)
         return JSONResponse(
             {"detail": "Internal server error", "error_id": error_id},
             status_code=500
         )
 
-    # Health-check
+    # -----------------------------------------------------------------------------
+    # Health-check & Root
+    # -----------------------------------------------------------------------------
     @app.get("/health", tags=["Health"])
     async def health_check():
         return {"status": "ok"}
 
-    # Root endpoint (hidden)
     @app.get("/", include_in_schema=False)
     async def root():
         return {"message": f"Welcome to {APP_TITLE} v{APP_VERSION}"}
 
+    # -----------------------------------------------------------------------------
     # Include Routers
+    # -----------------------------------------------------------------------------
     for router, prefix, tag in [
-        (users_router, "/users", "Users"),
-        (events_router, "/events", "Events"),
+        (users_router,     "/users",     "Users"),
+        (events_router,    "/events",    "Events"),
         (timeslots_router, "/timeslots", "Timeslots"),
-        (calendar_router, "/calendar", "Calendar")
+        (calendar_router,  "/calendar",  "Calendar"),
     ]:
         app.include_router(
             router,
@@ -145,7 +178,7 @@ def create_app() -> FastAPI:
 app = create_app()
 
 # -----------------------------------------------------------------------------
-# Uvicorn Entrypoint (local development)
+# Uvicorn Entrypoint (local dev)
 # -----------------------------------------------------------------------------
 if __name__ == "__main__":
     import uvicorn
