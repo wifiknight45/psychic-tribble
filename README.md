@@ -1,61 +1,119 @@
-# Psychic Tribble
-An interactive calendar dashboard built with FastAPI and SQLAlchemy.
+Overview
+This repository contains the backend application for the Psychic Tribble scheduling and calendar service. It’s built with FastAPI and SQLAlchemy, with automated database migrations, hardened security settings, rate limiting, and CI/CD pipelines for quality checks.
 
-## Features
-- User, Event, Timeslot, and Calendar Management via RESTful APIs
-- Modular Routing for clean API structure (/users, /events, /timeslots, /calendar)
-- Configurable Database (SQLite by default; override with DATABASE_URL)
-- Robust Error Handling and health check endpoint
-- CORS Support for easy frontend integration
-- Environment-based settings (development/production)
-- Ready for Docker deployment
+Features
+Automatic Alembic migrations on startup
 
-see project_path for project structure etc
+Centralized environment-driven configuration
 
-## Quickstart
+Hardened CORS settings with allowed origins, methods, and headers
 
-1. Clone & Install
-```sh
-git clone https://github.com/wifiknight45/psychic-tribble.git
+Rate limiting via SlowAPI to prevent abuse
+
+Request-size limiting to protect against oversized payloads
+
+Structured logging and comprehensive exception handling
+
+Modular routers for Users, Events, Timeslots, and Calendar
+
+GitHub Actions CI/CD pipelines for linting, testing, and security scans
+
+Prerequisites
+Python 3.9 or newer
+
+A SQLAlchemy-compatible database (SQLite by default)
+
+git, pip (or poetry)
+
+Installation
+Clone the repository
+
+bash
+git clone https://github.com/your-org/psychic-tribble.git
 cd psychic-tribble
-python3 -m venv venv
-source venv/bin/activate
+Create and activate a virtual environment
+
+bash
+python -m venv .venv
+source .venv/bin/activate
+Install dependencies
+
+bash
 pip install -r requirements.txt
-```
+Configuration
+Configuration is managed via environment variables (or a .env file). Defaults are shown in parentheses:
 
-2. Configure Environment
-Copy .env.example to .env and edit as needed (e.g., database URL, environment).
+PYTT_ENV (development)
 
-3. Run Locally
-```sh
-uvicorn psychic_tribble.app:app --reload
-```
+DATABASE_URL (sqlite:///./development.db)
 
-4. API Endpoints
-- Health Check: GET /health
-- Users: GET/POST /users
-- Events: GET/POST /events
-- Timeslots: GET/POST /timeslots
-- Calendar: GET/POST /calendar
-See the OpenAPI docs at: http://localhost:8000/docs
+ALEMBIC_INI (alembic.ini)
 
-## Docker
-Build and run using Docker:
-```sh
-docker build -t psychic-tribble .
-docker run -p 8000:8000 --env-file .env psychic-tribble
-```
+HOST (0.0.0.0)
 
-## Development Notes
-- Database: Uses SQLite by default; override with a different database by setting DATABASE_URL in your environment.
-- CORS: Open to all origins in development. Update in app.py for production.
-- Logging: DEBUG in development, INFO in production.
-- Routers: Modularized for scalability—add more as needed in routes/ and services/.
+PORT (8000)
 
-## Testing
-```sh
-pytest
-```
+CORS_ORIGINS (comma-separated; defaults to your production domain)
 
-## Credits
-Built with FastAPI, SQLAlchemy, and Uvicorn.
+RATE_LIMITS (e.g. 100/minute)
+
+MAX_BODY_SIZE (10485760 bytes = 10 MB)
+
+Database Migrations
+Alembic is configured to run on application startup. Make sure your alembic.ini and env.py are properly set:
+
+bash
+# on startup, FastAPI will automatically execute:
+alembic upgrade head
+To generate a new migration after model changes:
+
+bash
+alembic revision --autogenerate -m "Your migration message"
+alembic upgrade head
+CI/CD Pipelines
+A GitHub Actions workflow is included under .github/workflows/ci.yml. It runs:
+
+flake8 for linting
+
+pytest for unit and integration tests
+
+bandit or safety for security vulnerability scanning
+
+Push to main or open a pull request to trigger the pipeline.
+
+Running the Application
+Start the server locally with hot-reload:
+
+bash
+uvicorn app:app \
+  --host ${HOST:-0.0.0.0} \
+  --port ${PORT:-8000} \
+  --reload
+API Endpoints
+Health & Root
+GET /health Returns service status:
+
+json
+{ "status": "ok" }
+GET / (hidden) Returns welcome message and current version.
+
+Users
+Prefix: /users Tags: Users Database session injected via dependency.
+
+Events
+Prefix: /events Tags: Events
+
+Timeslots
+Prefix: /timeslots Tags: Timeslots
+
+Calendar
+Prefix: /calendar Tags: Calendar
+
+Error Handling
+422 Request validation errors return a structured list of field errors.
+
+404 Resource not found returns { "detail": "Resource not found" }.
+
+429 Rate limit exceeded returns { "detail": "Too Many Requests" }.
+
+500 Internal errors return { "detail": "Internal server error", "error_id": "<id>" }.
