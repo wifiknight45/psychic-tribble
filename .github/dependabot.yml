@@ -1,35 +1,17 @@
-# To get started with Dependabot version updates, you'll need to specify which
-# package ecosystems to update and where the package manifests are located.
-# Please see the documentation for all configuration options:
-# https://docs.github.com/code-security/dependabot/dependabot-version-updates/configuration-options-for-the-dependabot.yml-file
 
 version: 2
 updates:
-  # Example for Python projects (pip)
-  - package-ecosystem: "pip"
-    directory: "/" # Location of your requirements.txt or pyproject.toml
-    schedule:
-      interval: "weekly" # or "daily", "monthly"
-    open-pull-requests-limit: 5
-    # Optionally, set reviewers or assignees for PRs
-    # reviewers:
-    #   - "wifiknight45"
-    # assignees:
-    #   - "wifiknight45"
-    allow:
-      - dependency-type: "all" # "direct" or "indirect" or "all"
-    commit-message:
-      prefix: "deps"
-    labels:
-      - "dependencies"
-      - "security"
-
-  # Security updates for vulnerable dependencies
-  - package-ecosystem: "pip"
+  # Daily npm updates
+  - package-ecosystem: "npm"
     directory: "/"
     schedule:
       interval: "daily"
-    # Only create pull requests for security updates
-    ignore:
+    open-pull-requests-limit: 5
+
+  # Weekly Python updates (including transitive deps)
+  - package-ecosystem: "pip"
+    directory: "/"
+    schedule:
+      interval: "weekly"
+    allow:
       - dependency-type: "all"
-    security-updates-only: true
