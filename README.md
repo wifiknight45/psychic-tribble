@@ -10,33 +10,7 @@ An interactive calendar dashboard built with FastAPI and SQLAlchemy.
 - Environment-based settings (development/production)
 - Ready for Docker deployment
 
-## Project Structure
-Code
-psychic_tribble/
-├── __init__.py
-├── config.py
-├── app.py
-├── models.py
-├── schemas.py
-├── utils.py
-├── services/
-│   ├── __init__.py
-│   ├── user_service.py
-│   ├── event_service.py
-│   ├── timeslot_service.py
-│   └── calendar_service.py
-├── routes/
-│   ├── __init__.py
-│   ├── users.py
-│   ├── events.py
-│   ├── timeslots.py
-│   └── calendar.py
-├── requirements.txt
-├── Dockerfile
-├── .env.example
-└── tests/
-    └── test_services/
-        └── test_app.py
+see project_path for project structure etc
 
 ## Quickstart
 
