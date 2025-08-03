@@ -1,5 +1,5 @@
-```yaml
 version: '3.8'
+
 services:
   app:
     build:
@@ -8,40 +8,51 @@ services:
     ports:
       - "8000:8000"
     environment:
-      - DATABASE_URL=${DATABASE_URL}
-      - REDIS_URL=${REDIS_URL}
-      - PYTT_ENV=${PYTT_ENV}
-      - SECRET_KEY=${SECRET_KEY}
+      - PYTT_ENV=${PYTT_ENV:-production}
+      - DATABASE_URL=${DATABASE_URL:-postgresql://user:password@postgres:5432/psychic_tribble}
+      - REDIS_URL=${REDIS_URL:-redis://redis:6379/0}
+      - SECRET_KEY=${SECRET_KEY:-your-secure-secret-key}
+      - ALEMBIC_INI=${ALEMBIC_INI:-alembic.ini}
+      - CORS_ORIGINS=${CORS_ORIGINS:-["http://localhost:8000"]}
     volumes:
       - ./psychic_tribble:/app/psychic_tribble
       - ./static:/app/static
       - ./templates:/app/templates
+      - ./.env:/app/.env
     depends_on:
-      - redis
-      - postgres
-    command: uvicorn psychic_tribble.main:app --host 0.0.0.0 --port 8000 --reload
+      postgres:
+        condition: service_healthy
+      redis:
+        condition: service_healthy
+    command: >
+      sh -c "alembic upgrade head && 
+             uvicorn app:app --host 0.0.0.0 --port 8000 
+             ${PYTT_ENV:-production} == 'development' && --reload || --workers 4 --log-level info"
 
   redis:
     image: redis:7
-    ports:
-      - "6379:6379"
+    volumes:
+      - redis_data:/data
+    healthcheck:
+      test: ["CMD", "redis-cli", "ping"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
 
   postgres:
     image: postgres:15
     environment:
-      - POSTGRES_USER=${POSTGRES_USER}
-      - POSTGRES_PASSWORD=${POSTGRES_PASSWORD}
-      - POSTGRES_DB=${POSTGRES_DB}
-    ports:
-      - "5432:5432"
+      - POSTGRES_USER=${POSTGRES_USER:-user}
+      - POSTGRES_PASSWORD=${POSTGRES_PASSWORD:-password}
+      - POSTGRES_DB=${POSTGRES_DB:-psychic_tribble}
     volumes:
       - postgres_data:/var/lib/postgresql/data
     healthcheck:
-      test: ["CMD-SHELL", "pg_isready -U ${POSTGRES_USER}"]
+      test: ["CMD-SHELL", "pg_isready -U ${POSTGRES_USER:-user}"]
       interval: 10s
       timeout: 5s
       retries: 5
 
 volumes:
   postgres_data:
-```
+  redis_data:
