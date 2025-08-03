@@ -1,125 +1,229 @@
-# psychic_tribble/app.py
+# app.py
 
 import os
 import logging
-import traceback
+from pathlib import Path
+from datetime import datetime, timedelta
 
-from fastapi import FastAPI, Depends, Request, HTTPException
+from fastapi import (
+    FastAPI, Depends, HTTPException, Request, status
+)
 from fastapi.exceptions import RequestValidationError
 from fastapi.middleware.cors import CORSMiddleware
 from fastapi.responses import JSONResponse
+from fastapi.staticfiles import StaticFiles
+from fastapi.security import OAuth2PasswordBearer, OAuth2PasswordRequestForm
 
+from pydantic import BaseSettings
 from sqlalchemy import create_engine
 from sqlalchemy.exc import SQLAlchemyError
 from sqlalchemy.orm import sessionmaker, Session
-
 from alembic.config import Config as AlembicConfig
 from alembic import command
 
-from slowapi import Limiter
-from slowapi.errors import RateLimitExceeded, _rate_limit_exceeded_handler
-from slowapi.middleware import SlowAPIMiddleware
-from slowapi.util import get_remote_address
+from passlib.context import CryptContext
+from jose import JWTError, jwt
 
-from config import settings
+from slowapi import Limiter
+from slowapi.middleware import SlowAPIMiddleware
+from slowapi.errors import RateLimitExceeded, _rate_limit_exceeded_handler
+from slowapi.util import get_remote_address
+from slowapi.storage.redis import RedisStorage
+
 from psychic_tribble.db.base import Base
-from psychic_tribble.routes.users import users_router
-from psychic_tribble.routes.events import events_router
-from psychic_tribble.routes.timeslots import timeslots_router
-from psychic_tribble.routes.calendar import calendar_router
+from psychic_tribble.routes import (
+    users_router, events_router, timeslots_router, calendar_router
+)
 from psychic_tribble.utils import register_exception_handlers
 
 # -----------------------------------------------------------------------------
-# Environment & Logging
+# Settings via environment / .env
 # -----------------------------------------------------------------------------
-ENV = os.getenv("PYTT_ENV", "development")
-DEBUG = ENV == "development"
+class Settings(BaseSettings):
+    env: str = os.getenv("PYTT_ENV", "development")
+    debug: bool = env == "development"
+    database_url: str = os.getenv(
+        "DATABASE_URL", f"sqlite:///./{env}.db"
+    )
+    alembic_ini: str = os.getenv("ALEMBIC_INI", "alembic.ini")
+    secret_key: str = os.getenv("SECRET_KEY", "PLEASE_CHANGE_ME")
+    jwt_algorithm: str = "HS256"
+    access_token_expire_minutes: int = 30
+    cors_origins: list[str] = []
+    rate_limits: list[str] = []
+    redis_url: str = os.getenv("REDIS_URL", "redis://localhost:6379/0")
+    class Config:
+        env_file = ".env"
 
-APP_TITLE   = "Psychic Tribble"
-APP_VERSION = "1.0.0"
+settings = Settings()
+ALEMBIC_PATH = Path(__file__).parent / settings.alembic_ini
 
-HOST = os.getenv("HOST", "0.0.0.0")
-PORT = int(os.getenv("PORT", 8000))
-
-DATABASE_URL = os.getenv("DATABASE_URL", f"sqlite:///./{ENV}.db")
-ALEMBIC_INI  = os.getenv("ALEMBIC_INI", "alembic.ini")
-
-CORS_ORIGINS = getattr(settings, "CORS_ORIGINS", [])
-RATE_LIMITS  = getattr(settings, "RATE_LIMITS", ["100/minute"])
-MAX_BODY_SIZE = int(os.getenv("MAX_BODY_SIZE", 10 * 1024 * 1024))  # 10 MB
-
+# -----------------------------------------------------------------------------
+# Logging
+# -----------------------------------------------------------------------------
 logging.basicConfig(
-    level=logging.DEBUG if DEBUG else logging.INFO,
+    level=logging.DEBUG if settings.debug else logging.INFO,
     format="%(asctime)s [%(levelname)s] %(name)s: %(message)s",
 )
 logger = logging.getLogger("uvicorn.error")
 
 # -----------------------------------------------------------------------------
-# Database Setup
+# Cryptography & Auth Utilities
+# -----------------------------------------------------------------------------
+pwd_context = CryptContext(schemes=["bcrypt"], deprecated="auto")
+oauth2_scheme = OAuth2PasswordBearer(tokenUrl="/token")
+
+def verify_password(plain: str, hashed: str) -> bool:
+    return pwd_context.verify(plain, hashed)
+
+def hash_password(password: str) -> str:
+    return pwd_context.hash(password)
+
+def create_access_token(data: dict) -> str:
+    to_encode = data.copy()
+    expire = datetime.utcnow() + timedelta(
+        minutes=settings.access_token_expire_minutes
+    )
+    to_encode.update({"exp": expire})
+    return jwt.encode(to_encode, settings.secret_key, algorithm=settings.jwt_algorithm)
+
+def decode_access_token(token: str) -> dict:
+    try:
+        return jwt.decode(
+            token, settings.secret_key, algorithms=[settings.jwt_algorithm]
+        )
+    except JWTError:
+        raise HTTPException(
+            status_code=status.HTTP_401_UNAUTHORIZED,
+            detail="Invalid authentication credentials",
+            headers={"WWW-Authenticate": "Bearer"},
+        )
+
+# -----------------------------------------------------------------------------
+# Database Setup (Sync)
 # -----------------------------------------------------------------------------
 engine = create_engine(
-    DATABASE_URL,
-    echo=DEBUG,
+    settings.database_url,
+    echo=settings.debug,
     pool_pre_ping=True,
-    connect_args={"check_same_thread": False} if DATABASE_URL.startswith("sqlite") else {}
+    pool_size=10,
+    max_overflow=20,
+    connect_args={"check_same_thread": False}
+    if settings.database_url.startswith("sqlite")
+    else {},
 )
-SessionLocal = sessionmaker(autocommit=False, autoflush=False, bind=engine)
+SessionLocal = sessionmaker(
+    autocommit=False, autoflush=False, bind=engine
+)
+Base.metadata.bind = engine
 
 def get_db() -> Session:
-    """
-    Yield a database session and ensure proper teardown.
-    """
-    db = SessionLocal()
+    session = SessionLocal()
     try:
-        yield db
+        yield session
     except SQLAlchemyError as e:
-        logger.error("Database session error: %s", str(e))
-        raise HTTPException(status_code=500, detail="Database error")
+        logger.error("DB session error: %s", e)
+        raise HTTPException(500, "Database error")
     finally:
-        db.close()
+        session.close()
 
 # -----------------------------------------------------------------------------
 # Application Factory
 # -----------------------------------------------------------------------------
 def create_app() -> FastAPI:
     app = FastAPI(
-        title=APP_TITLE,
-        version=APP_VERSION,
-        debug=DEBUG,
-        max_request_size=MAX_BODY_SIZE,
+        title="Psychic Tribble",
+        version="1.0.0",
+        debug=settings.debug,
     )
 
+    # Mount static files for future HTML/CSS/JS
+    app.mount("/static", StaticFiles(directory="static"), name="static")
+
+    # Auto-migrate in development only
     @app.on_event("startup")
     def run_migrations():
-        logger.info("Running Alembic migrations (head)")
-        alembic_cfg = AlembicConfig(ALEMBIC_INI)
-        command.upgrade(alembic_cfg, "head")
+        if settings.debug:
+            logger.info("Running Alembic migrations")
+            alembic_cfg = AlembicConfig(str(ALEMBIC_PATH))
+            command.upgrade(alembic_cfg, "head")
 
+    # Global exception handlers
+    @app.exception_handler(RequestValidationError)
+    async def validation_exception_handler(
+        request: Request, exc: RequestValidationError
+    ):
+        return JSONResponse(
+            status_code=422,
+            content={"errors": exc.errors(), "body": exc.body},
+        )
+
+    register_exception_handlers(app)
+
+    # CORS
+    origins = (
+        settings.cors_origins
+        or (["*"] if settings.debug else ["https://yourdomain.com"])
+    )
     app.add_middleware(
         CORSMiddleware,
-        allow_origins=CORS_ORIGINS or ["https://yourdomain.com"],
+        allow_origins=origins,
         allow_credentials=True,
-        allow_methods=["GET", "POST", "PUT", "PATCH", "DELETE", "OPTIONS"],
-        allow_headers=["Authorization", "Content-Type"],
-        max_age=600,
+        allow_methods=["*"],
+        allow_headers=["*"],
     )
 
-    limiter = Limiter(key_func=get_remote_address, default_limits=RATE_LIMITS)
+    # Rate limiting backed by Redis
+    limiter = Limiter(
+        key_func=get_remote_address,
+        default_limits=settings.rate_limits or ["100/minute"],
+        storage=RedisStorage(settings.redis_url),
+    )
     app.state.limiter = limiter
     app.add_middleware(SlowAPIMiddleware)
     app.add_exception_handler(RateLimitExceeded, _rate_limit_exceeded_handler)
 
-    register_exception_handlers(app)
+    # -----------------------------------------------------------------------------
+    # Authentication Endpoints
+    # -----------------------------------------------------------------------------
+    @app.post("/token", tags=["Auth"])
+    async def login_for_access_token(
+        form_data: OAuth2PasswordRequestForm = Depends(),
+        db: Session = Depends(get_db),
+    ):
+        from psychic_tribble.db.models import User
 
-    @app.get("/health", tags=["Health"])
-    async def health_check():
-        return {"status": "ok"}
+        user = (
+            db.query(User)
+            .filter(User.email == form_data.username)
+            .first()
+        )
+        if not user or not verify_password(form_data.password, user.hashed_password):
+            raise HTTPException(
+                status_code=status.HTTP_401_UNAUTHORIZED,
+                detail="Incorrect username or password",
+                headers={"WWW-Authenticate": "Bearer"},
+            )
+        access_token = create_access_token({"sub": user.email})
+        return {"access_token": access_token, "token_type": "bearer"}
 
-    @app.get("/", include_in_schema=False)
-    async def root():
-        return {"message": f"Welcome to {APP_TITLE} v{APP_VERSION}"}
+    async def get_current_user(
+        token: str = Depends(oauth2_scheme),
+        db: Session = Depends(get_db),
+    ):
+        payload = decode_access_token(token)
+        email = payload.get("sub")
+        if email is None:
+            raise HTTPException(401, "Invalid token")
+        from psychic_tribble.db.models import User
+        user = db.query(User).filter(User.email == email).first()
+        if not user:
+            raise HTTPException(401, "User not found")
+        return user
 
-    # Include routers with DB dependency
+    # -----------------------------------------------------------------------------
+    # Core Routers (all require auth & DB)
+    # -----------------------------------------------------------------------------
     for router, prefix, tag in [
         (users_router,     "/users",     "Users"),
         (events_router,    "/events",    "Events"),
@@ -130,20 +234,29 @@ def create_app() -> FastAPI:
             router,
             prefix=prefix,
             tags=[tag],
-            dependencies=[Depends(get_db)],
+            dependencies=[
+                Depends(get_db),
+                Depends(get_current_user),
+            ],
         )
+
+    # Health check
+    @app.get("/health", tags=["Health"])
+    async def health_check():
+        return {"status": "ok"}
 
     return app
 
-# ASGI application instance
 app = create_app()
 
 if __name__ == "__main__":
     import uvicorn
+
     uvicorn.run(
-        "psychic_tribble.app:app",
-        host=HOST,
-        port=PORT,
-        reload=DEBUG,
-        log_level="debug" if DEBUG else "info",
+        "app:app",
+        host=os.getenv("HOST", "0.0.0.0"),
+        port=int(os.getenv("PORT", 8000)),
+        reload=settings.debug,
+        workers=4,
+        log_level="debug" if settings.debug else "info",
     )
