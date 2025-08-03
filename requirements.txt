@@ -1,0 +1,5 @@
+Flask>=2.0
+# your other deps…
+pytest>=8.0
+flake8>=6.0
+pytest-asyncio
