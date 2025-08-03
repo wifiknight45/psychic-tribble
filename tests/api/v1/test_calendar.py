@@ -1,6 +1,3 @@
--------
-├── core/test_utils.py ├── services/test_user_service.py ├── db/test_models.py └── conftest.py │ ├── core/ │ │ └── test_utils.py
-
 import pytest
 from fastapi import status
 from datetime import datetime, timedelta
