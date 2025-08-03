@@ -1,122 +1,72 @@
-Overview
-This repository contains the backend application for the Psychic Tribble scheduling and calendar service. It’s built with FastAPI and SQLAlchemy, with automated database migrations, hardened security settings, rate limiting, and CI/CD pipelines for quality checks.
+Psychic Tribble 
 
-Features
-Automatic Alembic migrations on startup
+Psychic Tribble is the core backend logic for a web and mobile application, providing user authentication, event management, timeslot scheduling, and calendar functionality. Built with FastAPI, SQLAlchemy, and Redis, it ensures secure, scalable, and rate-limited API endpoints for seamless integration with front-end clients.
+This codebase is proprietary and confidential. Unauthorized use, copying, modification, or distribution is strictly prohibited.
+Copyright
+Copyright (c) 2025 [The App]. All rights reserved.
+This software and its source code are proprietary and confidential. Unauthorized use, copying, modification, distribution, or reproduction in any form is prohibited without prior written permission from andrews.crystal@gmail.com or robert.hodgkiss@my.utsa.edu. 
 
-Centralized environment-driven configuration
-
-Hardened CORS settings with allowed origins, methods, and headers
-
-Rate limiting via SlowAPI to prevent abuse
-
-Request-size limiting to protect against oversized payloads
-
-Structured logging and comprehensive exception handling
-
-Modular routers for Users, Events, Timeslots, and Calendar
-
-GitHub Actions CI/CD pipelines for linting, testing, and security scans
+Project Structure
+app.py: Main application entry point, defining the FastAPI app, database setup, authentication, and core routers.
+psychic_tribble/: Contains database models, routes, and utilities.
+static/: Directory for static assets (e.g., HTML, CSS, JS).
+alembic.ini: Configuration for database migrations (development only).
 
 Prerequisites
-Python 3.9 or newer
 
-A SQLAlchemy-compatible database (SQLite by default)
+Python 3.9+
+Redis server
+Database (SQLite for development, PostgreSQL recommended for production)
+Dependencies: fastapi, sqlalchemy, alembic, passlib[bcrypt], python-jose, slowapi, uvicorn, redis
 
-git, pip (or poetry)
+Setup Instructions
+For authorized collaborators only:
 
-Installation
-Clone the repository
-
-bash
-git clone https://github.com/wifiknigh45/psychic-tribble.git
-
+Clone the Repository:git clone <https://github.com/wifiknight45/psychic-tribble/>
 cd psychic-tribble
 
-Create and activate a virtual environment
-bash
-python -m venv .venv
-source .venv/bin/activate
-Install dependencies
 
-bash
-pip install -r requirements.txt
+Install Dependencies:pip install -r requirements.txt
 
-Configuration
-Configuration is managed via environment variables (or a .env file). Defaults are shown in parentheses:
 
-PYTT_ENV (development)
+Configure Environment:
+Copy .env.example to .env and update variables:
+PYTT_ENV: Set to development or production.
+DATABASE_URL: Database connection string (e.g., sqlite:///./development.db or PostgreSQL URL).
+SECRET_KEY: Secure key for JWT authentication.
+REDIS_URL: Redis connection string (e.g., redis://localhost:6379/0).
+CORS_ORIGINS: Allowed origins for CORS (e.g., ["https://yourdomain.com"]).
+RATE_LIMITS: API rate limits (e.g., ["100/minute"]).
 
-DATABASE_URL (sqlite:///./development.db)
 
-ALEMBIC_INI (alembic.ini)
 
-HOST (0.0.0.0)
 
-PORT (8000)
+Run Migrations (development only):alembic upgrade head
 
-CORS_ORIGINS (comma-separated; defaults to your production domain)
 
-RATE_LIMITS (e.g. 100/minute)
+Start the Server:uvicorn app:app --host 0.0.0.0 --port 8000 --reload
 
-MAX_BODY_SIZE (10485760 bytes = 10 MB)
 
-Database Migrations
-Alembic is configured to run on application startup. Make sure your alembic.ini and env.py are properly set:
 
-bash
-# on startup, FastAPI will automatically execute:
-alembic upgrade head
+Usage
 
-To generate a new migration after model changes:
-bash
-alembic revision --autogenerate -m "Your migration message"
-alembic upgrade head
+Authentication: Use the /token endpoint to obtain a JWT token via OAuth2 password flow.
+API Endpoints:
+/users: User management (requires authentication).
+/events: Event creation and management.
+/timeslots: Timeslot scheduling.
+/calendar: Calendar operations.
+/health: Health check endpoint.
 
-CI/CD Pipelines
-A GitHub Actions workflow is included under .github/workflows/ci.yml. It runs:
 
-flake8 for linting
+Rate Limiting: Configurable via RATE_LIMITS in .env.
+Static Files: Serve front-end assets from /static.
 
-pytest for unit and integration tests
+Development Notes
 
-bandit or safety for security vulnerability scanning
+Debug Mode: Enabled when PYTT_ENV=development. Includes auto-migrations and detailed logging.
+Security: Uses bcrypt for password hashing and JWT for authentication.
+Database: Supports SQLite (development) and PostgreSQL (production).
 
-Push to main or open a pull request to trigger the pipeline.
-
-Running the Application
-Start the server locally with hot-reload:
-
-bash
-uvicorn app:app \
-  --host ${HOST:-0.0.0.0} \
-  --port ${PORT:-8000} \
-  --reload
-API Endpoints
-Health & Root
-GET /health Returns service status:
-
-json
-{ "status": "ok" }
-GET / (hidden) Returns welcome message and current version.
-
-Users
-Prefix: /users Tags: Users Database session injected via dependency.
-
-Events
-Prefix: /events Tags: Events
-
-Timeslots
-Prefix: /timeslots Tags: Timeslots
-
-Calendar
-Prefix: /calendar Tags: Calendar
-
-Error Handling
-422 Request validation errors return a structured list of field errors.
-
-404 Resource not found returns { "detail": "Resource not found" }.
-
-429 Rate limit exceeded returns { "detail": "Too Many Requests" }.
-
-500 Internal errors return { "detail": "Internal server error", "error_id": "<id>" }.
+Contact
+For issues or inquiries, contact andrews.crystal@gmail.com or robert.hodgkiss@my.utsa.edu.
