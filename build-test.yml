@@ -7,7 +7,39 @@ on:
     branches: [ main ]
 
 jobs:
-  lint-and-test:
+  lint:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: '3.10'
+
+      - name: Cache pip dependencies
+        uses: actions/cache@v4
+        with:
+          path: ~/.cache/pip
+          key: ${{ runner.os }}-pip-${{ hashFiles('requirements.txt') }}
+          restore-keys: |
+            ${{ runner.os }}-pip-
+
+      - name: Install dependencies
+        run: |
+          python -m pip install --upgrade pip
+          pip install flake8
+
+      - name: Lint with flake8
+        run: |
+          echo "Running critical lint checks (E9,F63,F7,F82)"
+          flake8 psychic_tribble tests --count --select=E9,F63,F7,F82 --show-source --statistics --exclude=psychic_tribble/db/migrations,venv,__pycache__
+          echo "Running full lint checks with relaxed exit code"
+          flake8 psychic_tribble tests --count --exit-zero --max-complexity=10 --max-line-length=127 --statistics --exclude=psychic_tribble/db/migrations,venv,__pycache__
+
+  test:
+    needs: lint
     runs-on: ubuntu-latest
     services:
       redis:
@@ -49,40 +81,37 @@ jobs:
         run: |
           python -m pip install --upgrade pip
           pip install -r requirements.txt
-          pip install flake8 pytest pytest-asyncio
+          pip install pytest pytest-asyncio pytest-cov
 
       - name: Install package in editable mode
         run: pip install -e .
 
-      - name: Lint with flake8
-        run: |
-          flake8 . --count --select=E9,F63,F7,F82 --show-source --statistics
-          flake8 . --count --exit-zero --max-complexity=10 --max-line-length=127 --statistics
-
       - name: Run migrations
         env:
           DATABASE_URL: postgresql://test_user:test_password@localhost:5432/test_db
+        working-directory: psychic_tribble
         run: |
           alembic upgrade head
 
       - name: Run tests with pytest
         env:
-          PYTHONPATH: .
+          PYTHONPATH: psychic_tribble
           DATABASE_URL: postgresql://test_user:test_password@localhost:5432/test_db
           REDIS_URL: redis://localhost:6379/0
           PYTT_ENV: test
           SECRET_KEY: test-secret-key
         run: |
-          pytest --cov=./ --cov-report=xml --maxfail=1 -q --disable-warnings
+          pytest tests --cov=psychic_tribble --cov-report=xml --maxfail=1 -v --disable-warnings
 
       - name: Upload coverage report
         uses: actions/upload-artifact@v4
+        if: always()
         with:
           name: coverage-report
           path: coverage.xml
 
   build:
-    needs: lint-and-test
+    needs: test
     runs-on: ubuntu-latest
     steps:
       - name: Checkout code
@@ -105,10 +134,10 @@ jobs:
         run: |
           python -m pip install --upgrade pip
           pip install -r requirements.txt
+          pip install build
 
       - name: Build package
         run: |
-          pip install build
           python -m build
 
       - name: Upload build artifacts
