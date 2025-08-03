@@ -1,9 +1,5 @@
-# pyschic_tribble/__init__.py
+# psychic_tribble/__init__.py
 
-"""
-pyschic_tribble
+from .app import app, create_app
 
-A backend service handling users, events, timeslots, and calendars.
-"""
-
-__version__ = "0.1.0"
+__all__ = ["app", "create_app"]
