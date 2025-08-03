@@ -1,1 +1,14 @@
-fastapi>=0.68.0 # FastAPI framework for building APIs uvicorn>=0.15.0 # ASGI server for running FastAPI sqlalchemy>=1.4.0 # ORM for PostgreSQL database operations psycopg2-binary>=2.9.0 # PostgreSQL adapter for SQLAlchemy alembic>=1.7.0 # Database migrations redis>=4.0.0 # Redis client for caching/session management pytest>=7.0.0 # Testing framework pytest-asyncio>=0.18.0 # Async testing support for pytest pytest-cov>=3.0.0 # Test coverage reporting flake8>=5.0.0 # Linting for code quality build>=0.8.0 # Tool for building Python packages setuptools>=61.0 # Build tool for packaging wheel>=0.37.0 # Wheel file format support for packaging jinja2>=3.0.0 # Template rendering (remove if not using templates)
+fastapi>=0.68.0          # FastAPI framework for building APIs
+uvicorn>=0.15.0         # ASGI server for running FastAPI
+sqlalchemy>=1.4.0       # ORM for PostgreSQL database operations
+psycopg2-binary>=2.9.0  # PostgreSQL adapter for SQLAlchemy
+alembic>=1.7.0          # Database migrations
+redis>=4.0.0            # Redis client for caching/session management
+pytest>=7.0.0           # Testing framework
+pytest-asyncio>=0.18.0  # Async testing support for pytest
+pytest-cov>=3.0.0       # Test coverage reporting
+flake8>=5.0.0           # Linting for code quality
+build>=0.8.0            # Tool for building Python packages
+setuptools>=61.0        # Build tool for packaging
+wheel>=0.37.0           # Wheel file format support for packaging
+jinja2>=3.0.0           # Template rendering (remove if not used)
