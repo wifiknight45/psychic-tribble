@@ -1,3 +1,5 @@
+# psychic_tribble/app.py
+
 import os
 import logging
 import traceback
@@ -15,10 +17,9 @@ from alembic.config import Config as AlembicConfig
 from alembic import command
 
 from slowapi import Limiter
-from slowapi.errors import RateLimitExceeded
+from slowapi.errors import RateLimitExceeded, _rate_limit_exceeded_handler
 from slowapi.middleware import SlowAPIMiddleware
 from slowapi.util import get_remote_address
-from slowapi.errors import _rate_limit_exceeded_handler
 
 from config import settings
 from psychic_tribble.db.base import Base
@@ -26,9 +27,10 @@ from psychic_tribble.routes.users import users_router
 from psychic_tribble.routes.events import events_router
 from psychic_tribble.routes.timeslots import timeslots_router
 from psychic_tribble.routes.calendar import calendar_router
+from psychic_tribble.utils import register_exception_handlers
 
 # -----------------------------------------------------------------------------
-# Configuration & Logging
+# Environment & Logging
 # -----------------------------------------------------------------------------
 ENV = os.getenv("PYTT_ENV", "development")
 DEBUG = ENV == "development"
@@ -42,7 +44,6 @@ PORT = int(os.getenv("PORT", 8000))
 DATABASE_URL = os.getenv("DATABASE_URL", f"sqlite:///./{ENV}.db")
 ALEMBIC_INI  = os.getenv("ALEMBIC_INI", "alembic.ini")
 
-# CORS origins & rate limits come from config or env
 CORS_ORIGINS = getattr(settings, "CORS_ORIGINS", [])
 RATE_LIMITS  = getattr(settings, "RATE_LIMITS", ["100/minute"])
 MAX_BODY_SIZE = int(os.getenv("MAX_BODY_SIZE", 10 * 1024 * 1024))  # 10 MB
@@ -65,13 +66,15 @@ engine = create_engine(
 SessionLocal = sessionmaker(autocommit=False, autoflush=False, bind=engine)
 
 def get_db() -> Session:
-    """Yield a database session and ensure proper teardown."""
+    """
+    Yield a database session and ensure proper teardown.
+    """
     db = SessionLocal()
     try:
         yield db
     except SQLAlchemyError as e:
         logger.error("Database session error: %s", str(e))
-        raise HTTPException(500, "Database error")
+        raise HTTPException(status_code=500, detail="Database error")
     finally:
         db.close()
 
@@ -83,22 +86,15 @@ def create_app() -> FastAPI:
         title=APP_TITLE,
         version=APP_VERSION,
         debug=DEBUG,
-        # built-in max request size (Starlette 0.27+)
-        max_request_size=MAX_BODY_SIZE
+        max_request_size=MAX_BODY_SIZE,
     )
 
-    # -----------------------------------------------------------------------------
-    # Run Alembic migrations on startup
-    # -----------------------------------------------------------------------------
     @app.on_event("startup")
     def run_migrations():
         logger.info("Running Alembic migrations (head)")
         alembic_cfg = AlembicConfig(ALEMBIC_INI)
         command.upgrade(alembic_cfg, "head")
 
-    # -----------------------------------------------------------------------------
-    # CORS Middleware (hardened for prod)
-    # -----------------------------------------------------------------------------
     app.add_middleware(
         CORSMiddleware,
         allow_origins=CORS_ORIGINS or ["https://yourdomain.com"],
@@ -108,46 +104,13 @@ def create_app() -> FastAPI:
         max_age=600,
     )
 
-    # -----------------------------------------------------------------------------
-    # Rate Limiting Middleware
-    # -----------------------------------------------------------------------------
     limiter = Limiter(key_func=get_remote_address, default_limits=RATE_LIMITS)
     app.state.limiter = limiter
     app.add_middleware(SlowAPIMiddleware)
     app.add_exception_handler(RateLimitExceeded, _rate_limit_exceeded_handler)
 
-    # -----------------------------------------------------------------------------
-    # Exception Handlers
-    # -----------------------------------------------------------------------------
-    @app.exception_handler(RequestValidationError)
-    async def validation_exception_handler(request: Request, exc: RequestValidationError):
-        logger.warning("Validation error on %s: %s", request.url, exc.errors())
-        return JSONResponse(
-            status_code=422,
-            content={"detail": exc.errors()}
-        )
+    register_exception_handlers(app)
 
-    @app.exception_handler(404)
-    async def not_found(request: Request, exc):
-        return JSONResponse({"detail": "Resource not found"}, status_code=404)
-
-    @app.exception_handler(HTTPException)
-    async def http_exception_handler(request: Request, exc: HTTPException):
-        return JSONResponse({"detail": exc.detail}, status_code=exc.status_code)
-
-    @app.exception_handler(Exception)
-    async def server_error(request: Request, exc: Exception):
-        error_id = os.urandom(8).hex()
-        tb = traceback.format_exc()
-        logger.error("Error ID %s on %s: %s\n%s", error_id, request.url, str(exc), tb)
-        return JSONResponse(
-            {"detail": "Internal server error", "error_id": error_id},
-            status_code=500
-        )
-
-    # -----------------------------------------------------------------------------
-    # Health-check & Root
-    # -----------------------------------------------------------------------------
     @app.get("/health", tags=["Health"])
     async def health_check():
         return {"status": "ok"}
@@ -156,9 +119,7 @@ def create_app() -> FastAPI:
     async def root():
         return {"message": f"Welcome to {APP_TITLE} v{APP_VERSION}"}
 
-    # -----------------------------------------------------------------------------
-    # Include Routers
-    # -----------------------------------------------------------------------------
+    # Include routers with DB dependency
     for router, prefix, tag in [
         (users_router,     "/users",     "Users"),
         (events_router,    "/events",    "Events"),
@@ -169,24 +130,20 @@ def create_app() -> FastAPI:
             router,
             prefix=prefix,
             tags=[tag],
-            dependencies=[Depends(get_db)]
+            dependencies=[Depends(get_db)],
         )
 
     return app
 
-# Instantiate ASGI app
+# ASGI application instance
 app = create_app()
 
-# -----------------------------------------------------------------------------
-# Uvicorn Entrypoint (local dev)
-# -----------------------------------------------------------------------------
 if __name__ == "__main__":
     import uvicorn
-
     uvicorn.run(
-        "app:app",
+        "psychic_tribble.app:app",
         host=HOST,
         port=PORT,
         reload=DEBUG,
-        log_level="debug" if DEBUG else "info"
+        log_level="debug" if DEBUG else "info",
     )
