@@ -1,6 +1,10 @@
+
+// Replace with your FastAPI backend URL
+const API_BASE_URL = 'https://your-backend.onrender.com';
+
 // Authentication
 async function login(username, password) {
-  const response = await fetch('/token', {
+  const response = await fetch(`${API_BASE_URL}/token`, {
     method: 'POST',
     headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
     body: new URLSearchParams({ username, password })
@@ -16,10 +20,11 @@ async function fetchEvents() {
   const token = localStorage.getItem('token');
   if (!token) {
     console.error('No token found, please login');
+    document.querySelector('.event-grid').innerHTML = '<p>Please log in to view events.</p>';
     return [];
   }
   try {
-    const response = await fetch('/events', {
+    const response = await fetch(`${API_BASE_URL}/events`, {
       headers: { 'Authorization': `Bearer ${token}` }
     });
     if (!response.ok) throw new Error('Failed to fetch events');
@@ -55,7 +60,7 @@ async function displayEvents() {
 async function showEventDetails(eventId) {
   const token = localStorage.getItem('token');
   try {
-    const response = await fetch(`/events/${eventId}`, {
+    const response = await fetch(`${API_BASE_URL}/events/${eventId}`, {
       headers: { 'Authorization': `Bearer ${token}` }
     });
     if (!response.ok) throw new Error('Failed to fetch event details');
@@ -79,6 +84,41 @@ async function showEventDetails(eventId) {
   }
 }
 
+// Create event
+async function createEvent(eventData) {
+  const token = localStorage.getItem('token');
+  try {
+    const response = await fetch(`${API_BASE_URL}/events`, {
+      method: 'POST',
+      headers: {
+        'Authorization': `Bearer ${token}`,
+        'Content-Type': 'application/json'
+      },
+      body: JSON.stringify(eventData)
+    });
+    if (!response.ok) throw new Error('Failed to create event');
+    await displayEvents();
+  } catch (error) {
+    console.error('Error creating event:', error);
+    alert('Failed to create event: ' + error.message);
+  }
+}
+
+// Fetch and display user profile
+async function fetchProfile() {
+  const token = localStorage.getItem('token');
+  try {
+    const response = await fetch(`${API_BASE_URL}/users/me`, {
+      headers: { 'Authorization': `Bearer ${token}` }
+    });
+    if (!response.ok) throw new Error('Failed to fetch profile');
+    const user = await response.json();
+    document.getElementById('profile-info').textContent = `Welcome, ${user.email}`;
+  } catch (error) {
+    console.error('Error fetching profile:', error);
+  }
+}
+
 // Smooth scrolling for navigation
 document.querySelectorAll('nav a').forEach(anchor => {
   anchor.addEventListener('click', function(e) {
@@ -93,13 +133,64 @@ document.querySelectorAll('nav a').forEach(anchor => {
 
 // Initialize
 document.addEventListener('DOMContentLoaded', () => {
-  // Example login (replace with actual form handling)
-  login('user@example.com', 'password').then(() => {
+  const token = localStorage.getItem('token');
+  const loginSection = document.getElementById('login');
+  const createEventSection = document.getElementById('create-event');
+  const profileSection = document.getElementById('profile');
+
+  if (token) {
+    loginSection.style.display = 'none';
+    createEventSection.style.display = 'block';
+    profileSection.style.display = 'block';
     displayEvents();
-  }).catch(error => {
-    console.error('Initialization error:', error);
-    document.querySelector('.event-grid').innerHTML = '<p>Please log in to view events.</p>';
-  });
+    fetchProfile();
+    const calendarEl = document.getElementById('calendar-view');
+    const calendar = new FullCalendar.Calendar(calendarEl, {
+      initialView: 'dayGridMonth',
+      events: async () => await fetchEvents(),
+      eventClick: (info) => showEventDetails(info.event.id)
+    });
+    calendar.render();
+  } else {
+    loginSection.style.display = 'block';
+    createEventSection.style.display = 'none';
+    profileSection.style.display = 'none';
+  }
+
+  document.getElementById('login-form').onsubmit = async (e) => {
+    e.preventDefault();
+    const username = document.getElementById('username').value;
+    const password = document.getElementById('password').value;
+    try {
+      await login(username, password);
+      loginSection.style.display = 'none';
+      createEventSection.style.display = 'block';
+      profileSection.style.display = 'block';
+      displayEvents();
+      fetchProfile();
+      const calendarEl = document.getElementById('calendar-view');
+      const calendar = new FullCalendar.Calendar(calendarEl, {
+        initialView: 'dayGridMonth',
+        events: async () => await fetchEvents(),
+        eventClick: (info) => showEventDetails(info.event.id)
+      });
+      calendar.render();
+    } catch (error) {
+      alert('Login failed: ' + error.message);
+    }
+  };
+
+  document.getElementById('event-form').onsubmit = async (e) => {
+    e.preventDefault();
+    const eventData = {
+      title: document.getElementById('event-title').value,
+      description: document.getElementById('event-desc').value,
+      start_time: document.getElementById('event-start').value,
+      end_time: document.getElementById('event-end').value
+    };
+    await createEvent(eventData);
+    document.getElementById('event-form').reset();
+  };
 
   // Close modal on outside click
   document.addEventListener('click', (e) => {
