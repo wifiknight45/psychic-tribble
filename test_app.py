@@ -130,7 +130,7 @@ def test_assign_to_slot_user_not_found(client, monkeypatch):
     resp: Response = client.post("/timeslots/ts-789/assign", json={"user_id": "u-999"})
     assert resp.status_code == 404
 
-iv. tests/test_calendar.py
+# iv. tests/test_calendar.py
 import pytest
 from flask import Response
 
