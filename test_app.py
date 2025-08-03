@@ -1,153 +1,118 @@
-# i. tests/test_users.py
+# test_app.py
+
 import pytest
-from flask import Response
+from fastapi.testclient import TestClient
 
-from app import create_app
+from psychic_tribble.app import create_app
 
+# ─── Dummy DTOs ────────────────────────────────────────────────────────────────
 
 class DummyUser:
-    def __init__(self, uid):
-        self.user_id = uid
-
-
-@pytest.fixture
-def client(monkeypatch):
-    # Patch the service layer before creating the app
-    monkeypatch.setattr(
-        "routes.users.user_service.create_user",
-        lambda name: DummyUser("u-123")
-    )
-    app = create_app()
-    return app.test_client()
-
-
-def test_create_user_success(client):
-    response: Response = client.post("/users", json={"name": "Alice"})
-    assert response.status_code == 201
-    payload = response.get_json()
-    assert payload == {"user_id": "u-123"}
-
-
-def test_create_user_missing_name(client):
-    response: Response = client.post("/users", json={})
-    assert response.status_code == 400
-    error = response.get_json().get("error")
-    assert "name" in error
-
-# ii. tests/test_events.py
-import pytest
-from flask import Response
-
-from app import create_app
-
+    def __init__(self, user_id):
+        self.user_id = user_id
 
 class DummyEvent:
-    def __init__(self, eid):
-        self.event_id = eid
-
-
-@pytest.fixture
-def client(monkeypatch):
-    monkeypatch.setattr(
-        "routes.events.event_service.create_event",
-        lambda name: DummyEvent("e-456")
-    )
-    app = create_app()
-    return app.test_client()
-
-
-def test_create_event_success(client):
-    response: Response = client.post("/events", json={"name": "Party"})
-    assert response.status_code == 201
-    assert response.get_json() == {"event_id": "e-456"}
-
-
-def test_create_event_missing_name(client):
-    response: Response = client.post("/events", json={})
-    assert response.status_code == 400
-
-# iii. tests/test_timeslots.pyy
-import pytest
-from flask import Response
-
-from app import create_app
-
+    def __init__(self, event_id):
+        self.event_id = event_id
 
 class DummyTimeslot:
-    def __init__(self, ts_id):
-        self.ts_id = ts_id
+    def __init__(self, timeslot_id):
+        self.timeslot_id = timeslot_id
 
+# ─── Shared TestClient Fixture ────────────────────────────────────────────────
 
 @pytest.fixture
 def client(monkeypatch):
-    # Default happy‐path
+    # Patch UserService.create_user
     monkeypatch.setattr(
-        "routes.timeslots.timeslot_service.add_timeslot",
-        lambda eid, d, s, e: DummyTimeslot("ts-789")
+        "psychic_tribble.routes.users.user_service.create_user",
+        lambda data: DummyUser("u-123")
+    )
+    # Patch EventService.create_event
+    monkeypatch.setattr(
+        "psychic_tribble.routes.events.event_service.create_event",
+        lambda data: DummyEvent("e-456")
+    )
+    # Patch TimeslotService methods
+    monkeypatch.setattr(
+        "psychic_tribble.routes.timeslots.timeslot_service.add_timeslot",
+        lambda event_id, day, start, end: DummyTimeslot("ts-789")
     )
     monkeypatch.setattr(
-        "routes.timeslots.timeslot_service.assign_user",
-        lambda ts_id, uid: None
+        "psychic_tribble.routes.timeslots.timeslot_service.assign_user",
+        lambda timeslot_id, user_id: None
     )
-    app = create_app()
-    return app.test_client()
+    # Patch CalendarService.build_calendar
+    monkeypatch.setattr(
+        "psychic_tribble.routes.calendar.calendar_service.build_calendar",
+        lambda: {"events": [], "timeslots": []}
+    )
 
+    app = create_app()
+    return TestClient(app)
+
+# ─── User Tests ────────────────────────────────────────────────────────────────
+
+def test_create_user_success(client):
+    resp = client.post("/users", json={"name": "Alice"})
+    assert resp.status_code == 201
+    assert resp.json() == {"user_id": "u-123"}
+
+def test_create_user_missing_name(client):
+    resp = client.post("/users", json={})
+    assert resp.status_code == 400
+    assert "name" in resp.json().get("error", "")
+
+# ─── Event Tests ───────────────────────────────────────────────────────────────
+
+def test_create_event_success(client):
+    resp = client.post("/events", json={"name": "Party"})
+    assert resp.status_code == 201
+    assert resp.json() == {"event_id": "e-456"}
+
+def test_create_event_missing_name(client):
+    resp = client.post("/events", json={})
+    assert resp.status_code == 400
+
+# ─── Timeslot Tests ───────────────────────────────────────────────────────────
 
 def test_add_timeslot_success(client):
     payload = {"day": "2025-08-01", "start": "09:00", "end": "11:00"}
-    resp: Response = client.post("/events/ev-1/timeslots", json=payload)
+    resp = client.post("/events/ev-1/timeslots", json=payload)
     assert resp.status_code == 201
-    assert resp.get_json() == {"timeslot_id": "ts-789"}
-
+    assert resp.json() == {"timeslot_id": "ts-789"}
 
 def test_add_timeslot_event_not_found(client, monkeypatch):
-    def raise_key(eid, d, s, ed):
+    def raise_event_not_found(eid, d, s, e):
         raise KeyError("Event not found")
 
     monkeypatch.setattr(
-        "routes.timeslots.timeslot_service.add_timeslot",
-        raise_key
+        "psychic_tribble.routes.timeslots.timeslot_service.add_timeslot",
+        raise_event_not_found
     )
     payload = {"day": "2025-08-01", "start": "09:00", "end": "11:00"}
-    resp: Response = client.post("/events/ev-42/timeslots", json=payload)
+    resp = client.post("/events/ev-42/timeslots", json=payload)
     assert resp.status_code == 404
 
-
 def test_assign_to_slot_success(client):
-    resp: Response = client.post("/timeslots/ts-789/assign", json={"user_id": "u-123"})
+    resp = client.post("/timeslots/ts-789/assign", json={"user_id": "u-123"})
     assert resp.status_code == 200
-    assert resp.get_json() == {"message": "Assigned successfully"}
-
+    assert resp.json() == {"message": "Assigned successfully"}
 
 def test_assign_to_slot_user_not_found(client, monkeypatch):
-    def raise_key(ts_id, uid):
+    def raise_user_not_found(ts_id, uid):
         raise KeyError("User not found")
 
     monkeypatch.setattr(
-        "routes.timeslots.timeslot_service.assign_user",
-        raise_key
+        "psychic_tribble.routes.timeslots.timeslot_service.assign_user",
+        raise_user_not_found
     )
-    resp: Response = client.post("/timeslots/ts-789/assign", json={"user_id": "u-999"})
+    resp = client.post("/timeslots/ts-789/assign", json={"user_id": "u-999"})
     assert resp.status_code == 404
 
-# iv. tests/test_calendar.py
-import pytest
-from flask import Response
-
-from app import create_app
-
-
-@pytest.fixture
-def client(monkeypatch):
-    monkeypatch.setattr(
-        "routes.calendar.calendar_service.build_calendar",
-        lambda: {"events": [], "timeslots": []}
-    )
-    app = create_app()
-    return app.test_client()
-
+# ─── Calendar Tests ───────────────────────────────────────────────────────────
 
 def test_view_calendar_success(client):
-    resp: Response = client.get("/calendar")
+    resp = client.get("/calendar")
     assert resp.status_code == 200
-    assert resp.get_json() == {"events": [], "timeslots": []}
+    assert resp.json() == {"events": [], "timeslots": []}
