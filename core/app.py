@@ -5,8 +5,11 @@ import logging
 from pathlib import Path
 from datetime import datetime, timedelta
 
+import pytz
+from icalendar import Calendar as iCalCalendar, Event as iCalEvent
+
 from fastapi import (
-    FastAPI, Depends, HTTPException, Request, status
+    FastAPI, Depends, HTTPException, Request, Response, status
 )
 from fastapi.exceptions import RequestValidationError
 from fastapi.middleware.cors import CORSMiddleware
@@ -14,7 +17,7 @@ from fastapi.responses import JSONResponse
 from fastapi.staticfiles import StaticFiles
 from fastapi.security import OAuth2PasswordBearer, OAuth2PasswordRequestForm
 
-from pydantic import BaseSettings
+from pydantic import BaseSettings, AnyUrl
 from sqlalchemy import create_engine
 from sqlalchemy.exc import SQLAlchemyError
 from sqlalchemy.orm import sessionmaker, Session
@@ -31,6 +34,7 @@ from slowapi.util import get_remote_address
 from slowapi.storage.redis import RedisStorage
 
 from psychic_tribble.db.base import Base
+from psychic_tribble.db.models import User, Event  # ← make sure your Event model is here
 from psychic_tribble.routes import (
     users_router, events_router, timeslots_router, calendar_router
 )
@@ -42,7 +46,7 @@ from psychic_tribble.utils import register_exception_handlers
 class Settings(BaseSettings):
     env: str = os.getenv("PYTT_ENV", "development")
     debug: bool = env == "development"
-    database_url: str = os.getenv(
+    database_url: AnyUrl = os.getenv(
         "DATABASE_URL", f"sqlite:///./{env}.db"
     )
     alembic_ini: str = os.getenv("ALEMBIC_INI", "alembic.ini")
@@ -52,8 +56,10 @@ class Settings(BaseSettings):
     cors_origins: list[str] = []
     rate_limits: list[str] = []
     redis_url: str = os.getenv("REDIS_URL", "redis://localhost:6379/0")
+
     class Config:
         env_file = ".env"
+        env_file_encoding = "utf-8"
 
 settings = Settings()
 ALEMBIC_PATH = Path(__file__).parent / settings.alembic_ini
@@ -103,13 +109,13 @@ def decode_access_token(token: str) -> dict:
 # Database Setup (Sync)
 # -----------------------------------------------------------------------------
 engine = create_engine(
-    settings.database_url,
+    str(settings.database_url),
     echo=settings.debug,
     pool_pre_ping=True,
     pool_size=10,
     max_overflow=20,
     connect_args={"check_same_thread": False}
-    if settings.database_url.startswith("sqlite")
+    if str(settings.database_url).startswith("sqlite")
     else {},
 )
 SessionLocal = sessionmaker(
@@ -191,8 +197,6 @@ def create_app() -> FastAPI:
         form_data: OAuth2PasswordRequestForm = Depends(),
         db: Session = Depends(get_db),
     ):
-        from psychic_tribble.db.models import User
-
         user = (
             db.query(User)
             .filter(User.email == form_data.username)
@@ -215,7 +219,6 @@ def create_app() -> FastAPI:
         email = payload.get("sub")
         if email is None:
             raise HTTPException(401, "Invalid token")
-        from psychic_tribble.db.models import User
         user = db.query(User).filter(User.email == email).first()
         if not user:
             raise HTTPException(401, "User not found")
@@ -240,10 +243,50 @@ def create_app() -> FastAPI:
             ],
         )
 
+    # -----------------------------------------------------------------------------
     # Health check
+    # -----------------------------------------------------------------------------
     @app.get("/health", tags=["Health"])
     async def health_check():
         return {"status": "ok"}
+
+    # -----------------------------------------------------------------------------
+    # New: RFC 5545–compliant iCalendar feed
+    # -----------------------------------------------------------------------------
+    @app.get(
+        "/calendar/feed.ics",
+        response_class=Response,
+        tags=["Calendar"],
+        summary="Get your calendar as an RFC 5545 iCalendar feed"
+    )
+    async def ics_feed(
+        db: Session = Depends(get_db),
+        current_user: User = Depends(get_current_user),
+    ):
+        # Build the calendar
+        cal = iCalCalendar()
+        cal.add("prodid", "-//Psychic Tribble//EN")
+        cal.add("version", "2.0")
+
+        # Fetch all events for this user
+        events = db.query(Event).filter(Event.user_id == current_user.id).all()
+
+        utc = pytz.UTC
+        for ev in events:
+            component = iCalEvent()
+            component.add("uid", f"{ev.id}@psychic-tribble")
+            component.add("dtstamp", datetime.utcnow().replace(tzinfo=utc))
+            component.add("dtstart", ev.start_time.astimezone(utc))
+            component.add("dtend", ev.end_time.astimezone(utc))
+            component.add("summary", ev.title)
+            if ev.description:
+                component.add("description", ev.description)
+            if getattr(ev, "location", None):
+                component.add("location", ev.location)
+            cal.add_component(component)
+
+        ical_bytes = cal.to_ical()
+        return Response(content=ical_bytes, media_type="text/calendar; charset=utf-8")
 
     return app
 
@@ -260,3 +303,4 @@ if __name__ == "__main__":
         workers=4,
         log_level="debug" if settings.debug else "info",
     )
+
