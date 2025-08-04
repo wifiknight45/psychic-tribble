@@ -12,4 +12,6 @@ build>=0.8.0
 setuptools>=61.0
 wheel>=0.37.0
 jinja2>=3.0.0
-httpx>=0.23.0  # Added for template testing
+httpx>=0.23.0  
+icalendar==5.0.13
+pytz==2024.1
