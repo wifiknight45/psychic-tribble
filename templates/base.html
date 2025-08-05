@@ -3,25 +3,86 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Psychic Tribble</title>
-  <link href="https://fonts.googleapis.com/css2?family=Roboto:wght@400;700&display=swap" rel="stylesheet">
-  <link rel="stylesheet" href="/static/css/style.css">
+  <meta name="description" content="{% block description %}Plan your events with a futuristic twist using Psychic Tribble.{% endblock %}">
+  <meta name="keywords" content="event planner, calendar, Psychic Tribble, futuristic scheduling">
+  <meta name="author" content="Psychic Tribble">
+  <title>{% block title %}Psychic Tribble{% endblock %}</title>
+  <link rel="icon" type="image/png" href="{% block favicon %}{{ url_for('static', filename='images/favicon.png') }}{% endblock %}">
+  <link href="https://fonts.googleapis.com/css2?family=Roboto:wght@400;700&display=swap" rel="stylesheet" rel="noopener">
+  <link href="https://cdn.jsdelivr.net/npm/fullcalendar@6.1.8/main.min.css" rel="stylesheet" rel="noopener">
+  <link rel="stylesheet" href="{% block css %}{{ url_for('static', filename='css/style.css') }}{% endblock %}">
+  {% block extra_head %}{% endblock %}
 </head>
 <body>
-  <header>
+  <header role="banner">
     <h1>Psychic Tribble</h1>
-    <nav>
-      <a href="#events">Events</a>
-      <a href="#calendar">Calendar</a>
-      <a href="#profile">Profile</a>
+    <p>Plan your events with a futuristic twist!</p>
+    <nav role="navigation" aria-label="Main navigation">
+      <ul>
+        <li><a href="#events" aria-current="page">Events</a></li>
+        <li><a href="#calendar">Calendar</a></li>
+        <li><a href="#profile">Profile</a></li>
+      </ul>
     </nav>
   </header>
-  <div class="container">
-    <section id="events">
-      <h2>Events</h2>
-      <div class="event-grid"></div>
+
+  <main class="container" role="main">
+    {% block content %}
+    <section id="login" aria-labelledby="login-heading">
+      <h2 id="login-heading">Login</h2>
+      <form id="login-form" aria-describedby="login-instructions">
+        <p id="login-instructions" class="visually-hidden">Enter your email and password to log in.</p>
+        <label for="username">Email</label>
+        <input type="email" id="username" name="username" placeholder="you@example.com" required aria-required="true">
+        <label for="password">Password</label>
+        <input type="password" id="password" name="password" placeholder="••••••••" required aria-required="true">
+        <button type="submit">Login</button>
+      </form>
     </section>
-  </div>
-  <script src="/static/js/app.js"></script>
+
+    <section id="create-event" aria-labelledby="create-event-heading" style="display: none;">
+      <h2 id="create-event-heading">Create Event</h2>
+      <form id="event-form" aria-describedby="event-instructions">
+        <p id="event-instructions" class="visually-hidden">Fill out the form to create a new event.</p>
+        <label for="event-title">Title</label>
+        <input type="text" id="event-title" name="title" placeholder="Event Title" required aria-required="true">
+        <label for="event-desc">Description</label>
+        <textarea id="event-desc" name="description" placeholder="Details..." aria-describedby="event-desc-hint"></textarea>
+        <p id="event-desc-hint" class="visually-hidden">Optional event description.</p>
+        <label for="event-start">Start Time</label>
+        <input type="datetime-local" id="event-start" name="start_time" required aria-required="true">
+        <label for="event-end">End Time</label>
+        <input type="datetime-local" id="event-end" name="end_time" required aria-required="true">
+        <button type="submit">Add Event</button>
+      </form>
+    </section>
+
+    <section id="events" aria-labelledby="events-heading">
+      <h2 id="events-heading">Events</h2>
+      <div class="event-grid" aria-live="polite">
+        <p>Please log in to view events.</p>
+      </div>
+    </section>
+
+    <section id="calendar" aria-labelledby="calendar-heading">
+      <h2 id="calendar-heading">Calendar</h2>
+      <div id="calendar-view" aria-label="Monthly calendar view"></div>
+    </section>
+
+    <section id="profile" aria-labelledby="profile-heading" style="display: none;">
+      <h2 id="profile-heading">Profile</h2>
+      <p id="profile-info">Log in to view your profile.</p>
+      <button id="logout-button" type="button">Logout</button>
+    </section>
+    {% endblock %}
+  </main>
+
+  <footer role="contentinfo">
+    <p>&copy; 2025 Psychic Tribble</p>
+  </footer>
+
+  <script src="https://cdn.jsdelivr.net/npm/fullcalendar@6.1.8/main.min.js" defer></script>
+  <script src="{% block js %}{{ url_for('static', filename='js/app.js') }}{% endblock %}" defer></script>
+  {% block extra_scripts %}{% endblock %}
 </body>
 </html>
