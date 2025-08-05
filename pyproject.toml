@@ -12,7 +12,7 @@ readme = "README.md"
 requires-python = ">=3.8"
 license = { text = "MIT" }
 authors = [
-  { name = "Your Name", email = "you@example.com" }
+  { name = "Robert Hodgkiss", email = "robert.hodgkiss@my.utsa.edu" }
 ]
 dependencies = [
   "fastapi>=0.70.0",
