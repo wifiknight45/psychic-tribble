@@ -1,6 +1,9 @@
-from setuptools import setup, find_packages
+#!/usr/bin/env python3
+import io
 from pathlib import Path
+from setuptools import setup, find_packages
 
+# read long description from README.md
 here = Path(__file__).parent
 long_description = (here / "README.md").read_text(encoding="utf-8")
 
@@ -10,9 +13,9 @@ setup(
     description="Backend for event scheduling with FastAPI and iCalendar export",
     long_description=long_description,
     long_description_content_type="text/markdown",
-    author="Your Name",
-    author_email="you@example.com",
-    url="https://github.com/yourusername/psychic-tribble",
+    author="Robert Hodgkiss",
+    author_email="robert.hodgkiss@my.utsa.edu",
+    url="https://github.com/wifiknight45/psychic-tribble",
     packages=find_packages(exclude=["tests*", "venv*", ".env*"]),
     python_requires=">=3.8",
     install_requires=[
@@ -35,16 +38,27 @@ setup(
             "flake8",
             "mypy",
             "black",
-        ]
+        ],
     },
     entry_points={
         "console_scripts": [
+            # if your app module exposes a main() that starts uvicorn,
+            # point to it here (e.g. app.run:main). Otherwise remove this.
             "psychic-tribble=app:app",
-        ]
+        ],
     },
+    include_package_data=True,
+    license="Proprietary",
+    license_files=("LICENSE",),
     classifiers=[
+        "License :: Other/Proprietary License",
         "Programming Language :: Python :: 3",
         "Framework :: FastAPI",
-        "License :: OSI Approved :: MIT License",
+        "Operating System :: OS Independent",
     ],
+    project_urls={
+        "Homepage": "https://github.com/wifiknight45/psychic-tribble",
+        "Source":   "https://github.com/wifiknight45/psychic-tribble",
+    },
 )
+
