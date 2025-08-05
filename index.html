@@ -1,62 +1,126 @@
+
 <!DOCTYPE html>
 <html lang="en">
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta name="description" content="Plan your events with a futuristic twist using Psychic Tribble's calendar and event planner.">
+  <meta name="keywords" content="event planner, calendar, Psychic Tribble, futuristic scheduling">
+  <meta name="author" content="Psychic Tribble">
   <title>Psychic Tribble</title>
-  <link href="https://fonts.googleapis.com/css2?family=Roboto:wght@400;700&display=swap" rel="stylesheet">
-  <link href="https://cdn.jsdelivr.net/npm/fullcalendar@6.1.8/main.min.css" rel="stylesheet">
-  <link rel="stylesheet" href="/psychic-tribble/static/css/style.css">
+  <link rel="icon" type="image/png" href="./static/images/favicon.png">
+  <link href="https://fonts.googleapis.com/css2?family=Roboto:wght@400;700&display=swap" rel="stylesheet" rel="noopener">
+  <link href="https://cdn.jsdelivr.net/npm/fullcalendar@6.1.8/main.min.css" rel="stylesheet" rel="noopener">
+  <link rel="stylesheet" href="./static/css/style.css">
 </head>
 <body>
-  <header>
+  <header role="banner">
     <h1>Psychic Tribble</h1>
     <p>Plan your events with a futuristic twist!</p>
-    <nav>
-      <a href="#events">Events</a>
-      <a href="#calendar">Calendar</a>
-      <a href="#profile">Profile</a>
+    <nav role="navigation" aria-label="Main navigation">
+      <ul>
+        <li><a href="#events" aria-current="page">Events</a></li>
+        <li><a href="#calendar">Calendar</a></li>
+        <li><a href="#profile">Profile</a></li>
+      </ul>
     </nav>
   </header>
 
-  <div class="container">
-    <section id="login">
-      <h2>Login</h2>
-      <form id="login-form">
-        <input type="email" id="username" placeholder="Email" required>
-        <input type="password" id="password" placeholder="Password" required>
+  <main class="container">
+    <section id="login" aria-labelledby="login-heading">
+      <h2 id="login-heading">Login</h2>
+      <form id="login-form" aria-describedby="login-instructions">
+        <p id="login-instructions" class="visually-hidden">Enter your email and password to log in.</p>
+        <label for="username">Email</label>
+        <input
+          type="email"
+          id="username"
+          name="username"
+          placeholder="you@example.com"
+          required
+          aria-required="true"
+        >
+        <label for="password">Password</label>
+        <input
+          type="password"
+          id="password"
+          name="password"
+          placeholder="••••••••"
+          required
+          aria-required="true"
+        >
         <button type="submit">Login</button>
       </form>
     </section>
 
-    <section id="create-event" style="display: none;">
-      <h2>Create Event</h2>
-      <form id="event-form">
-        <input type="text" id="event-title" placeholder="Event Title" required>
-        <textarea id="event-desc" placeholder="Description"></textarea>
-        <input type="datetime-local" id="event-start" required>
-        <input type="datetime-local" id="event-end" required>
+    <section id="create-event" aria-labelledby="create-event-heading" style="display: none;">
+      <h2 id="create-event-heading">Create Event</h2>
+      <form id="event-form" aria-describedby="event-instructions">
+        <p id="event-instructions" class="visually-hidden">Fill out the form to create a new event.</p>
+        <label for="event-title">Title</label>
+        <input
+          type="text"
+          id="event-title"
+          name="title"
+          placeholder="Event Title"
+          required
+          aria-required="true"
+        >
+        <label for="event-desc">Description</label>
+        <textarea
+          id="event-desc"
+          name="description"
+          placeholder="Details..."
+          aria-describedby="event-desc-hint"
+        ></textarea>
+        <p id="event-desc-hint" class="visually-hidden">Optional event description.</p>
+        <label for="event-start">Start Time</label>
+        <input
+          type="datetime-local"
+          id="event-start"
+          name="start_time"
+          required
+          aria-required="true"
+        >
+        <label for="event-end">End Time</label>
+        <input
+          type="datetime-local"
+          id="event-end"
+          name="end_time"
+          required
+          aria-required="true"
+        >
         <button type="submit">Add Event</button>
       </form>
     </section>
 
-    <section id="events">
-      <h2>Events</h2>
-      <div class="event-grid"></div>
+    <section id="events" aria-labelledby="events-heading">
+      <h2 id="events-heading">Events</h2>
+      <div class="event-grid" aria-live="polite">
+        <p>Please log in to view events.</p>
+      </div>
     </section>
 
-    <section id="calendar">
-      <h2>Calendar</h2>
-      <div id="calendar-view"></div>
+    <section id="calendar" aria-labelledby="calendar-heading">
+      <h2 id="calendar-heading">Calendar</h2>
+      <div
+        id="calendar-view"
+        aria-label="Monthly calendar view"
+      ></div>
     </section>
 
-    <section id="profile" style="display: none;">
-      <h2>Profile</h2>
+    <section id="profile" aria-labelledby="profile-heading" style="display: none;">
+      <h2 id="profile-heading">Profile</h2>
       <p id="profile-info">Log in to view your profile.</p>
+      <button id="logout-button" type="button">Logout</button>
     </section>
-  </div>
+  </main>
 
-  <script src="https://cdn.jsdelivr.net/npm/fullcalendar@6.1.8/main.min.js"></script>
-  <script src="/psychic-tribble/static/js/app.js"></script>
+  <footer role="contentinfo">
+    <p>&copy; 2025 Psychic Tribble</p>
+  </footer>
+
+  <script src="https://cdn.jsdelivr.net/npm/fullcalendar@6.1.8/main.min.js" defer></script>
+  <script src="./static/js/app.js" defer></script>
 </body>
 </html>
