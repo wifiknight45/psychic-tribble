@@ -1,37 +1,48 @@
 Psychic Tribble
-Note: This codebase is proprietary and confidential. Unauthorized use, copying, modification, or distribution is strictly prohibited. For authorized access and inquiries, contact andrews.crystal@gmail.com or robert.hodgkiss@my.utsa.edu.
+Psychic-Tribble app offers a secure and intuitive way to manage events, schedule timeslots, and sync with your calendar using a modern web interface and API. Built with FastAPI, it’s fast, scalable, and perfect for teams or individuals.
+
+Note: This codebase is proprietary and confidential. Unauthorized use, copying, modification, or distribution is prohibited. For access or inquiries, contact andrews.crystal@gmail.com or robert.hodgkiss@my.utsa.edu.
 
 Table of Contents
-Description
+
+What Is Psychic Tribble?
+Features
 Project Structure
 Prerequisites
 Setup Instructions
-Usage
-Development Notes
-Production Deployment
+Using the App
+Development Tips
+Deploying to Production
 Contact
 About
 
-Description
-Psychic Tribble is a robust backend solution for web and mobile applications, providing secure user authentication, comprehensive event management, flexible timeslot scheduling, and integrated calendar functionality. Built with the high-performance FastAPI framework, it ensures efficient and scalable API endpoints with automatic API documentation, data validation via Pydantic, and asynchronous processing. SQLAlchemy manages database operations, while Redis enables rate limiting for enhanced security and performance.
-This codebase is proprietary and confidential. Unauthorized use, copying, modification, or distribution is strictly prohibited.
-Project Structure
+What Is Psychic Tribble?
+Psychic Tribble is a powerful event management app designed for seamless scheduling and calendar integration. Whether you’re planning team meetings or personal events, it offers:
 
-app.py: Main application entry point, defining the FastAPI app, database setup, authentication, and core routers.
-psychic_tribble/: Contains database models (db/), routes (routes/), and utilities (core/utils.py).
-static/: Directory for static assets (e.g., HTML, CSS, JS).
-alembic.ini: Configuration for database migrations (development only).
-migrations/: Directory for Alembic migration scripts.
+A user-friendly web interface with a calendar view.
+Secure login and event management via API.
+iCalendar feed for syncing with Google Calendar, Outlook, and more.
+
+Screenshot of GUI interface or dashboard app or website splash page
+
+Secure Authentication: Log in with email and password to access your events.
+Event Management: Create, view, and delete events with a clean interface.
+Calendar View: Visualize events using an interactive calendar.
+iCalendar Feed: Sync events with external calendar apps.
+Fast and Scalable: Built with FastAPI for high performance.
+Rate Limiting: Protects the API using Redis for secure access.
+
+Project Structure
+app.py: Main app, sets up FastAPI, database, and API routes.
+psychic_tribble/: Contains database models (db/), API routes (routes/), and utilities (utils/).
+static/: Web interface files (HTML, CSS, JS).
+alembic.ini & migrations/: Database migration configuration and scripts.
 
 Prerequisites
-
-Python 3.9+
-Redis server (running locally or accessible via REDIS_URL)
-Database (SQLite for development, PostgreSQL recommended for production)
-Virtual environment (recommended)
-
+Python: 3.9 or higher.
+Redis: Running locally or via a service (set REDIS_URL).
+Database: SQLite for development, PostgreSQL for production.
 Dependencies:
-
 fastapi
 sqlalchemy
 alembic
@@ -49,9 +60,9 @@ git clone https://github.com/wifiknight45/psychic-tribble/
 cd psychic-tribble
 
 
-Set Up a Virtual Environment (recommended):
+Set Up a Virtual Environment:
 python -m venv venv
-source venv/bin/activate  # On Windows: venv\Scripts\activate
+source venv/bin/activate  # Windows: venv\Scripts\activate
 
 
 Install Dependencies:
@@ -59,80 +70,69 @@ pip install -r requirements.txt
 
 
 Configure Environment:
-
 Copy .env.example to .env.
-Update the variables in .env:
-PYTT_ENV: Set to 'development' or 'production'.
-DATABASE_URL: Database connection string (e.g., 'sqlite:///./development.db' for development, or 'postgresql://user:password@localhost:5432/psychic_tribble' for production).
-SECRET_KEY: A secure key for JWT authentication (generate using python -c "import os; print(os.urandom(32).hex())").
-REDIS_URL: Redis connection string (e.g., 'redis://localhost:6379/0').
-CORS_ORIGINS: Comma-separated list of allowed origins for CORS (e.g., ["http://localhost:3000","https://yourdomain.com"]).
-RATE_LIMITS: API rate limits (e.g., ["100/minute","1000/day"]).
+Update .env with:
+PYTT_ENV: development or production.
+DATABASE_URL: E.g., sqlite:///./development.db or postgresql://user:password@localhost:5432/psychic_tribble.
+SECRET_KEY: Generate with python -c "import os; print(os.urandom(32).hex())".
+REDIS_URL: E.g., redis://localhost:6379/0.
+CORS_ORIGINS: E.g., ["http://localhost:8000", "https://yourdomain.com"].
+RATE_LIMITS: E.g., ["100/minute", "1000/day"].
 
 
-
-
-Run Migrations (development only):
+Run Database Migrations (development only):
 alembic upgrade head
-
 
 Start the Server:
 uvicorn app:app --host 0.0.0.0 --port 8000 --reload
 
+Visit http://localhost:8000/static/index.html to see the web interface.
 
+Using the App
 
-Usage
-Authentication
+Web Interface:
+Open http://localhost:8000/static/index.html (INPUT DEPLOYED URL HERE).
+Log in with your email and password.
+Create, view, or delete events in the “Events” or “Calendar” sections.
+Copy the iCalendar feed URL from the “Calendar Feed” section to sync with Google Calendar or Outlook.
 
-Use the /token endpoint to obtain a JWT token via OAuth2 password flow (e.g., POST /token with username and password).
-
-API Endpoints
-
-/users: User management (requires authentication).
-/events: Event creation and management.
-/timeslots: Timeslot scheduling.
+API Access:
+Log in via POST /token with email and password to get a JWT token.
+Use the token to access:
+/users: Manage user accounts.
+/events: Create, view, or delete events.
+/timeslots: Schedule timeslots.
 /calendar: Calendar operations.
-/health: Health check endpoint.
+/calendar/feed.ics: Download your iCalendar feed.
 
-API Documentation
+Explore API docs at /docs (Swagger UI) or /redoc.
 
-Access automatic API documentation at:
-/docs (Swagger UI)
-/redoc (ReDoc)when the server is running.
+Health Check: Visit /health to confirm the server is running.
 
+Development Tips
+Debug Mode: Set PYTT_ENV=development for auto-migrations and detailed logs.
+Security: Uses bcrypt for passwords and JWT for authentication.
+Database: SQLite for development; switch to PostgreSQL for production.
+Testing: Add tests with pytest (create a tests/ folder if needed).
+Static Files: Customize the web interface in static/ (e.g., index.html, css/style.css, js/app.js).
 
-
-Rate Limiting
-
-Configured via RATE_LIMITS in .env (e.g., ["100/minute","1000/day"]).
-
-Static Files
-
-Serve front-end assets from /static.
-
-Development Notes
-
-Debug Mode: Enabled when PYTT_ENV=development, providing auto-migrations and detailed logging.
-Security: Uses bcrypt for password hashing and JWT for authentication.
-Database: Supports SQLite (development) and PostgreSQL (production).
-Testing: Run tests using pytest (if tests are implemented).
-
-Production Deployment
-For production:
-
+Deploying to Production
 Set PYTT_ENV=production in .env to disable debug mode and auto-migrations.
-Use a production-ready database like PostgreSQL.
-Start the server with multiple workers for better performance:uvicorn app:app --host 0.0.0.0 --port 8000 --workers 4
+Use a PostgreSQL database and update DATABASE_URL.
+Ensure Redis is running and REDIS_URL is set.
+Deploy with:uvicorn app:app --host 0.0.0.0 --port 8000 --workers 4
 
+Or 
+use Gunicorn:gunicorn --worker-class uvicorn.workers.UvicornWorker --workers 4 app:app --bind 0.0.0.0:8000
 
-Alternatively, use Gunicorn with Uvicorn workers:gunicorn --worker-class uvicorn.workers.UvicornWorker --workers 4 app:app --bind 0.0.0.0:8000
-
-
-Ensure Redis is configured for rate limiting.
+Host on a platform like Render, Heroku, or AWS.
+Update CORS_ORIGINS for your production domain.
+Test the web interface at https://yourdomain.com/static/index.html.
 
 Contact
-For issues or inquiries, contact andrews.crystal@gmail.com or robert.hodgkiss@my.utsa.edu.
+For questions or issues, reach out to:
+andrews.crystal@gmail.com
+robert.hodgkiss@my.utsa.edu
+
 About
-Interactive calendar dashboard
-Copyright (c) 2025 [The App]. All rights reserved.
-This software and its source code are proprietary and confidential. Unauthorized use, copying, modification, distribution, or reproduction in any form is prohibited without prior written permission from andrews.crystal@gmail.com or robert.hodgkiss@my.utsa.edu.
+Psychic Tribble is an interactive calendar dashboard for seamless event planning. Copyright © 2025 Psychic Tribble. All rights reserved.This software is proprietary and confidential. Unauthorized use is prohibited without written permission from the authors.
