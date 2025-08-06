@@ -1,23 +1,29 @@
-// app.js
-
-const API_BASE_URL = 'https://your-backend.onrender.com';
+// Dynamically set API base URL for local dev and production
+const API_BASE_URL = window.location.hostname === 'localhost' 
+    ? 'http://localhost:8000' 
+    : 'https://your-backend.onrender.com';
 
 // Cache all frequently-used DOM nodes
 const DOM = {
-  loginSection:      document.getElementById('login'),
-  createEventSection:document.getElementById('create-event'),
-  profileSection:    document.getElementById('profile'),
-  eventGrid:         document.querySelector('.event-grid'),
-  loginForm:         document.getElementById('login-form'),
-  eventForm:         document.getElementById('event-form'),
-  calendarView:      document.getElementById('calendar-view'),
-  profileInfo:       document.getElementById('profile-info'),
+  loginSection: document.getElementById('login'),
+  createEventSection: document.getElementById('create-event'),
+  profileSection: document.getElementById('profile'),
+  eventGrid: document.querySelector('.event-grid'),
+  loginForm: document.getElementById('login-form'),
+  eventForm: document.getElementById('event-form'),
+  calendarView: document.getElementById('calendar-view'),
+  profileInfo: document.getElementById('profile-info'),
+  logoutButton: document.getElementById('logout-button'),
+  navCreateEvent: document.getElementById('nav-create-event'),
+  navProfile: document.getElementById('nav-profile'),
+  icsUrl: document.getElementById('ics-url'), // For calendar feed URL
 };
 
 // Utility functions
 const Utils = {
   isValidEmail: email => /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email),
-  handleError: err => console.error(err),
+  handleError: err => console.error('Error:', err),
+  formatDate: date => new Date(date).toLocaleString(),
 };
 
 // Authentication methods
@@ -32,15 +38,40 @@ const Auth = {
       body: new URLSearchParams({ username: email, password }),
     });
 
-    if (!res.ok) throw new Error(`Login failed: ${res.statusText}`);
+    if (!res.ok) {
+      const errData = await res.json();
+      throw new Error(errData.detail?.message || `Login failed: ${res.statusText}`);
+    }
+    const { access_token, refresh_token } = await res.json();
+    localStorage.setItem('access_token', access_token);
+    localStorage.setItem('refresh_token', refresh_token);
+    return { access_token, refresh_token };
+  },
+
+  async refreshToken() {
+    const refreshToken = localStorage.getItem('refresh_token');
+    if (!refreshToken) throw new Error('No refresh token available');
+
+    const res = await fetch(`${API_BASE_URL}/refresh`, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ refresh_token: refreshToken }),
+    });
+
+    if (!res.ok) throw new Error('Failed to refresh token');
     const { access_token } = await res.json();
-    localStorage.setItem('token', access_token);
+    localStorage.setItem('access_token', access_token);
     return access_token;
   },
 
   getToken() {
-    return localStorage.getItem('token');
-  }
+    return localStorage.getItem('access_token');
+  },
+
+  logout() {
+    localStorage.removeItem('access_token');
+    localStorage.removeItem('refresh_token');
+  },
 };
 
 // Wrap all backend calls to automatically add Authorization header
@@ -52,55 +83,78 @@ const API = {
 
     const res = await fetch(`${API_BASE_URL}${path}`, {
       ...options,
-      headers
+      headers,
     });
 
-    if (!res.ok) throw new Error(res.statusText);
+    if (res.status === 401) {
+      try {
+        await Auth.refreshToken();
+        return this.request(path, options); // Retry with new token
+      } catch (err) {
+        Auth.logout();
+        throw new Error('Session expired. Please log in again.');
+      }
+    }
+
+    if (!res.ok) throw new Error((await res.json()).detail?.message || res.statusText);
     return res.json();
   },
 
-  fetchEvents: ()      => API.request('/events'),
-  fetchEvent: id       => API.request(`/events/${id}`),
-  createEvent: data    => API.request('/events', {
-    method:  'POST',
+  fetchEvents: () => API.request('/events'),
+  fetchEvent: id => API.request(`/events/${id}`),
+  createEvent: data => API.request('/events', {
+    method: 'POST',
     headers: { 'Content-Type': 'application/json' },
-    body:    JSON.stringify(data)
+    body: JSON.stringify(data),
   }),
-  fetchProfile: ()     => API.request('/users/me'),
+  deleteEvent: id => API.request(`/events/${id}`, { method: 'DELETE' }),
+  fetchProfile: () => API.request('/users/me'),
 };
 
 // UI-rendering helpers
 const UI = {
-  showSection(section) {
-    [DOM.loginSection, DOM.createEventSection, DOM.profileSection]
-      .forEach(sec => sec.style.display = sec === section ? 'block' : 'none');
+  showSection(section, show = true) {
+    [DOM.loginSection, DOM.createEventSection, DOM.profileSection].forEach(
+      sec => (sec.style.display = sec === section ? (show ? 'block' : 'none') : 'none')
+    );
+    [DOM.navCreateEvent, DOM.navProfile].forEach(
+      nav => (nav.style.display = show && section !== DOM.loginSection ? 'block' : 'none')
+    );
   },
 
-  showMessage(containerSelector, html) {
-    document.querySelector(containerSelector).innerHTML = html;
+  showMessage(containerSelector, html, isError = false) {
+    const container = document.querySelector(containerSelector);
+    container.innerHTML = `<p aria-live="polite" class="${isError ? 'error' : ''}">${html}</p>`;
   },
 
-  showLoading() {
-    DOM.eventGrid.innerHTML = '<p aria-live="polite">Loading events...</p>';
+  showLoading(containerSelector) {
+    this.showMessage(containerSelector, 'Loading...');
   },
 
   renderEvents(events) {
     if (!events.length) {
-      DOM.eventGrid.innerHTML = '<p aria-live="polite">No events found.</p>';
+      this.showMessage('.event-grid', 'No events found.');
       return;
     }
 
-    DOM.eventGrid.innerHTML = events.map(e => `
+    DOM.eventGrid.innerHTML = events
+      .map(
+        e => `
       <div class="event-card" role="article" data-id="${e.id}">
         <h3>${e.title || 'Untitled Event'}</h3>
         <p>${e.description || 'No description'}</p>
-        <p>Start: ${new Date(e.start_time).toLocaleString()}</p>
-        <button class="view-details"
-                aria-label="View details for ${e.title || 'event'}">
+        <p>Start: ${Utils.formatDate(e.start_time)}</p>
+        <p>End: ${Utils.formatDate(e.end_time)}</p>
+        <button class="view-details" aria-label="View details for ${e.title || 'event'}">
           View Details
         </button>
+        <button class="delete-event" aria-label="Delete ${e.title || 'event'}">
+          Delete
+        </button>
       </div>
-    `).join('');
+    `
+      )
+      .join('');
   },
 
   openModal(contentHtml) {
@@ -119,43 +173,53 @@ const UI = {
     closeBtn.focus();
     const removeModal = () => modal.remove();
 
-    closeBtn.addEventListener('click',  removeModal);
+    closeBtn.addEventListener('click', removeModal);
     closeBtn.addEventListener('keydown', e => {
       if (e.key === 'Enter' || e.key === ' ') removeModal();
     });
     modal.addEventListener('click', e => {
       if (e.target === modal) removeModal();
     });
-  }
+  },
+
+  updateIcsUrl() {
+    if (DOM.icsUrl) {
+      DOM.icsUrl.textContent = Auth.getToken()
+        ? `${API_BASE_URL}/calendar/feed.ics`
+        : 'Log in to get your calendar feed URL.';
+    }
+  },
 };
 
 // Core application logic
 const App = {
-  // Load & render the event list
   async loadEvents() {
     if (!Auth.getToken()) {
-      UI.showMessage('.event-grid', '<p aria-live="polite">Please log in to view events.</p>');
+      UI.showMessage('.event-grid', 'Please log in to view events.');
+      UI.showMessage('#calendar-view', 'Please log in to view calendar.', false);
       return;
     }
-    UI.showLoading();
+    UI.showLoading('.event-grid');
+    UI.showLoading('#calendar-view');
     try {
       const events = await API.fetchEvents();
       UI.renderEvents(events);
+      this.initCalendar(events);
     } catch (err) {
       Utils.handleError(err);
-      UI.showMessage('.event-grid', '<p aria-live="polite">Error loading events. Please try again.</p>');
+      UI.showMessage('.event-grid', 'Error loading events. Please try again.', true);
+      UI.showMessage('#calendar-view', 'Error loading calendar.', true);
     }
   },
 
-  // Open detail modal for a single event
   async showEventDetails(id) {
     try {
       const e = await API.fetchEvent(id);
       UI.openModal(`
         <h2>${e.title || 'Untitled Event'}</h2>
         <p>${e.description || 'No description'}</p>
-        <p>Start: ${new Date(e.start_time).toLocaleString()}</p>
-        <p>End:   ${new Date(e.end_time).toLocaleString()}</p>
+        <p>Start: ${Utils.formatDate(e.start_time)}</p>
+        <p>End: ${Utils.formatDate(e.end_time)}</p>
       `);
     } catch (err) {
       Utils.handleError(err);
@@ -163,13 +227,28 @@ const App = {
     }
   },
 
-  // POST a new event then refresh the list
+  async deleteEvent(id) {
+    if (!confirm('Are you sure you want to delete this event?')) return;
+    try {
+      await API.deleteEvent(id);
+      await this.loadEvents();
+      alert('Event deleted successfully!');
+    } catch (err) {
+      Utils.handleError(err);
+      alert(`Failed to delete event: ${err.message}`);
+    }
+  },
+
   async createEvent(data) {
-    await API.createEvent(data);
+    await API.createEvent({
+      title: data.title,
+      description: data.description,
+      start_time: new Date(data.start_time).toISOString(),
+      end_time: new Date(data.end_time).toISOString(),
+    });
     await this.loadEvents();
   },
 
-  // Fetch & display user profile
   async loadProfile() {
     try {
       const u = await API.fetchProfile();
@@ -180,23 +259,28 @@ const App = {
     }
   },
 
-  // Initialize FullCalendar
-  initCalendar() {
+  initCalendar(events = []) {
     if (!DOM.calendarView) return;
+    DOM.calendarView.innerHTML = ''; // Clear previous calendar
     const calendar = new FullCalendar.Calendar(DOM.calendarView, {
       initialView: 'dayGridMonth',
-      events: () => this.loadEvents(),
+      events: events.map(e => ({
+        id: e.id,
+        title: e.title,
+        start: e.start_time,
+        end: e.end_time,
+        extendedProps: { description: e.description },
+      })),
       eventClick: info => this.showEventDetails(info.event.id),
       headerToolbar: {
-        left:   'prev,next today',
+        left: 'prev,next today',
         center: 'title',
-        right:  'dayGridMonth,timeGridWeek,timeGridDay'
-      }
+        right: 'dayGridMonth,timeGridWeek,timeGridDay',
+      },
     });
     calendar.render();
   },
 
-  // Smooth-scroll nav links
   initNav() {
     document.querySelectorAll('nav a').forEach(a => {
       a.addEventListener('click', e => {
@@ -208,12 +292,11 @@ const App = {
     });
   },
 
-  // Wire up form submissions & grid clicks
   bindEvents() {
     // LOGIN
     DOM.loginForm.addEventListener('submit', async e => {
       e.preventDefault();
-      const email    = e.target.username.value;
+      const email = e.target.username.value;
       const password = e.target.password.value;
       try {
         await Auth.login(email, password);
@@ -221,7 +304,7 @@ const App = {
         UI.showSection(DOM.profileSection);
         await this.loadEvents();
         await this.loadProfile();
-        this.initCalendar();
+        UI.updateIcsUrl();
       } catch (err) {
         alert(`Login failed: ${err.message}`);
       }
@@ -231,37 +314,50 @@ const App = {
     DOM.eventForm.addEventListener('submit', async e => {
       e.preventDefault();
       const title = e.target['event-title'].value.trim();
-      const desc  = e.target['event-desc'].value.trim();
-      const start = e.target['event-start'].value;
-      const end   = e.target['event-end'].value;
+      const description = e.target['event-desc'].value.trim();
+      const start_time = e.target['event-start'].value;
+      const end_time = e.target['event-end'].value;
 
       if (!title) return alert('Event title is required');
-      if (!start || !end) return alert('Start and end times are required');
-      if (new Date(end) <= new Date(start))
+      if (!start_time || !end_time) return alert('Start and end times are required');
+      if (new Date(end_time) <= new Date(start_time))
         return alert('End time must be after start time');
 
       try {
-        await this.createEvent({ title, description: desc, start_time: start, end_time: end });
+        await this.createEvent({ title, description, start_time, end_time });
         alert('Event created successfully!');
         e.target.reset();
       } catch (err) {
-        alert(err.message);
+        alert(`Failed to create event: ${err.message}`);
       }
     });
 
-    // DELEGATE: View Details buttons inside .event-grid
+    // DELEGATE: View Details and Delete buttons
     DOM.eventGrid.addEventListener('click', e => {
       if (e.target.matches('.view-details')) {
         const id = e.target.closest('.event-card').dataset.id;
         this.showEventDetails(id);
+      } else if (e.target.matches('.delete-event')) {
+        const id = e.target.closest('.event-card').dataset.id;
+        this.deleteEvent(id);
       }
+    });
+
+    // LOGOUT
+    DOM.logoutButton.addEventListener('click', () => {
+      Auth.logout();
+      UI.showSection(DOM.loginSection);
+      UI.showMessage('.event-grid', 'Please log in to view events.');
+      DOM.calendarView.innerHTML = '';
+      DOM.profileInfo.textContent = 'Log in to view your profile.';
+      UI.updateIcsUrl();
     });
   },
 
-  // App startup
   async init() {
     this.bindEvents();
     this.initNav();
+    UI.updateIcsUrl();
 
     const token = Auth.getToken();
     if (token) {
@@ -269,12 +365,11 @@ const App = {
       UI.showSection(DOM.profileSection);
       await this.loadEvents();
       await this.loadProfile();
-      this.initCalendar();
     } else {
       UI.showSection(DOM.loginSection);
-      UI.showMessage('.event-grid', '<p aria-live="polite">Please log in to view events.</p>');
+      UI.showMessage('.event-grid', 'Please log in to view events.');
     }
-  }
+  },
 };
 
 // Bootstrap after DOM is ready
