@@ -1,0 +1,12 @@
+pytest==8.3.3               # Test framework for unit/integration tests
+pytest-asyncio==1.1.0       # Asyncio support for testing async endpoints
+pytest-cov==6.2.1           # Measures test coverage
+ruff==0.7.0                 # Fast linter/formatter, replaces flake8, black, isort
+pre-commit==3.8.0           # Manages Git hooks for linting/formatting
+tox==4.22.0                 # Tests across Python versions
+build==1.2.2                # Builds source/wheel distributions
+setuptools==74.1.2          # Packaging utilities
+wheel==0.44.0               # Generates wheel packages
+twine==6.1.0                # Uploads packages to PyPI
+bump2version==1.0.1         # Automates version bumps
+ipython==9.4.0              # Interactive shell for debugging
