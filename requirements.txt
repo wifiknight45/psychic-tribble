@@ -1,17 +1,16 @@
-fastapi>=0.68.0
-uvicorn>=0.15.0
-sqlalchemy>=1.4.0
-psycopg2-binary>=2.9.0
-alembic>=1.7.0
-redis>=4.0.0
-pytest>=7.0.0
-pytest-asyncio>=0.18.0
-pytest-cov>=3.0.0
-flake8>=5.0.0
-build>=0.8.0
-setuptools>=61.0
-wheel>=0.37.0
-jinja2>=3.0.0
-httpx>=0.23.0  
-icalendar==5.0.13
-pytz==2024.1
+fastapi[standard]==0.116.1  # FastAPI with interactive docs, JSON Schema, performance extras
+uvicorn[standard]==0.35.0   # ASGI server with HTTP/1.1, HTTP/2, WebSockets, auto-reload
+gunicorn==23.0.0            # Production WSGI server for running uvicorn workers
+sqlalchemy==2.0.35          # SQL toolkit and ORM for database operations
+psycopg2-binary==2.9.9      # PostgreSQL adapter for development (use psycopg in production)
+psycopg==3.2.2              # Modern PostgreSQL adapter for production, supports async
+alembic==1.16.4             # Database migration tool for SQLAlchemy
+redis==5.0.8                # Python client for Redis, used for rate limiting and caching
+httpx==0.28.1               # HTTP client for testing or external API calls
+icalendar==6.3.1            # RFC 5545-compliant iCalendar parser/generator
+python-dotenv==1.0.1        # Loads .env file for configuration
+pydantic==2.9.2             # Data validation for FastAPI and settings
+python-jose[cryptography]==3.3.0  # JWT authentication for /token, /refresh
+passlib[bcrypt]==1.7.4      # Password hashing for authentication
+structlog==24.4.0           # Structured JSON logging for debugging
+python-multipart==0.0.12    # Handles form data for OAuth2 password flow
