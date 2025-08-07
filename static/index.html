@@ -3,24 +3,178 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <meta name="description" content="Plan your events with a futuristic twist using Psychic Tribble's calendar and event planner.">
-  <meta name="keywords" content="event planner, calendar, Psychic Tribble, futuristic scheduling">
+  <meta name="description" content="Effortless time management with Psychic Tribble's sleek calendar and event planner.">
+  <meta name="keywords" content="calendar, time management, event planner, Psychic Tribble, productivity">
   <meta name="author" content="Psychic Tribble">
   <title>Psychic Tribble</title>
   <link rel="icon" type="image/png" href="./static/images/favicon.png">
-  <link href="https://fonts.googleapis.com/css2?family=Roboto:wght@400;700&display=swap" rel="stylesheet" rel="noopener">
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;700&family=Space+Grotesk:wght@400;700&display=swap" rel="stylesheet" rel="noopener">
   <link href="https://cdn.jsdelivr.net/npm/fullcalendar@6.1.8/main.min.css" rel="stylesheet" rel="noopener">
   <link rel="stylesheet" href="./static/css/style.css">
+  <style>
+    :root {
+      --bg-color: #f5f7fa;
+      --text-color: #2d3748;
+      --primary-color: #4c6ef5;
+      --glass-bg: rgba(255, 255, 255, 0.2);
+      --glass-border: 1px solid rgba(255, 255, 255, 0.3);
+      --blur: blur(10px);
+      --shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+    }
+    body {
+      font-family: 'Inter', sans-serif;
+      background: linear-gradient(135deg, #e2e8f0, #dbeafe);
+      color: var(--text-color);
+      margin: 0;
+      padding: 0;
+      min-height: 100vh;
+    }
+    header {
+      text-align: center;
+      padding: 2rem 1rem;
+      background: transparent;
+    }
+    .hero {
+      max-width: 600px;
+      margin: 0 auto;
+    }
+    h1 {
+      font-family: 'Space Grotesk', sans-serif;
+      font-size: 2.5rem;
+      margin: 0;
+      color: var(--primary-color);
+    }
+    .hero p {
+      font-size: 1.2rem;
+      opacity: 0.8;
+      margin: 0.5rem 0 1.5rem;
+    }
+    .cta-button {
+      display: inline-block;
+      padding: 0.75rem 1.5rem;
+      background: var(--glass-bg);
+      backdrop-filter: var(--blur);
+      border: var(--glass-border);
+      border-radius: 8px;
+      color: var(--primary-color);
+      text-decoration: none;
+      font-weight: 500;
+      transition: transform 0.2s;
+    }
+    .cta-button:hover {
+      transform: translateY(-2px);
+    }
+    nav ul {
+      list-style: none;
+      padding: 0;
+      display: flex;
+      justify-content: center;
+      gap: 1.5rem;
+      margin: 1rem 0;
+    }
+    nav a {
+      color: var(--text-color);
+      text-decoration: none;
+      font-weight: 500;
+      font-size: 1rem;
+      transition: color 0.2s;
+    }
+    nav a:hover {
+      color: var(--primary-color);
+    }
+    .container {
+      max-width: 800px;
+      margin: 0 auto;
+      padding: 1rem;
+    }
+    section {
+      background: var(--glass-bg);
+      backdrop-filter: var(--blur);
+      border: var(--glass-border);
+      border-radius: 12px;
+      padding: 1.5rem;
+      margin-bottom: 2rem;
+      box-shadow: var(--shadow);
+    }
+    h2 {
+      font-family: 'Space Grotesk', sans-serif;
+      font-size: 1.5rem;
+      margin-top: 0;
+      color: var(--primary-color);
+    }
+    form {
+      display: flex;
+      flex-direction: column;
+      gap: 1rem;
+    }
+    label {
+      font-weight: 500;
+      font-size: 0.9rem;
+    }
+    input, textarea {
+      padding: 0.75rem;
+      border: 1px solid rgba(0, 0, 0, 0.1);
+      border-radius: 8px;
+      background: rgba(255, 255, 255, 0.5);
+      font-family: 'Inter', sans-serif;
+    }
+    button {
+      padding: 0.75rem;
+      background: var(--primary-color);
+      color: white;
+      border: none;
+      border-radius: 8px;
+      font-weight: 500;
+      cursor: pointer;
+      transition: background 0.2s;
+    }
+    button:hover {
+      background: #3b82f6;
+    }
+    .event-grid {
+      display: grid;
+      gap: 1rem;
+    }
+    .event-card {
+      background: var(--glass-bg);
+      backdrop-filter: var(--blur);
+      border: var(--glass-border);
+      border-radius: 8px;
+      padding: 1rem;
+    }
+    footer {
+      text-align: center;
+      padding: 1rem;
+      font-size: 0.9rem;
+      opacity: 0.7;
+    }
+    @media (max-width: 768px) {
+      .container {
+        padding: 0.5rem;
+      }
+      nav ul {
+        flex-direction: column;
+        gap: 0.5rem;
+      }
+      section {
+        padding: 1rem;
+      }
+    }
+  </style>
 </head>
 <body>
   <header role="banner">
-    <h1>Psychic Tribble</h1>
-    <p>Plan your events with a futuristic twist!</p>
+    <div class="hero">
+      <h1>Psychic Tribble</h1>
+      <p>Simplify your schedule with effortless time management.</p>
+      <a href="#create-event" class="cta-button" id="nav-create-event" aria-label="Create a new event">Add Event</a>
+    </div>
     <nav role="navigation" aria-label="Main navigation">
       <ul>
-        <li><a href="#events" aria-current="page">Events</a></li>
+        <li><a href="/" aria-current="page">Home</a></li>
+        <li><a href="#events">Events</a></li>
         <li><a href="#calendar">Calendar</a></li>
-        <li><a href="#profile">Profile</a></li>
+        <li><a href="#profile" id="nav-profile">Profile</a></li>
       </ul>
     </nav>
   </header>
@@ -29,7 +183,7 @@
     <section id="login" aria-labelledby="login-heading">
       <h2 id="login-heading">Login</h2>
       <form id="login-form" aria-describedby="login-instructions">
-        <p id="login-instructions" class="visually-hidden">Enter your email and password to log in.</p>
+        <p id="login-instructions">Sign in to manage your schedule.</p>
         <label for="username">Email</label>
         <input
           type="email"
@@ -50,18 +204,19 @@
         >
         <button type="submit">Login</button>
       </form>
+      <p>Not a member? <a href="#signup">Sign up to start organizing!</a></p>
     </section>
 
     <section id="create-event" aria-labelledby="create-event-heading" style="display: none;">
-      <h2 id="create-event-heading">Create Event</h2>
+      <h2 id="create-event-heading">New Event</h2>
       <form id="event-form" aria-describedby="event-instructions">
-        <p id="event-instructions" class="visually-hidden">Fill out the form to create a new event.</p>
+        <p id="event-instructions">Add a new event to your schedule.</p>
         <label for="event-title">Title</label>
         <input
           type="text"
           id="event-title"
           name="title"
-          placeholder="Event Title"
+          placeholder="e.g., Project Deadline"
           required
           aria-required="true"
         >
@@ -69,10 +224,10 @@
         <textarea
           id="event-desc"
           name="description"
-          placeholder="Details..."
+          placeholder="e.g., Finalize project report..."
           aria-describedby="event-desc-hint"
         ></textarea>
-        <p id="event-desc-hint" class="visually-hidden">Optional event description.</p>
+        <p id="event-desc-hint">Optional: Add event details.</p>
         <label for="event-start">Start Time</label>
         <input
           type="datetime-local"
@@ -94,18 +249,16 @@
     </section>
 
     <section id="events" aria-labelledby="events-heading">
-      <h2 id="events-heading">Events</h2>
+      <h2 id="events-heading">Your Events</h2>
       <div class="event-grid" aria-live="polite">
-        <p>Please log in to view events.</p>
+        <p>Please log in to view your events.</p>
       </div>
     </section>
 
     <section id="calendar" aria-labelledby="calendar-heading">
       <h2 id="calendar-heading">Calendar</h2>
-      <div
-        id="calendar-view"
-        aria-label="Monthly calendar view"
-      ></div>
+      <div id="calendar-view" aria-label="Monthly calendar view"></div>
+      <p id="ics-url" aria-label="Calendar feed URL">Log in to get your calendar feed URL.</p>
     </section>
 
     <section id="profile" aria-labelledby="profile-heading" style="display: none;">
@@ -116,7 +269,7 @@
   </main>
 
   <footer role="contentinfo">
-    <p>&copy; 2025 Psychic Tribble</p>
+    <p>&copy; 2025 Psychic Tribble. Simplify your time.</p>
   </footer>
 
   <script src="https://cdn.jsdelivr.net/npm/fullcalendar@6.1.8/main.min.js" defer></script>
