@@ -3,82 +3,140 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <meta name="description" content="{% block description %}Plan your events with a futuristic twist using Psychic Tribble.{% endblock %}">
-  <meta name="keywords" content="event planner, calendar, Psychic Tribble, futuristic scheduling">
+  <meta name="description" content="{% block description %}Effortless time management with Psychic Tribble's sleek calendar and event planner.{% endblock %}">
+  <meta name="keywords" content="calendar, time management, event planner, Psychic Tribble, productivity">
   <meta name="author" content="Psychic Tribble">
   <title>{% block title %}Psychic Tribble{% endblock %}</title>
   <link rel="icon" type="image/png" href="{% block favicon %}{{ url_for('static', filename='images/favicon.png') }}{% endblock %}">
-  <link href="https://fonts.googleapis.com/css2?family=Roboto:wght@400;700&display=swap" rel="stylesheet" rel="noopener">
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;700&family=Space+Grotesk:wght@400;700&display=swap" rel="stylesheet" rel="noopener">
   <link href="https://cdn.jsdelivr.net/npm/fullcalendar@6.1.8/main.min.css" rel="stylesheet" rel="noopener">
-  <link rel="stylesheet" href="{% block css %}{{ url_for('static', filename='css/style.css') }}{% endblock %}">
+  <link rel="stylesheet" href="{% block css %}{{ url_for('static', filename='css/styles.css') }}{% endblock %}">
   {% block extra_head %}{% endblock %}
 </head>
 <body>
   <header role="banner">
-    <h1>Psychic Tribble</h1>
-    <p>Plan your events with a futuristic twist!</p>
+    <h1 class="app-title">🔮 Psychic Tribble</h1>
     <nav role="navigation" aria-label="Main navigation">
       <ul>
-        <li><a href="#events" aria-current="page">Events</a></li>
-        <li><a href="#calendar">Calendar</a></li>
-        <li><a href="#profile">Profile</a></li>
+        <li><a href="/" aria-current="page">Home</a></li>
+        <li><a href="#events">Events</a></li>
+        <li><a href="#calendar" id="nav-create-event">Calendar</a></li>
+        <li><a href="#profile" id="nav-profile">Profile</a></li>
       </ul>
     </nav>
   </header>
 
-  <main class="container" role="main">
+  <div id="statusContainer"></div>
+
+  <main class="main-container" role="main">
     {% block content %}
-    <section id="login" aria-labelledby="login-heading">
-      <h2 id="login-heading">Login</h2>
-      <form id="login-form" aria-describedby="login-instructions">
-        <p id="login-instructions" class="visually-hidden">Enter your email and password to log in.</p>
-        <label for="username">Email</label>
-        <input type="email" id="username" name="username" placeholder="you@example.com" required aria-required="true">
-        <label for="password">Password</label>
-        <input type="password" id="password" name="password" placeholder="••••••••" required aria-required="true">
-        <button type="submit">Login</button>
-      </form>
-    </section>
-
-    <section id="create-event" aria-labelledby="create-event-heading" style="display: none;">
-      <h2 id="create-event-heading">Create Event</h2>
-      <form id="event-form" aria-describedby="event-instructions">
-        <p id="event-instructions" class="visually-hidden">Fill out the form to create a new event.</p>
-        <label for="event-title">Title</label>
-        <input type="text" id="event-title" name="title" placeholder="Event Title" required aria-required="true">
-        <label for="event-desc">Description</label>
-        <textarea id="event-desc" name="description" placeholder="Details..." aria-describedby="event-desc-hint"></textarea>
-        <p id="event-desc-hint" class="visually-hidden">Optional event description.</p>
-        <label for="event-start">Start Time</label>
-        <input type="datetime-local" id="event-start" name="start_time" required aria-required="true">
-        <label for="event-end">End Time</label>
-        <input type="datetime-local" id="event-end" name="end_time" required aria-required="true">
-        <button type="submit">Add Event</button>
-      </form>
-    </section>
-
-    <section id="events" aria-labelledby="events-heading">
-      <h2 id="events-heading">Events</h2>
-      <div class="event-grid" aria-live="polite">
-        <p>Please log in to view events.</p>
-      </div>
-    </section>
-
-    <section id="calendar" aria-labelledby="calendar-heading">
+    <div class="calendar-container">
       <h2 id="calendar-heading">Calendar</h2>
       <div id="calendar-view" aria-label="Monthly calendar view"></div>
-    </section>
+      <p id="ics-url" aria-label="Calendar feed URL">Log in to get your calendar feed URL.</p>
+    </div>
 
-    <section id="profile" aria-labelledby="profile-heading" style="display: none;">
-      <h2 id="profile-heading">Profile</h2>
-      <p id="profile-info">Log in to view your profile.</p>
-      <button id="logout-button" type="button">Logout</button>
-    </section>
+    <div class="side-panel">
+      <div class="panel-section" id="create-event" style="display: block;">
+        <h2 id="create-event-heading">New Event</h2>
+        <form id="event-form" aria-describedby="event-instructions">
+          <p id="event-instructions">Add a new event to your schedule.</p>
+          <label for="event-title">Title</label>
+          <input
+            type="text"
+            class="form-input"
+            id="event-title"
+            name="title"
+            placeholder="e.g., Project Deadline"
+            required
+            aria-required="true"
+          >
+          <label for="event-desc">Description</label>
+          <textarea
+            class="form-input"
+            id="event-desc"
+            name="description"
+            placeholder="e.g., Finalize project report..."
+            aria-describedby="event-desc-hint"
+          ></textarea>
+          <p id="event-desc-hint">Optional: Add event details.</p>
+          <label for="event-start">Start Time</label>
+          <input
+            type="datetime-local"
+            class="form-input"
+            id="event-start"
+            name="start_time"
+            required
+            aria-required="true"
+          >
+          <label for="event-end">End Time</label>
+          <input
+            type="datetime-local"
+            class="form-input"
+            id="event-end"
+            name="end_time"
+            required
+            aria-required="true"
+          >
+          <button type="submit">Add Event</button>
+        </form>
+      </div>
+
+      <div class="panel-section" id="events">
+        <h2 id="events-heading">Your Events</h2>
+        <div class="event-grid" aria-live="polite">
+          <p>Please log in to view your events.</p>
+        </div>
+      </div>
+
+      <div class="panel-section" id="profile" style="display: none;">
+        <h2 id="profile-heading">Profile</h2>
+        <p id="profile-info">Log in to view your profile.</p>
+        <button id="logout-button">Logout</button>
+      </div>
+    </div>
     {% endblock %}
   </main>
 
+  <div class="modal-overlay" id="authModal">
+    <div class="modal">
+      <span class="close-modal" aria-label="Close modal">&times;</span>
+      <h2 id="modalTitle">Login</h2>
+      <form id="authForm" aria-describedby="auth-instructions">
+        <p id="auth-instructions">Sign in or sign up to manage your schedule.</p>
+        <label for="authEmail">Email</label>
+        <input
+          type="email"
+          class="form-input"
+          id="authEmail"
+          name="username"
+          placeholder="you@example.com"
+          required
+          aria-required="true"
+        >
+        <label for="authPassword">Password</label>
+        <input
+          type="password"
+          class="form-input"
+          id="authPassword"
+          name="password"
+          placeholder="••••••••"
+          required
+          aria-required="true"
+        >
+        <button type="submit">
+          <span id="authSpinner" class="spinner" style="display: none;"></span>
+          <span id="authSubmitText">Login</span>
+        </button>
+      </form>
+      <p style="text-align: center; margin-top: 16px;">
+        <a href="#" id="toggleAuth" style="color: var(--accent-color);">Sign up</a>
+      </p>
+    </div>
+  </div>
+
   <footer role="contentinfo">
-    <p>&copy; 2025 Psychic Tribble</p>
+    <p>&copy; 2025 Psychic Tribble. Simplify your time.</p>
   </footer>
 
   <script src="https://cdn.jsdelivr.net/npm/fullcalendar@6.1.8/main.min.js" defer></script>
