@@ -13,260 +13,388 @@
   <link rel="stylesheet" href="./static/css/style.css">
   <style>
     :root {
-      --bg-color: #f5f7fa;
-      --text-color: #2d3748;
-      --primary-color: #4c6ef5;
-      --glass-bg: rgba(255, 255, 255, 0.2);
-      --glass-border: 1px solid rgba(255, 255, 255, 0.3);
-      --blur: blur(10px);
-      --shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+      --primary-glass: rgba(255, 255, 255, 0.1);
+      --secondary-glass: rgba(255, 255, 255, 0.05);
+      --border-glass: rgba(255, 255, 255, 0.2);
+      --text-primary: rgba(255, 255, 255, 0.95);
+      --text-secondary: rgba(255, 255, 255, 0.7);
+      --text-muted: rgba(255, 255, 255, 0.4);
+      --accent-color: #4f46e5;
+      --success-color: #10b981;
+      --danger-color: #ef4444;
     }
+
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+    }
+
     body {
       font-family: 'Inter', sans-serif;
-      background: linear-gradient(135deg, #e2e8f0, #dbeafe);
-      color: var(--text-color);
-      margin: 0;
-      padding: 0;
+      background: linear-gradient(135deg, #667eea 0%, #764ba2 50%, #667eea 100%);
+      background-size: 400% 400%;
+      animation: gradientShift 15s ease infinite;
       min-height: 100vh;
+      display: flex;
+      flex-direction: column;
+      padding: 20px;
+      color: var(--text-primary);
     }
+
+    @keyframes gradientShift {
+      0%, 100% { background-position: 0% 50%; }
+      50% { background-position: 100% 50%; }
+    }
+
     header {
-      text-align: center;
-      padding: 2rem 1rem;
-      background: transparent;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 24px;
+      padding: 16px 24px;
+      background: var(--primary-glass);
+      backdrop-filter: blur(20px);
+      border: 1px solid var(--border-glass);
+      border-radius: 16px;
+      box-shadow: 0 8px 32px rgba(0, 0, 0, 0.1);
     }
-    .hero {
-      max-width: 600px;
-      margin: 0 auto;
-    }
-    h1 {
+
+    .app-title {
       font-family: 'Space Grotesk', sans-serif;
-      font-size: 2.5rem;
-      margin: 0;
-      color: var(--primary-color);
+      font-size: 24px;
+      font-weight: 700;
     }
-    .hero p {
-      font-size: 1.2rem;
-      opacity: 0.8;
-      margin: 0.5rem 0 1.5rem;
-    }
-    .cta-button {
-      display: inline-block;
-      padding: 0.75rem 1.5rem;
-      background: var(--glass-bg);
-      backdrop-filter: var(--blur);
-      border: var(--glass-border);
-      border-radius: 8px;
-      color: var(--primary-color);
-      text-decoration: none;
-      font-weight: 500;
-      transition: transform 0.2s;
-    }
-    .cta-button:hover {
-      transform: translateY(-2px);
-    }
+
     nav ul {
       list-style: none;
-      padding: 0;
       display: flex;
-      justify-content: center;
-      gap: 1.5rem;
-      margin: 1rem 0;
+      gap: 16px;
     }
+
     nav a {
-      color: var(--text-color);
+      color: var(--text-secondary);
       text-decoration: none;
       font-weight: 500;
-      font-size: 1rem;
-      transition: color 0.2s;
+      font-size: 14px;
+      transition: color 0.3s ease;
     }
+
     nav a:hover {
-      color: var(--primary-color);
+      color: var(--text-primary);
     }
-    .container {
-      max-width: 800px;
+
+    .main-container {
+      display: flex;
+      gap: 24px;
+      flex: 1;
+      max-width: 1200px;
       margin: 0 auto;
-      padding: 1rem;
+      width: 100%;
     }
-    section {
-      background: var(--glass-bg);
-      backdrop-filter: var(--blur);
-      border: var(--glass-border);
-      border-radius: 12px;
-      padding: 1.5rem;
-      margin-bottom: 2rem;
-      box-shadow: var(--shadow);
+
+    .calendar-container {
+      flex: 1;
+      background: var(--primary-glass);
+      backdrop-filter: blur(20px);
+      border: 1px solid var(--border-glass);
+      border-radius: 20px;
+      padding: 24px;
+      box-shadow: 0 8px 32px rgba(0, 0, 0, 0.1);
+      animation: slideIn 0.8s cubic-bezier(0.4, 0, 0.2, 1);
     }
+
+    @keyframes slideIn {
+      from { opacity: 0; transform: translateY(30px); }
+      to { opacity: 1; transform: translateY(0); }
+    }
+
+    .side-panel {
+      width: 300px;
+      display: flex;
+      flex-direction: column;
+      gap: 20px;
+    }
+
+    .panel-section {
+      background: var(--primary-glass);
+      backdrop-filter: blur(20px);
+      border: 1px solid var(--border-glass);
+      border-radius: 16px;
+      padding: 20px;
+      box-shadow: 0 8px 32px rgba(0, 0, 0, 0.1);
+    }
+
     h2 {
       font-family: 'Space Grotesk', sans-serif;
-      font-size: 1.5rem;
-      margin-top: 0;
-      color: var(--primary-color);
+      font-size: 18px;
+      font-weight: 600;
+      margin-bottom: 16px;
     }
+
     form {
       display: flex;
       flex-direction: column;
-      gap: 1rem;
+      gap: 12px;
     }
-    label {
-      font-weight: 500;
-      font-size: 0.9rem;
-    }
-    input, textarea {
-      padding: 0.75rem;
-      border: 1px solid rgba(0, 0, 0, 0.1);
+
+    .form-input {
+      background: var(--secondary-glass);
+      border: 1px solid var(--border-glass);
       border-radius: 8px;
-      background: rgba(255, 255, 255, 0.5);
-      font-family: 'Inter', sans-serif;
+      padding: 10px 12px;
+      color: var(--text-primary);
+      font-size: 14px;
+      backdrop-filter: blur(10px);
+      transition: all 0.3s ease;
     }
+
+    .form-input:focus {
+      outline: none;
+      border-color: var(--accent-color);
+      box-shadow: 0 0 0 3px rgba(79, 70, 229, 0.1);
+    }
+
+    .form-input::placeholder {
+      color: var(--text-muted);
+    }
+
     button {
-      padding: 0.75rem;
-      background: var(--primary-color);
-      color: white;
+      background: linear-gradient(135deg, var(--accent-color), #6366f1);
       border: none;
       border-radius: 8px;
-      font-weight: 500;
+      padding: 12px;
+      color: white;
+      font-size: 14px;
+      font-weight: 600;
       cursor: pointer;
-      transition: background 0.2s;
+      transition: all 0.3s ease;
     }
+
     button:hover {
-      background: #3b82f6;
+      transform: translateY(-2px);
+      box-shadow: 0 8px 24px rgba(79, 70, 229, 0.4);
     }
+
     .event-grid {
       display: grid;
-      gap: 1rem;
+      gap: 12px;
     }
+
     .event-card {
-      background: var(--glass-bg);
-      backdrop-filter: var(--blur);
-      border: var(--glass-border);
+      background: var(--secondary-glass);
+      backdrop-filter: blur(10px);
+      border: 1px solid var(--border-glass);
       border-radius: 8px;
-      padding: 1rem;
+      padding: 12px;
+      transition: all 0.3s ease;
     }
-    footer {
-      text-align: center;
-      padding: 1rem;
-      font-size: 0.9rem;
-      opacity: 0.7;
+
+    .event-card:hover {
+      background: rgba(255, 255, 255, 0.15);
     }
+
+    .modal-overlay {
+      position: fixed;
+      top: 0;
+      left: 0;
+      right: 0;
+      bottom: 0;
+      background: rgba(0, 0, 0, 0.5);
+      backdrop-filter: blur(5px);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      z-index: 1000;
+      opacity: 0;
+      visibility: hidden;
+      transition: all 0.3s ease;
+    }
+
+    .modal-overlay.active {
+      opacity: 1;
+      visibility: visible;
+    }
+
+    .modal {
+      background: var(--primary-glass);
+      backdrop-filter: blur(20px);
+      border: 1px solid var(--border-glass);
+      border-radius: 16px;
+      padding: 24px;
+      max-width: 400px;
+      width: 90%;
+      box-shadow: 0 20px 60px rgba(0, 0, 0, 0.3);
+      transform: scale(0.9);
+      transition: transform 0.3s ease;
+    }
+
+    .modal-overlay.active .modal {
+      transform: scale(1);
+    }
+
+    .status-message {
+      padding: 12px;
+      border-radius: 8px;
+      margin-bottom: 16px;
+      font-size: 14px;
+      opacity: 0;
+      transform: translateY(-10px);
+      transition: all 0.3s ease;
+    }
+
+    .status-message.show {
+      opacity: 1;
+      transform: translateY(0);
+    }
+
+    .status-success {
+      background: rgba(16, 185, 129, 0.2);
+      border: 1px solid rgba(16, 185, 129, 0.3);
+      color: var(--success-color);
+    }
+
+    .status-error {
+      background: rgba(239, 68, 68, 0.2);
+      border: 1px solid rgba(239, 68, 68, 0.3);
+      color: var(--danger-color);
+    }
+
     @media (max-width: 768px) {
-      .container {
-        padding: 0.5rem;
+      .main-container {
+        flex-direction: column;
+      }
+      .side-panel {
+        width: 100%;
+      }
+      header {
+        flex-direction: column;
+        gap: 12px;
+        text-align: center;
       }
       nav ul {
         flex-direction: column;
-        gap: 0.5rem;
-      }
-      section {
-        padding: 1rem;
+        gap: 8px;
       }
     }
   </style>
 </head>
 <body>
-  <header role="banner">
-    <div class="hero">
-      <h1>Psychic Tribble</h1>
-      <p>Simplify your schedule with effortless time management.</p>
-      <a href="#create-event" class="cta-button" id="nav-create-event" aria-label="Create a new event">Add Event</a>
-    </div>
+  <header>
+    <h1 class="app-title">🔮 Psychic Tribble</h1>
     <nav role="navigation" aria-label="Main navigation">
       <ul>
         <li><a href="/" aria-current="page">Home</a></li>
         <li><a href="#events">Events</a></li>
-        <li><a href="#calendar">Calendar</a></li>
+        <li><a href="#calendar" id="nav-create-event">Calendar</a></li>
         <li><a href="#profile" id="nav-profile">Profile</a></li>
       </ul>
     </nav>
   </header>
 
-  <main class="container">
-    <section id="login" aria-labelledby="login-heading">
-      <h2 id="login-heading">Login</h2>
-      <form id="login-form" aria-describedby="login-instructions">
-        <p id="login-instructions">Sign in to manage your schedule.</p>
-        <label for="username">Email</label>
+  <div id="statusContainer"></div>
+
+  <main class="main-container">
+    <div class="calendar-container">
+      <h2 id="calendar-heading">Calendar</h2>
+      <div id="calendar-view" aria-label="Monthly calendar view"></div>
+      <p id="ics-url" aria-label="Calendar feed URL">Log in to get your calendar feed URL.</p>
+    </div>
+
+    <div class="side-panel">
+      <div class="panel-section" id="create-event" style="display: block;">
+        <h2 id="create-event-heading">New Event</h2>
+        <form id="event-form" aria-describedby="event-instructions">
+          <p id="event-instructions">Add a new event to your schedule.</p>
+          <label for="event-title">Title</label>
+          <input
+            type="text"
+            class="form-input"
+            id="event-title"
+            name="title"
+            placeholder="e.g., Project Deadline"
+            required
+            aria-required="true"
+          >
+          <label for="event-desc">Description</label>
+          <textarea
+            class="form-input"
+            id="event-desc"
+            name="description"
+            placeholder="e.g., Finalize project report..."
+            aria-describedby="event-desc-hint"
+          ></textarea>
+          <p id="event-desc-hint">Optional: Add event details.</p>
+          <label for="event-start">Start Time</label>
+          <input
+            type="datetime-local"
+            class="form-input"
+            id="event-start"
+            name="start_time"
+            required
+            aria-required="true"
+          >
+          <label for="event-end">End Time</label>
+          <input
+            type="datetime-local"
+            class="form-input"
+            id="event-end"
+            name="end_time"
+            required
+            aria-required="true"
+          >
+          <button type="submit">Add Event</button>
+        </form>
+      </div>
+
+      <div class="panel-section" id="events">
+        <h2 id="events-heading">Your Events</h2>
+        <div class="event-grid" aria-live="polite">
+          <p>Please log in to view your events.</p>
+        </div>
+      </div>
+    </div>
+  </main>
+
+  <div class="modal-overlay" id="authModal">
+    <div class="modal">
+      <h2 id="modalTitle">Login</h2>
+      <form id="authForm" aria-describedby="auth-instructions">
+        <p id="auth-instructions">Sign in or sign up to manage your schedule.</p>
+        <label for="authEmail">Email</label>
         <input
           type="email"
-          id="username"
-          name="username"
+          class="form-input"
+          id="authEmail"
           placeholder="you@example.com"
           required
           aria-required="true"
         >
-        <label for="password">Password</label>
+        <label for="authPassword">Password</label>
         <input
           type="password"
-          id="password"
-          name="password"
+          class="form-input"
+          id="authPassword"
           placeholder="••••••••"
           required
           aria-required="true"
         >
-        <button type="submit">Login</button>
+        <button type="submit">
+          <span id="authSpinner" class="spinner" style="display: none;"></span>
+          <span id="authSubmitText">Login</span>
+        </button>
       </form>
-      <p>Not a member? <a href="#signup">Sign up to start organizing!</a></p>
-    </section>
+      <p style="text-align: center; margin-top: 16px;">
+        <a href="#" id="toggleAuth" style="color: var(--accent-color);">Sign up</a>
+      </p>
+    </div>
+  </div>
 
-    <section id="create-event" aria-labelledby="create-event-heading" style="display: none;">
-      <h2 id="create-event-heading">New Event</h2>
-      <form id="event-form" aria-describedby="event-instructions">
-        <p id="event-instructions">Add a new event to your schedule.</p>
-        <label for="event-title">Title</label>
-        <input
-          type="text"
-          id="event-title"
-          name="title"
-          placeholder="e.g., Project Deadline"
-          required
-          aria-required="true"
-        >
-        <label for="event-desc">Description</label>
-        <textarea
-          id="event-desc"
-          name="description"
-          placeholder="e.g., Finalize project report..."
-          aria-describedby="event-desc-hint"
-        ></textarea>
-        <p id="event-desc-hint">Optional: Add event details.</p>
-        <label for="event-start">Start Time</label>
-        <input
-          type="datetime-local"
-          id="event-start"
-          name="start_time"
-          required
-          aria-required="true"
-        >
-        <label for="event-end">End Time</label>
-        <input
-          type="datetime-local"
-          id="event-end"
-          name="end_time"
-          required
-          aria-required="true"
-        >
-        <button type="submit">Add Event</button>
-      </form>
-    </section>
-
-    <section id="events" aria-labelledby="events-heading">
-      <h2 id="events-heading">Your Events</h2>
-      <div class="event-grid" aria-live="polite">
-        <p>Please log in to view your events.</p>
-      </div>
-    </section>
-
-    <section id="calendar" aria-labelledby="calendar-heading">
-      <h2 id="calendar-heading">Calendar</h2>
-      <div id="calendar-view" aria-label="Monthly calendar view"></div>
-      <p id="ics-url" aria-label="Calendar feed URL">Log in to get your calendar feed URL.</p>
-    </section>
-
-    <section id="profile" aria-labelledby="profile-heading" style="display: none;">
-      <h2 id="profile-heading">Profile</h2>
-      <p id="profile-info">Log in to view your profile.</p>
-      <button id="logout-button" type="button">Logout</button>
-    </section>
-  </main>
+  <div class="panel-section" id="profile" style="display: none;">
+    <h2 id="profile-heading">Profile</h2>
+    <p id="profile-info">Log in to view your profile.</p>
+    <button id="logout-button">Logout</button>
+  </div>
 
   <footer role="contentinfo">
     <p>&copy; 2025 Psychic Tribble. Simplify your time.</p>
