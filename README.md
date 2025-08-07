@@ -1,5 +1,4 @@
-Psychic Tribble
-Psychic-Tribble app offers a secure and intuitive way to manage events, schedule timeslots, and sync with your calendar using a modern web interface and API. Built with FastAPI, it’s fast, scalable, and perfect for teams or individuals.
+The Psychic-Tribble app offers a secure and intuitive way to manage events, schedule timeslots, and sync with your calendar using a modern web interface and API. Built with FastAPI, it’s fast, scalable, and perfect for teams or individuals.
 
 Note: This codebase is proprietary and confidential. Unauthorized use, copying, modification, or distribution is prohibited. For access or inquiries, contact andrews.crystal@gmail.com or robert.hodgkiss@my.utsa.edu.
 
