@@ -1,0 +1,1176 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Psychic Tribble - Calendar</title>
+    <style>
+        :root {
+            --primary-glass: rgba(255, 255, 255, 0.1);
+            --secondary-glass: rgba(255, 255, 255, 0.05);
+            --border-glass: rgba(255, 255, 255, 0.2);
+            --text-primary: rgba(255, 255, 255, 0.95);
+            --text-secondary: rgba(255, 255, 255, 0.7);
+            --text-muted: rgba(255, 255, 255, 0.4);
+            --accent-color: #4f46e5;
+            --success-color: #10b981;
+            --warning-color: #f59e0b;
+            --danger-color: #ef4444;
+        }
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 50%, #667eea 100%);
+            background-size: 400% 400%;
+            animation: gradientShift 15s ease infinite;
+            min-height: 100vh;
+            display: flex;
+            flex-direction: column;
+            padding: 20px;
+        }
+
+        @keyframes gradientShift {
+            0%, 100% { background-position: 0% 50%; }
+            50% { background-position: 100% 50%; }
+        }
+
+        /* Header */
+        .app-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 24px;
+            padding: 16px 24px;
+            background: var(--primary-glass);
+            backdrop-filter: blur(20px);
+            border: 1px solid var(--border-glass);
+            border-radius: 16px;
+            box-shadow: 0 8px 32px rgba(0, 0, 0, 0.1);
+        }
+
+        .app-title {
+            color: var(--text-primary);
+            font-size: 24px;
+            font-weight: 700;
+            letter-spacing: -0.5px;
+        }
+
+        .user-info {
+            display: flex;
+            align-items: center;
+            gap: 16px;
+            color: var(--text-secondary);
+            font-size: 14px;
+        }
+
+        .logout-btn, .auth-btn {
+            background: var(--secondary-glass);
+            border: 1px solid var(--border-glass);
+            border-radius: 8px;
+            padding: 8px 16px;
+            color: var(--text-primary);
+            font-size: 13px;
+            font-weight: 500;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            backdrop-filter: blur(10px);
+        }
+
+        .logout-btn:hover, .auth-btn:hover {
+            background: rgba(255, 255, 255, 0.2);
+            transform: translateY(-1px);
+        }
+
+        /* Main Container */
+        .main-container {
+            display: flex;
+            gap: 24px;
+            flex: 1;
+            max-width: 1400px;
+            margin: 0 auto;
+            width: 100%;
+        }
+
+        /* Calendar Container */
+        .calendar-container {
+            flex: 1;
+            background: var(--primary-glass);
+            backdrop-filter: blur(20px);
+            border: 1px solid var(--border-glass);
+            border-radius: 20px;
+            padding: 32px;
+            box-shadow: 
+                0 8px 32px rgba(0, 0, 0, 0.1),
+                0 0 0 1px rgba(255, 255, 255, 0.1) inset;
+            transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+            animation: slideIn 0.8s cubic-bezier(0.4, 0, 0.2, 1);
+            max-width: 600px;
+        }
+
+        /* Side Panel */
+        .side-panel {
+            width: 300px;
+            display: flex;
+            flex-direction: column;
+            gap: 20px;
+        }
+
+        .panel-section {
+            background: var(--primary-glass);
+            backdrop-filter: blur(20px);
+            border: 1px solid var(--border-glass);
+            border-radius: 16px;
+            padding: 20px;
+            box-shadow: 0 8px 32px rgba(0, 0, 0, 0.1);
+        }
+
+        .panel-title {
+            color: var(--text-primary);
+            font-size: 16px;
+            font-weight: 600;
+            margin-bottom: 16px;
+        }
+
+        /* Event Form */
+        .event-form {
+            display: flex;
+            flex-direction: column;
+            gap: 12px;
+        }
+
+        .form-input {
+            background: var(--secondary-glass);
+            border: 1px solid var(--border-glass);
+            border-radius: 8px;
+            padding: 10px 12px;
+            color: var(--text-primary);
+            font-size: 14px;
+            backdrop-filter: blur(10px);
+            transition: all 0.3s ease;
+        }
+
+        .form-input:focus {
+            outline: none;
+            border-color: var(--accent-color);
+            box-shadow: 0 0 0 3px rgba(79, 70, 229, 0.1);
+        }
+
+        .form-input::placeholder {
+            color: var(--text-muted);
+        }
+
+        .btn-primary {
+            background: linear-gradient(135deg, var(--accent-color), #6366f1);
+            border: none;
+            border-radius: 8px;
+            padding: 12px 20px;
+            color: white;
+            font-size: 14px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            box-shadow: 0 4px 16px rgba(79, 70, 229, 0.3);
+        }
+
+        .btn-primary:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 8px 24px rgba(79, 70, 229, 0.4);
+        }
+
+        .btn-primary:disabled {
+            opacity: 0.5;
+            cursor: not-allowed;
+            transform: none;
+        }
+
+        /* Events List */
+        .events-list {
+            max-height: 300px;
+            overflow-y: auto;
+        }
+
+        .event-item {
+            background: var(--secondary-glass);
+            border: 1px solid var(--border-glass);
+            border-radius: 8px;
+            padding: 12px;
+            margin-bottom: 8px;
+            transition: all 0.3s ease;
+        }
+
+        .event-item:hover {
+            background: rgba(255, 255, 255, 0.15);
+        }
+
+        .event-title {
+            color: var(--text-primary);
+            font-size: 14px;
+            font-weight: 600;
+            margin-bottom: 4px;
+        }
+
+        .event-time {
+            color: var(--text-secondary);
+            font-size: 12px;
+        }
+
+        .event-actions {
+            margin-top: 8px;
+            display: flex;
+            gap: 8px;
+        }
+
+        .btn-small {
+            background: var(--secondary-glass);
+            border: 1px solid var(--border-glass);
+            border-radius: 6px;
+            padding: 4px 8px;
+            color: var(--text-secondary);
+            font-size: 11px;
+            cursor: pointer;
+            transition: all 0.3s ease;
+        }
+
+        .btn-small:hover {
+            background: rgba(255, 255, 255, 0.2);
+        }
+
+        .btn-danger:hover {
+            background: var(--danger-color);
+            color: white;
+        }
+
+        /* Auth Modal */
+        .modal-overlay {
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: rgba(0, 0, 0, 0.5);
+            backdrop-filter: blur(5px);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            z-index: 1000;
+            opacity: 0;
+            visibility: hidden;
+            transition: all 0.3s ease;
+        }
+
+        .modal-overlay.active {
+            opacity: 1;
+            visibility: visible;
+        }
+
+        .modal {
+            background: var(--primary-glass);
+            backdrop-filter: blur(20px);
+            border: 1px solid var(--border-glass);
+            border-radius: 16px;
+            padding: 32px;
+            max-width: 400px;
+            width: 90%;
+            box-shadow: 0 20px 60px rgba(0, 0, 0, 0.3);
+            transform: scale(0.9);
+            transition: transform 0.3s ease;
+        }
+
+        .modal-overlay.active .modal {
+            transform: scale(1);
+        }
+
+        /* Calendar specific styles */
+        @keyframes slideIn {
+            from {
+                opacity: 0;
+                transform: translateY(30px) scale(0.9);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0) scale(1);
+            }
+        }
+
+        .calendar-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 28px;
+            padding: 0 8px;
+        }
+
+        .nav-button {
+            background: var(--secondary-glass);
+            border: 1px solid var(--border-glass);
+            border-radius: 12px;
+            width: 44px;
+            height: 44px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            cursor: pointer;
+            transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+            backdrop-filter: blur(10px);
+        }
+
+        .nav-button:hover {
+            background: rgba(255, 255, 255, 0.25);
+            transform: scale(1.05);
+        }
+
+        .nav-arrow {
+            width: 6px;
+            height: 6px;
+            border: 2px solid var(--text-primary);
+            border-bottom: none;
+            border-right: none;
+            transform: rotate(-45deg);
+        }
+
+        .nav-arrow.right {
+            transform: rotate(135deg);
+        }
+
+        .month-year {
+            color: var(--text-primary);
+            font-size: 22px;
+            font-weight: 600;
+            letter-spacing: -0.5px;
+            text-align: center;
+            min-width: 180px;
+        }
+
+        .calendar-grid {
+            display: grid;
+            grid-template-columns: repeat(7, 1fr);
+            gap: 4px;
+        }
+
+        .day-header {
+            text-align: center;
+            padding: 12px 0;
+            color: var(--text-secondary);
+            font-size: 12px;
+            font-weight: 600;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+        }
+
+        .day-cell {
+            aspect-ratio: 1;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            border-radius: 12px;
+            cursor: pointer;
+            transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+            position: relative;
+            font-size: 15px;
+            font-weight: 500;
+            color: var(--text-primary);
+        }
+
+        .day-cell:hover {
+            background: var(--secondary-glass);
+            transform: scale(1.1);
+        }
+
+        .day-cell.other-month {
+            color: var(--text-muted);
+        }
+
+        .day-cell.today {
+            background: rgba(79, 70, 229, 0.3);
+            box-shadow: 0 0 0 2px rgba(79, 70, 229, 0.5);
+            font-weight: 700;
+        }
+
+        .day-cell.selected {
+            background: linear-gradient(135deg, rgba(79, 70, 229, 0.4), rgba(79, 70, 229, 0.2));
+            box-shadow: 
+                0 4px 16px rgba(79, 70, 229, 0.2),
+                0 0 0 1px rgba(79, 70, 229, 0.3) inset;
+            font-weight: 700;
+            transform: scale(1.05);
+        }
+
+        .day-cell.has-events::after {
+            content: '';
+            position: absolute;
+            bottom: 4px;
+            width: 4px;
+            height: 4px;
+            background: var(--success-color);
+            border-radius: 50%;
+            animation: pulse 2s infinite;
+        }
+
+        @keyframes pulse {
+            0%, 100% { opacity: 1; transform: scale(1); }
+            50% { opacity: 0.6; transform: scale(1.2); }
+        }
+
+        .calendar-footer {
+            margin-top: 24px;
+            display: flex;
+            justify-content: center;
+            gap: 12px;
+        }
+
+        .footer-button {
+            background: var(--secondary-glass);
+            border: 1px solid var(--border-glass);
+            border-radius: 20px;
+            padding: 8px 16px;
+            color: var(--text-secondary);
+            font-size: 13px;
+            font-weight: 500;
+            cursor: pointer;
+            transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+            backdrop-filter: blur(10px);
+        }
+
+        .footer-button:hover {
+            background: rgba(255, 255, 255, 0.2);
+            color: var(--text-primary);
+            transform: translateY(-1px);
+        }
+
+        /* Loading States */
+        .loading {
+            opacity: 0.5;
+            pointer-events: none;
+        }
+
+        .spinner {
+            border: 2px solid var(--secondary-glass);
+            border-top: 2px solid var(--accent-color);
+            border-radius: 50%;
+            width: 16px;
+            height: 16px;
+            animation: spin 1s linear infinite;
+            display: inline-block;
+            margin-right: 8px;
+        }
+
+        @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+
+        /* Status Messages */
+        .status-message {
+            padding: 12px;
+            border-radius: 8px;
+            margin-bottom: 16px;
+            font-size: 14px;
+            opacity: 0;
+            transform: translateY(-10px);
+            transition: all 0.3s ease;
+        }
+
+        .status-message.show {
+            opacity: 1;
+            transform: translateY(0);
+        }
+
+        .status-success {
+            background: rgba(16, 185, 129, 0.2);
+            border: 1px solid rgba(16, 185, 129, 0.3);
+            color: var(--success-color);
+        }
+
+        .status-error {
+            background: rgba(239, 68, 68, 0.2);
+            border: 1px solid rgba(239, 68, 68, 0.3);
+            color: var(--danger-color);
+        }
+
+        /* Responsive Design */
+        @media (max-width: 768px) {
+            .main-container {
+                flex-direction: column;
+            }
+            
+            .side-panel {
+                width: 100%;
+                order: -1;
+            }
+            
+            .calendar-container {
+                max-width: none;
+            }
+            
+            .app-header {
+                flex-direction: column;
+                gap: 12px;
+                text-align: center;
+            }
+        }
+
+        @media (max-width: 480px) {
+            body {
+                padding: 16px;
+            }
+            
+            .calendar-container {
+                padding: 20px;
+            }
+            
+            .month-year {
+                font-size: 18px;
+                min-width: 140px;
+            }
+            
+            .day-cell {
+                font-size: 13px;
+            }
+        }
+    </style>
+</head>
+<body>
+    <!-- Header -->
+    <header class="app-header">
+        <h1 class="app-title">🔮 Psychic Tribble</h1>
+        <div class="user-info">
+            <span id="userEmail">Not logged in</span>
+            <button id="authBtn" class="auth-btn">Login</button>
+        </div>
+    </header>
+
+    <!-- Status Messages -->
+    <div id="statusContainer"></div>
+
+    <!-- Main Container -->
+    <div class="main-container">
+        <!-- Calendar Container -->
+        <div class="calendar-container">
+            <div class="calendar-header">
+                <button class="nav-button" id="prevBtn">
+                    <div class="nav-arrow"></div>
+                </button>
+                <div class="month-year" id="monthYear"></div>
+                <button class="nav-button" id="nextBtn">
+                    <div class="nav-arrow right"></div>
+                </button>
+            </div>
+
+            <div class="calendar-grid" id="calendarGrid">
+                <div class="day-header">Sun</div>
+                <div class="day-header">Mon</div>
+                <div class="day-header">Tue</div>
+                <div class="day-header">Wed</div>
+                <div class="day-header">Thu</div>
+                <div class="day-header">Fri</div>
+                <div class="day-header">Sat</div>
+            </div>
+
+            <div class="calendar-footer">
+                <button class="footer-button" id="todayBtn">Today</button>
+                <button class="footer-button" id="clearBtn">Clear Selection</button>
+                <button class="footer-button" id="exportBtn">Export .ics</button>
+            </div>
+        </div>
+
+        <!-- Side Panel -->
+        <div class="side-panel">
+            <!-- Quick Event Form -->
+            <div class="panel-section">
+                <h3 class="panel-title">Add Event</h3>
+                <form class="event-form" id="eventForm">
+                    <input type="text" class="form-input" id="eventTitle" placeholder="Event title" required>
+                    <input type="datetime-local" class="form-input" id="eventStart" required>
+                    <input type="datetime-local" class="form-input" id="eventEnd" required>
+                    <textarea class="form-input" id="eventDescription" placeholder="Description (optional)" rows="3"></textarea>
+                    <input type="text" class="form-input" id="eventLocation" placeholder="Location (optional)">
+                    <button type="submit" class="btn-primary">
+                        <span id="submitSpinner" class="spinner" style="display: none;"></span>
+                        Add Event
+                    </button>
+                </form>
+            </div>
+
+            <!-- Events for Selected Date -->
+            <div class="panel-section">
+                <h3 class="panel-title">Events</h3>
+                <div id="selectedDateEvents">
+                    <p style="color: var(--text-secondary); font-size: 14px; text-align: center;">
+                        Select a date to view events
+                    </p>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Auth Modal -->
+    <div class="modal-overlay" id="authModal">
+        <div class="modal">
+            <h3 class="panel-title" id="modalTitle">Login</h3>
+            <form class="event-form" id="authForm">
+                <input type="email" class="form-input" id="authEmail" placeholder="Email" required>
+                <input type="password" class="form-input" id="authPassword" placeholder="Password" required>
+                <button type="submit" class="btn-primary">
+                    <span id="authSpinner" class="spinner" style="display: none;"></span>
+                    <span id="authSubmitText">Login</span>
+                </button>
+            </form>
+            <p style="color: var(--text-secondary); font-size: 13px; text-align: center; margin-top: 16px;">
+                Don't have an account? <a href="#" id="toggleAuth" style="color: var(--accent-color);">Sign up</a>
+            </p>
+        </div>
+    </div>
+
+    <script>
+        class PsychicTribbleCalendar {
+            constructor() {
+                this.currentDate = new Date();
+                this.selectedDate = null;
+                this.events = new Map(); // Map<dateString, Event[]>
+                this.currentUser = null;
+                this.accessToken = localStorage.getItem('access_token');
+                this.isLoginMode = true;
+
+                this.monthNames = [
+                    'January', 'February', 'March', 'April', 'May', 'June',
+                    'July', 'August', 'September', 'October', 'November', 'December'
+                ];
+
+                this.initializeElements();
+                this.bindEvents();
+                this.checkAuth();
+                this.render();
+            }
+
+            initializeElements() {
+                // Calendar elements
+                this.monthYearEl = document.getElementById('monthYear');
+                this.calendarGrid = document.getElementById('calendarGrid');
+                this.prevBtn = document.getElementById('prevBtn');
+                this.nextBtn = document.getElementById('nextBtn');
+                this.todayBtn = document.getElementById('todayBtn');
+                this.clearBtn = document.getElementById('clearBtn');
+                this.exportBtn = document.getElementById('exportBtn');
+
+                // UI elements
+                this.userEmailEl = document.getElementById('userEmail');
+                this.authBtn = document.getElementById('authBtn');
+                this.statusContainer = document.getElementById('statusContainer');
+
+                // Form elements
+                this.eventForm = document.getElementById('eventForm');
+                this.eventTitle = document.getElementById('eventTitle');
+                this.eventStart = document.getElementById('eventStart');
+                this.eventEnd = document.getElementById('eventEnd');
+                this.eventDescription = document.getElementById('eventDescription');
+                this.eventLocation = document.getElementById('eventLocation');
+                this.submitSpinner = document.getElementById('submitSpinner');
+
+                // Events display
+                this.selectedDateEvents = document.getElementById('selectedDateEvents');
+
+                // Auth modal
+                this.authModal = document.getElementById('authModal');
+                this.authForm = document.getElementById('authForm');
+                this.authEmail = document.getElementById('authEmail');
+                this.authPassword = document.getElementById('authPassword');
+                this.authSpinner = document.getElementById('authSpinner');
+                this.authSubmitText = document.getElementById('authSubmitText');
+                this.toggleAuth = document.getElementById('toggleAuth');
+                this.modalTitle = document.getElementById('modalTitle');
+            }
+
+            bindEvents() {
+                // Calendar navigation
+                this.prevBtn.addEventListener('click', () => this.previousMonth());
+                this.nextBtn.addEventListener('click', () => this.nextMonth());
+                this.todayBtn.addEventListener('click', () => this.goToToday());
+                this.clearBtn.addEventListener('click', () => this.clearSelection());
+                this.exportBtn.addEventListener('click', () => this.exportCalendar());
+
+                // Auth
+                this.authBtn.addEventListener('click', () => this.toggleAuthModal());
+                this.authForm.addEventListener('submit', (e) => this.handleAuth(e));
+                this.toggleAuth.addEventListener('click', (e) => {
+                    e.preventDefault();
+                    this.toggleAuthMode();
+                });
+
+                // Event form
+                this.eventForm.addEventListener('submit', (e) => this.createEvent(e));
+
+                // Close modal on outside click
+                this.authModal.addEventListener('click', (e) => {
+                    if (e.target === this.authModal) {
+                        this.hideAuthModal();
+                    }
+                });
+            }
+
+            async checkAuth() {
+                if (this.accessToken) {
+                    try {
+                        const response = await this.apiCall('/users/me');
+                        if (response.ok) {
+                            const user = await response.json();
+                            this.setCurrentUser(user);
+                            await this.loadEvents();
+                        } else {
+                            this.logout();
+                        }
+                    } catch (error) {
+                        console.error('Auth check failed:', error);
+                        this.logout();
+                    }
+                }
+            }
+
+            setCurrentUser(user) {
+                this.currentUser = user;
+                this.userEmailEl.textContent = user.email;
+                this.authBtn.textContent = 'Logout';
+                this.authBtn.onclick = () => this.logout();
+            }
+
+            logout() {
+                localStorage.removeItem('access_token');
+                this.accessToken = null;
+                this.currentUser = null;
+                this.userEmailEl.textContent = 'Not logged in';
+                this.authBtn.textContent = 'Login';
+                this.authBtn.onclick = () => this.toggleAuthModal();
+                this.events.clear();
+                this.render();
+            }
+
+            toggleAuthModal() {
+                if (this.authModal.classList.contains('active')) {
+                    this.hideAuthModal();
+                } else {
+                    this.showAuthModal();
+                }
+            }
+
+            showAuthModal() {
+                this.authModal.classList.add('active');
+                this.authEmail.focus();
+            }
+
+            hideAuthModal() {
+                this.authModal.classList.remove('active');
+                this.authForm.reset();
+            }
+
+            toggleAuthMode() {
+                this.isLoginMode = !this.isLoginMode;
+                if (this.isLoginMode) {
+                    this.modalTitle.textContent = 'Login';
+                    this.authSubmitText.textContent = 'Login';
+                    this.toggleAuth.textContent = 'Sign up';
+                } else {
+                    this.modalTitle.textContent = 'Sign Up';
+                    this.authSubmitText.textContent = 'Sign Up';
+                    this.toggleAuth.textContent = 'Login';
+                }
+            }
+
+            async handleAuth(e) {
+                e.preventDefault();
+                this.authSpinner.style.display = 'inline-block';
+                
+                const email = this.authEmail.value;
+                const password = this.authPassword.value;
+
+                try {
+                    if (this.isLoginMode) {
+                        await this.login(email, password);
+                    } else {
+                        await this.register(email, password);
+                    }
+                } catch (error) {
+                    this.showStatus(error.message, 'error');
+                } finally {
+                    this.authSpinner.style.display = 'none';
+                }
+            }
+
+            async login(email, password) {
+                const formData = new URLSearchParams();
+                formData.append('username', email);
+                formData.append('password', password);
+
+                const response = await fetch('/token', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/x-www-form-urlencoded',
+                    },
+                    body: formData
+                });
+
+                if (response.ok) {
+                    const data = await response.json();
+                    this.accessToken = data.access_token;
+                    localStorage.setItem('access_token', this.accessToken);
+                    
+                    // Get user info
+                    const userResponse = await this.apiCall('/users/me');
+                    const user = await userResponse.json();
+                    this.setCurrentUser(user);
+                    
+                    this.hideAuthModal();
+                    this.showStatus('Successfully logged in!', 'success');
+                    await this.loadEvents();
+                } else {
+                    const error = await response.json();
+                    throw new Error(error.detail || 'Login failed');
+                }
+            }
+
+            async register(email, password) {
+                const response = await this.apiCall('/users', {
+                    method: 'POST',
+                    body: JSON.stringify({ email, password })
+                });
+
+                if (response.ok) {
+                    this.showStatus('Account created! Please log in.', 'success');
+                    this.isLoginMode = true;
+                    this.toggleAuthMode();
+                } else {
+                    const error = await response.json();
+                    throw new Error(error.detail || 'Registration failed');
+                }
+            }
+
+            async apiCall(endpoint, options = {}) {
+                const config = {
+                    headers: {
+                        'Content-Type': 'application/json',
+                        ...(this.accessToken && { 'Authorization': `Bearer ${this.accessToken}` })
+                    },
+                    ...options
+                };
+
+                return fetch(endpoint, config);
+            }
+
+            async loadEvents() {
+                if (!this.currentUser) return;
+
+                try {
+                    const response = await this.apiCall('/events');
+                    if (response.ok) {
+                        const events = await response.json();
+                        this.processEvents(events);
+                        this.render();
+                    }
+                } catch (error) {
+                    console.error('Failed to load events:', error);
+                }
+            }
+
+            processEvents(events) {
+                this.events.clear();
+                events.forEach(event => {
+                    const startDate = new Date(event.start_time);
+                    const dateKey = this.formatDateString(startDate);
+                    
+                    if (!this.events.has(dateKey)) {
+                        this.events.set(dateKey, []);
+                    }
+                    this.events.get(dateKey).push(event);
+                });
+            }
+
+            async createEvent(e) {
+                e.preventDefault();
+                if (!this.currentUser) {
+                    this.showAuthModal();
+                    return;
+                }
+
+                this.submitSpinner.style.display = 'inline-block';
+
+                try {
+                    const eventData = {
+                        title: this.eventTitle.value,
+                        start_time: new Date(this.eventStart.value).toISOString(),
+                        end_time: new Date(this.eventEnd.value).toISOString(),
+                        description: this.eventDescription.value || null,
+                        location: this.eventLocation.value || null
+                    };
+
+                    const response = await this.apiCall('/events', {
+                        method: 'POST',
+                        body: JSON.stringify(eventData)
+                    });
+
+                    if (response.ok) {
+                        const newEvent = await response.json();
+                        this.showStatus('Event created successfully!', 'success');
+                        this.eventForm.reset();
+                        await this.loadEvents();
+                    } else {
+                        const error = await response.json();
+                        throw new Error(error.detail || 'Failed to create event');
+                    }
+                } catch (error) {
+                    this.showStatus(error.message, 'error');
+                } finally {
+                    this.submitSpinner.style.display = 'none';
+                }
+            }
+
+            async deleteEvent(eventId) {
+                if (!confirm('Are you sure you want to delete this event?')) return;
+
+                try {
+                    const response = await this.apiCall(`/events/${eventId}`, {
+                        method: 'DELETE'
+                    });
+
+                    if (response.ok) {
+                        this.showStatus('Event deleted successfully!', 'success');
+                        await this.loadEvents();
+                    } else {
+                        throw new Error('Failed to delete event');
+                    }
+                } catch (error) {
+                    this.showStatus(error.message, 'error');
+                }
+            }
+
+            async exportCalendar() {
+                if (!this.currentUser) {
+                    this.showAuthModal();
+                    return;
+                }
+
+                try {
+                    const response = await this.apiCall('/calendar/feed.ics');
+                    if (response.ok) {
+                        const blob = await response.blob();
+                        const url = window.URL.createObjectURL(blob);
+                        const a = document.createElement('a');
+                        a.href = url;
+                        a.download = 'psychic-tribble-calendar.ics';
+                        document.body.appendChild(a);
+                        a.click();
+                        document.body.removeChild(a);
+                        window.URL.revokeObjectURL(url);
+                        this.showStatus('Calendar exported successfully!', 'success');
+                    } else {
+                        throw new Error('Failed to export calendar');
+                    }
+                } catch (error) {
+                    this.showStatus(error.message, 'error');
+                }
+            }
+
+            showStatus(message, type) {
+                const statusEl = document.createElement('div');
+                statusEl.className = `status-message status-${type}`;
+                statusEl.textContent = message;
+                
+                this.statusContainer.appendChild(statusEl);
+                
+                // Trigger animation
+                setTimeout(() => statusEl.classList.add('show'), 100);
+                
+                // Auto-remove after 5 seconds
+                setTimeout(() => {
+                    statusEl.classList.remove('show');
+                    setTimeout(() => {
+                        if (statusEl.parentNode) {
+                            statusEl.parentNode.removeChild(statusEl);
+                        }
+                    }, 300);
+                }, 5000);
+            }
+
+            previousMonth() {
+                this.currentDate.setMonth(this.currentDate.getMonth() - 1);
+                this.render();
+            }
+
+            nextMonth() {
+                this.currentDate.setMonth(this.currentDate.getMonth() + 1);
+                this.render();
+            }
+
+            goToToday() {
+                this.currentDate = new Date();
+                this.selectedDate = new Date();
+                this.render();
+                this.updateSelectedDateEvents();
+            }
+
+            clearSelection() {
+                this.selectedDate = null;
+                this.render();
+                this.updateSelectedDateEvents();
+            }
+
+            formatDateString(date) {
+                return date.getFullYear() + '-' + 
+                       String(date.getMonth() + 1).padStart(2, '0') + '-' + 
+                       String(date.getDate()).padStart(2, '0');
+            }
+
+            formatDateTime(dateTimeString) {
+                const date = new Date(dateTimeString);
+                return date.toLocaleString('en-US', {
+                    month: 'short',
+                    day: 'numeric',
+                    hour: 'numeric',
+                    minute: '2-digit',
+                    hour12: true
+                });
+            }
+
+            isToday(date) {
+                const today = new Date();
+                return date.toDateString() === today.toDateString();
+            }
+
+            isSelected(date) {
+                return this.selectedDate && date.toDateString() === this.selectedDate.toDateString();
+            }
+
+            hasEvents(date) {
+                return this.events.has(this.formatDateString(date));
+            }
+
+            updateSelectedDateEvents() {
+                if (!this.selectedDate) {
+                    this.selectedDateEvents.innerHTML = `
+                        <p style="color: var(--text-secondary); font-size: 14px; text-align: center;">
+                            Select a date to view events
+                        </p>
+                    `;
+                    return;
+                }
+
+                const dateKey = this.formatDateString(this.selectedDate);
+                const dayEvents = this.events.get(dateKey) || [];
+
+                if (dayEvents.length === 0) {
+                    this.selectedDateEvents.innerHTML = `
+                        <p style="color: var(--text-secondary); font-size: 14px; text-align: center;">
+                            No events for ${this.selectedDate.toLocaleDateString()}
+                        </p>
+                    `;
+                    return;
+                }
+
+                const eventsHtml = dayEvents.map(event => `
+                    <div class="event-item">
+                        <div class="event-title">${event.title}</div>
+                        <div class="event-time">
+                            ${this.formatDateTime(event.start_time)} - ${this.formatDateTime(event.end_time)}
+                        </div>
+                        ${event.description ? `<div style="color: var(--text-secondary); font-size: 12px; margin-top: 4px;">${event.description}</div>` : ''}
+                        ${event.location ? `<div style="color: var(--text-secondary); font-size: 12px;">📍 ${event.location}</div>` : ''}
+                        <div class="event-actions">
+                            <button class="btn-small btn-danger" onclick="calendar.deleteEvent(${event.id})">Delete</button>
+                        </div>
+                    </div>
+                `).join('');
+
+                this.selectedDateEvents.innerHTML = `
+                    <div style="margin-bottom: 12px; color: var(--text-primary); font-weight: 600;">
+                        ${this.selectedDate.toLocaleDateString('en-US', { 
+                            weekday: 'long', 
+                            year: 'numeric', 
+                            month: 'long', 
+                            day: 'numeric' 
+                        })}
+                    </div>
+                    <div class="events-list">${eventsHtml}</div>
+                `;
+            }
+
+            render() {
+                // Update month/year display
+                this.monthYearEl.textContent = 
+                    `${this.monthNames[this.currentDate.getMonth()]} ${this.currentDate.getFullYear()}`;
+
+                // Clear existing day cells
+                const existingDays = this.calendarGrid.querySelectorAll('.day-cell');
+                existingDays.forEach(day => day.remove());
+
+                // Calculate calendar dates
+                const year = this.currentDate.getFullYear();
+                const month = this.currentDate.getMonth();
+                
+                const firstDay = new Date(year, month, 1);
+                const lastDay = new Date(year, month + 1, 0);
+                const startDate = new Date(firstDay);
+                startDate.setDate(startDate.getDate() - firstDay.getDay());
+
+                // Generate calendar grid
+                for (let i = 0; i < 42; i++) {
+                    const cellDate = new Date(startDate);
+                    cellDate.setDate(startDate.getDate() + i);
+                    
+                    const dayCell = document.createElement('div');
+                    dayCell.className = 'day-cell';
+                    dayCell.textContent = cellDate.getDate();
+                    
+                    // Add classes based on date properties
+                    if (cellDate.getMonth() !== month) {
+                        dayCell.classList.add('other-month');
+                    }
+                    
+                    if (this.isToday(cellDate)) {
+                        dayCell.classList.add('today');
+                    }
+                    
+                    if (this.isSelected(cellDate)) {
+                        dayCell.classList.add('selected');
+                    }
+                    
+                    if (this.hasEvents(cellDate)) {
+                        dayCell.classList.add('has-events');
+                    }
+                    
+                    // Add click event
+                    dayCell.addEventListener('click', () => {
+                        this.selectedDate = new Date(cellDate);
+                        this.render();
+                        this.updateSelectedDateEvents();
+                        
+                        // Pre-fill event form with selected date
+                        if (this.selectedDate) {
+                            const dateStr = this.selectedDate.toISOString().slice(0, 16);
+                            const endDate = new Date(this.selectedDate);
+                            endDate.setHours(endDate.getHours() + 1);
+                            const endDateStr = endDate.toISOString().slice(0, 16);
+                            
+                            this.eventStart.value = dateStr;
+                            this.eventEnd.value = endDateStr;
+                        }
+                    });
+                    
+                    this.calendarGrid.appendChild(dayCell);
+                }
+
+                // Update selected date events display
+                this.updateSelectedDateEvents();
+            }
+        }
+
+        // Initialize calendar when DOM is loaded
+        let calendar;
+        document.addEventListener('DOMContentLoaded', () => {
+            calendar = new PsychicTribbleCalendar();
+        });
+    </script>
+</body>
+</html>
