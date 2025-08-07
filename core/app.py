@@ -1,5 +1,3 @@
-# app.py
-
 import os
 import logging
 from pathlib import Path
@@ -17,7 +15,7 @@ from fastapi.responses import JSONResponse
 from fastapi.staticfiles import StaticFiles
 from fastapi.security import OAuth2PasswordBearer, OAuth2PasswordRequestForm
 
-from pydantic import BaseSettings, AnyUrl
+from pydantic_settings import BaseSettings, SettingsConfigDict
 from sqlalchemy import create_engine
 from sqlalchemy.exc import SQLAlchemyError
 from sqlalchemy.orm import sessionmaker, Session
@@ -34,7 +32,7 @@ from slowapi.util import get_remote_address
 from slowapi.storage.redis import RedisStorage
 
 from psychic_tribble.db.base import Base
-from psychic_tribble.db.models import User, Event  # ← make sure your Event model is here
+from psychic_tribble.db.models import User, Event
 from psychic_tribble.routes import (
     users_router, events_router, timeslots_router, calendar_router
 )
@@ -46,7 +44,7 @@ from psychic_tribble.utils import register_exception_handlers
 class Settings(BaseSettings):
     env: str = os.getenv("PYTT_ENV", "development")
     debug: bool = env == "development"
-    database_url: AnyUrl = os.getenv(
+    database_url: str = os.getenv(
         "DATABASE_URL", f"sqlite:///./{env}.db"
     )
     alembic_ini: str = os.getenv("ALEMBIC_INI", "alembic.ini")
@@ -57,9 +55,10 @@ class Settings(BaseSettings):
     rate_limits: list[str] = []
     redis_url: str = os.getenv("REDIS_URL", "redis://localhost:6379/0")
 
-    class Config:
-        env_file = ".env"
-        env_file_encoding = "utf-8"
+    model_config = SettingsConfigDict(
+        env_file=".env",
+        env_file_encoding="utf-8"
+    )
 
 settings = Settings()
 ALEMBIC_PATH = Path(__file__).parent / settings.alembic_ini
