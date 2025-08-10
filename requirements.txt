@@ -13,4 +13,4 @@ pydantic==2.9.2             # Data validation for FastAPI and settings
 python-jose[cryptography]==3.3.0  # JWT authentication for /token, /refresh
 passlib[bcrypt]==1.7.4      # Password hashing for authentication
 structlog==24.4.0           # Structured JSON logging for debugging
-python-multipart==0.0.12    # Handles form data for OAuth2 password flow
+python-multipart==0.0.18    # Handles form data for OAuth2 password flow

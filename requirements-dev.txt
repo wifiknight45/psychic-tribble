@@ -5,7 +5,7 @@ ruff==0.7.0                 # Fast linter/formatter, replaces flake8, black, iso
 pre-commit==3.8.0           # Manages Git hooks for linting/formatting
 tox==4.22.0                 # Tests across Python versions
 build==1.2.2                # Builds source/wheel distributions
-setuptools==74.1.2          # Packaging utilities
+setuptools==78.1.1          # Packaging utilities
 wheel==0.44.0               # Generates wheel packages
 twine==6.1.0                # Uploads packages to PyPI
 bump2version==1.0.1         # Automates version bumps
