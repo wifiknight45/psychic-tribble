@@ -1,18 +1,17 @@
-Psychic-Tribble 🔮📅
+Psychic-Tribble 
 A secure, intuitive calendar and event management platform built for modern teams and individuals. Psychic-Tribble offers seamless scheduling, calendar synchronization, and a powerful API—all wrapped in a fast, scalable FastAPI backend.
 
-⚠️ Proprietary Software Notice
+⚠️ Proprietary Software Notice ⚠️ 
 This codebase is proprietary and confidential. Unauthorized use, copying, modification, or distribution is prohibited. For access or licensing inquiries, contact the development team.
 
-🌟 Features
-
-🔐 Secure Authentication - Email/password login with JWT token-based security
-📋 Event Management - Create, view, edit, and delete events with an intuitive interface
-📅 Interactive Calendar - Visual calendar view for easy event planning and overview
-🔄 Calendar Sync - iCalendar feed integration for Google Calendar, Outlook, and other apps
-⚡ High Performance - Built with FastAPI for speed and scalability
-🛡️ Rate Limiting - Redis-powered API protection and request throttling
-🌐 Cross-Platform Ready - Web interface foundation for future mobile apps
+Features
+Secure Authentication - Email/password login with JWT token-based security
+Event Management - Create, view, edit, and delete events with an intuitive interface
+Interactive Calendar - Visual calendar view for easy event planning and overview
+Calendar Sync - iCalendar feed integration for Google Calendar, Outlook, and other apps
+High Performance - Built with FastAPI for speed and scalability
+Rate Limiting - Redis-powered API protection and request throttling
+Cross-Platform Ready - Web interface foundation for future mobile apps
 
 🏗️ Architecture
 psychic-tribble/
@@ -38,13 +37,14 @@ Core Dependencies
 fastapi
 sqlalchemy
 alembic
-passlib[bcrypt]
+passlib [bcrypt]
 python-jose
 slowapi
 uvicorn
 redis
+
 🚀 Quick Start
-For Authorized Collaborators
+For Authorized Collaborators only 
 
 Clone and Setup
 bashgit clone https://github.com/wifiknight45/psychic-tribble/
@@ -75,33 +75,28 @@ Launch Application
 bashuvicorn app:app --host 0.0.0.0 --port 8000 --reload
 
 Access the Application
-
 Web Interface: http://localhost:8000/static/index.html
 API Documentation: http://localhost:8000/docs
 Health Check: http://localhost:8000/health
 
-
-
-💻 Using Psychic-Tribble
+Using Psychic-Tribble
 Web Interface
 Navigate to the web interface and:
-
-Login with your email and password
-Manage Events in the Events section
-View Calendar for visual event planning
-Get Calendar Feed URL for external calendar sync
+  a) Login with your email and password
+  b) Manage Events in the Events section
+  c) View Calendar for visual event planning
+  d) Get Calendar Feed URL for external calendar sync
 
 API Access
-
 Authentication
-bashPOST /token
+bash
+POST /token
 {
   "email": "your-email@example.com",
   "password": "your-password"
 }
 
 Available Endpoints
-
 /users - User management
 /events - Event CRUD operations
 /timeslots - Timeslot scheduling
@@ -109,31 +104,31 @@ Available Endpoints
 /calendar/feed.ics - iCalendar feed download
 
 
-
 Calendar Integration
 Copy your personal iCalendar feed URL from the web interface and add it to:
+  a) Google Calendar
+  b) Outlook
+  c) Apple Calendar
+  d) Any iCalendar-compatible application
 
-Google Calendar
-Outlook
-Apple Calendar
-Any iCalendar-compatible application
-
-🛠️ Development
+Development
 Development Mode
 bash# Enable debug mode and auto-migrations
 export PYTT_ENV=development
-Security Features
 
+Security Features
 Password Hashing: bcrypt for secure password storage
 JWT Authentication: Stateless token-based authentication
 Rate Limiting: Redis-backed request throttling
 
 Testing
-bash# Create tests directory and add pytest tests
+bash
+# Create tests directory and add pytest tests
 mkdir tests
 pip install pytest
 pytest
-🌍 Production Deployment
+
+Production Deployment
 Environment Setup
 envPYTT_ENV=production
 DATABASE_URL=postgresql://user:password@localhost:5432/psychic_tribble
@@ -159,11 +154,14 @@ Phase 2: 🔄 Docker containerization for cloud-native deployment
 Phase 3: 📱 Android app (Kotlin) via Google Play
 Phase 4: 🍎 iOS app (Swift) via App Store
 
-📞 Contact & Support
-Development Team
+Contact & Support
+Development
+Robert Hodgkiss 
+wifiknight45@proton.me
 
-Crystal Andrews - andrews.crystal@gmail.com
-Robert Hodgkiss - robert.hodgkiss@my.utsa.edu
+Business and Marketing
+Crystal Andrews 
+andrews.crystal@gmail.com
 
 For questions, bug reports, or feature requests, please reach out to the development team.
 
