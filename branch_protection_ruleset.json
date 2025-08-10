@@ -1,0 +1,73 @@
+{
+  "name": "branch_protection",
+  "target": "branch_protection_rule",
+  "enforcement": "active",
+  "conditions": {
+    "branches": [
+      "main",
+      "release/*"
+    ]
+  },
+  "rules": [
+    {
+      "type": "required_pull_request_reviews",
+      "required_approving_review_count": 2
+    },
+    {
+      "type": "required_status_checks",
+      "strict": true,
+      "contexts": [
+        "ci/test",
+        "ci/lint",
+        "ci/build"
+      ]
+    },
+    {
+      "type": "enforce_admins",
+      "enabled": true
+    },
+    {
+      "type": "required_linear_history",
+      "enabled": true
+    },
+    {
+      "type": "allow_force_pushes",
+      "enabled": false
+    },
+    {
+      "type": "allow_deletions",
+      "enabled": false
+    },
+    {
+      "type": "required_conversation_resolution",
+      "enabled": true
+    },
+    {
+      "type": "required_signatures",
+      "enabled": true
+    },
+    {
+      "type": "required_deployments",
+      "environments": [
+        "staging",
+        "production"
+      ]
+    },
+    {
+      "type": "pull_request_branch_prefix",
+      "branch_prefixes": [
+        "feature/",
+        "bugfix/",
+        "hotfix/"
+      ]
+    },
+    {
+      "type": "commit_message_pattern",
+      "pattern": "^(feat|fix|chore|docs|style|refactor|perf|test)\\:"
+    },
+    {
+      "type": "commit_author_email_pattern",
+      "pattern": "@psychic-tribble\\.com$"
+    }
+  ]
+}
