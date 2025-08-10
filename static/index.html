@@ -11,273 +11,6 @@
   <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;700&family=Space+Grotesk:wght@400;700&display=swap" rel="stylesheet" rel="noopener">
   <link href="https://cdn.jsdelivr.net/npm/fullcalendar@6.1.8/main.min.css" rel="stylesheet" rel="noopener">
   <link rel="stylesheet" href="./static/css/style.css">
-  <style>
-    :root {
-      --primary-glass: rgba(255, 255, 255, 0.1);
-      --secondary-glass: rgba(255, 255, 255, 0.05);
-      --border-glass: rgba(255, 255, 255, 0.2);
-      --text-primary: rgba(255, 255, 255, 0.95);
-      --text-secondary: rgba(255, 255, 255, 0.7);
-      --text-muted: rgba(255, 255, 255, 0.4);
-      --accent-color: #4f46e5;
-      --success-color: #10b981;
-      --danger-color: #ef4444;
-    }
-
-    * {
-      margin: 0;
-      padding: 0;
-      box-sizing: border-box;
-    }
-
-    body {
-      font-family: 'Inter', sans-serif;
-      background: linear-gradient(135deg, #667eea 0%, #764ba2 50%, #667eea 100%);
-      background-size: 400% 400%;
-      animation: gradientShift 15s ease infinite;
-      min-height: 100vh;
-      display: flex;
-      flex-direction: column;
-      padding: 20px;
-      color: var(--text-primary);
-    }
-
-    @keyframes gradientShift {
-      0%, 100% { background-position: 0% 50%; }
-      50% { background-position: 100% 50%; }
-    }
-
-    header {
-      display: flex;
-      justify-content: space-between;
-      align-items: center;
-      margin-bottom: 24px;
-      padding: 16px 24px;
-      background: var(--primary-glass);
-      backdrop-filter: blur(20px);
-      border: 1px solid var(--border-glass);
-      border-radius: 16px;
-      box-shadow: 0 8px 32px rgba(0, 0, 0, 0.1);
-    }
-
-    .app-title {
-      font-family: 'Space Grotesk', sans-serif;
-      font-size: 24px;
-      font-weight: 700;
-    }
-
-    nav ul {
-      list-style: none;
-      display: flex;
-      gap: 16px;
-    }
-
-    nav a {
-      color: var(--text-secondary);
-      text-decoration: none;
-      font-weight: 500;
-      font-size: 14px;
-      transition: color 0.3s ease;
-    }
-
-    nav a:hover {
-      color: var(--text-primary);
-    }
-
-    .main-container {
-      display: flex;
-      gap: 24px;
-      flex: 1;
-      max-width: 1200px;
-      margin: 0 auto;
-      width: 100%;
-    }
-
-    .calendar-container {
-      flex: 1;
-      background: var(--primary-glass);
-      backdrop-filter: blur(20px);
-      border: 1px solid var(--border-glass);
-      border-radius: 20px;
-      padding: 24px;
-      box-shadow: 0 8px 32px rgba(0, 0, 0, 0.1);
-      animation: slideIn 0.8s cubic-bezier(0.4, 0, 0.2, 1);
-    }
-
-    @keyframes slideIn {
-      from { opacity: 0; transform: translateY(30px); }
-      to { opacity: 1; transform: translateY(0); }
-    }
-
-    .side-panel {
-      width: 300px;
-      display: flex;
-      flex-direction: column;
-      gap: 20px;
-    }
-
-    .panel-section {
-      background: var(--primary-glass);
-      backdrop-filter: blur(20px);
-      border: 1px solid var(--border-glass);
-      border-radius: 16px;
-      padding: 20px;
-      box-shadow: 0 8px 32px rgba(0, 0, 0, 0.1);
-    }
-
-    h2 {
-      font-family: 'Space Grotesk', sans-serif;
-      font-size: 18px;
-      font-weight: 600;
-      margin-bottom: 16px;
-    }
-
-    form {
-      display: flex;
-      flex-direction: column;
-      gap: 12px;
-    }
-
-    .form-input {
-      background: var(--secondary-glass);
-      border: 1px solid var(--border-glass);
-      border-radius: 8px;
-      padding: 10px 12px;
-      color: var(--text-primary);
-      font-size: 14px;
-      backdrop-filter: blur(10px);
-      transition: all 0.3s ease;
-    }
-
-    .form-input:focus {
-      outline: none;
-      border-color: var(--accent-color);
-      box-shadow: 0 0 0 3px rgba(79, 70, 229, 0.1);
-    }
-
-    .form-input::placeholder {
-      color: var(--text-muted);
-    }
-
-    button {
-      background: linear-gradient(135deg, var(--accent-color), #6366f1);
-      border: none;
-      border-radius: 8px;
-      padding: 12px;
-      color: white;
-      font-size: 14px;
-      font-weight: 600;
-      cursor: pointer;
-      transition: all 0.3s ease;
-    }
-
-    button:hover {
-      transform: translateY(-2px);
-      box-shadow: 0 8px 24px rgba(79, 70, 229, 0.4);
-    }
-
-    .event-grid {
-      display: grid;
-      gap: 12px;
-    }
-
-    .event-card {
-      background: var(--secondary-glass);
-      backdrop-filter: blur(10px);
-      border: 1px solid var(--border-glass);
-      border-radius: 8px;
-      padding: 12px;
-      transition: all 0.3s ease;
-    }
-
-    .event-card:hover {
-      background: rgba(255, 255, 255, 0.15);
-    }
-
-    .modal-overlay {
-      position: fixed;
-      top: 0;
-      left: 0;
-      right: 0;
-      bottom: 0;
-      background: rgba(0, 0, 0, 0.5);
-      backdrop-filter: blur(5px);
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      z-index: 1000;
-      opacity: 0;
-      visibility: hidden;
-      transition: all 0.3s ease;
-    }
-
-    .modal-overlay.active {
-      opacity: 1;
-      visibility: visible;
-    }
-
-    .modal {
-      background: var(--primary-glass);
-      backdrop-filter: blur(20px);
-      border: 1px solid var(--border-glass);
-      border-radius: 16px;
-      padding: 24px;
-      max-width: 400px;
-      width: 90%;
-      box-shadow: 0 20px 60px rgba(0, 0, 0, 0.3);
-      transform: scale(0.9);
-      transition: transform 0.3s ease;
-    }
-
-    .modal-overlay.active .modal {
-      transform: scale(1);
-    }
-
-    .status-message {
-      padding: 12px;
-      border-radius: 8px;
-      margin-bottom: 16px;
-      font-size: 14px;
-      opacity: 0;
-      transform: translateY(-10px);
-      transition: all 0.3s ease;
-    }
-
-    .status-message.show {
-      opacity: 1;
-      transform: translateY(0);
-    }
-
-    .status-success {
-      background: rgba(16, 185, 129, 0.2);
-      border: 1px solid rgba(16, 185, 129, 0.3);
-      color: var(--success-color);
-    }
-
-    .status-error {
-      background: rgba(239, 68, 68, 0.2);
-      border: 1px solid rgba(239, 68, 68, 0.3);
-      color: var(--danger-color);
-    }
-
-    @media (max-width: 768px) {
-      .main-container {
-        flex-direction: column;
-      }
-      .side-panel {
-        width: 100%;
-      }
-      header {
-        flex-direction: column;
-        gap: 12px;
-        text-align: center;
-      }
-      nav ul {
-        flex-direction: column;
-        gap: 8px;
-      }
-    }
-  </style>
 </head>
 <body>
   <header>
@@ -286,23 +19,23 @@
       <ul>
         <li><a href="/" aria-current="page">Home</a></li>
         <li><a href="#events">Events</a></li>
-        <li><a href="#calendar" id="nav-create-event">Calendar</a></li>
+        <li><a href="#calendar" id="nav-calendar">Calendar</a></li>
         <li><a href="#profile" id="nav-profile">Profile</a></li>
       </ul>
     </nav>
   </header>
 
-  <div id="statusContainer"></div>
+  <div id="statusContainer" aria-live="polite"></div>
 
   <main class="main-container">
     <div class="calendar-container">
       <h2 id="calendar-heading">Calendar</h2>
       <div id="calendar-view" aria-label="Monthly calendar view"></div>
-      <p id="ics-url" aria-label="Calendar feed URL">Log in to get your calendar feed URL.</p>
+      <a id="ics-url" href="#" aria-label="Subscribe to calendar feed" target="_blank">Log in to get your calendar feed URL.</a>
     </div>
 
     <div class="side-panel">
-      <div class="panel-section" id="create-event" style="display: block;">
+      <div class="panel-section" id="create-event" style="display: none;">
         <h2 id="create-event-heading">New Event</h2>
         <form id="event-form" aria-describedby="event-instructions">
           <p id="event-instructions">Add a new event to your schedule.</p>
@@ -349,15 +82,20 @@
 
       <div class="panel-section" id="events">
         <h2 id="events-heading">Your Events</h2>
-        <div class="event-grid" aria-live="polite">
-          <p>Please log in to view your events.</p>
-        </div>
+        <div class="event-grid" aria-live="polite"></div>
+      </div>
+
+      <div class="panel-section" id="profile" style="display: none;">
+        <h2 id="profile-heading">Profile</h2>
+        <p id="profile-info">Loading profile...</p>
+        <button id="logout-button">Logout</button>
       </div>
     </div>
   </main>
 
   <div class="modal-overlay" id="authModal">
     <div class="modal">
+      <span class="close-modal" role="button" tabindex="0" aria-label="Close modal">&times;</span>
       <h2 id="modalTitle">Login</h2>
       <form id="authForm" aria-describedby="auth-instructions">
         <p id="auth-instructions">Sign in or sign up to manage your schedule.</p>
@@ -385,15 +123,9 @@
         </button>
       </form>
       <p style="text-align: center; margin-top: 16px;">
-        <a href="#" id="toggleAuth" style="color: var(--accent-color);">Sign up</a>
+        <a href="#" id="toggleAuth" style="color: var(--accent-color);">Sign up instead</a>
       </p>
     </div>
-  </div>
-
-  <div class="panel-section" id="profile" style="display: none;">
-    <h2 id="profile-heading">Profile</h2>
-    <p id="profile-info">Log in to view your profile.</p>
-    <button id="logout-button">Logout</button>
   </div>
 
   <footer role="contentinfo">
