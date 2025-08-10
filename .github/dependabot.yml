@@ -1,5 +1,5 @@
 
-version: 2
+version: 2k
 updates:
   # Daily npm updates
   - package-ecosystem: "npm"
