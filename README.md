@@ -13,22 +13,7 @@ High Performance - Built with FastAPI for speed and scalability
 Rate Limiting - Redis-powered API protection and request throttling
 Cross-Platform Ready - Web interface foundation for future mobile apps
 
-🏗️ Architecture
-psychic-tribble/
-├── app.py                 # Main FastAPI application
-├── psychic_tribble/       # Core application modules
-│   ├── db/               # Database models and schemas
-│   ├── routes/           # API endpoint definitions
-│   └── utils/            # Helper utilities and services
-├── static/               # Web interface assets
-│   ├── index.html        # Main web application
-│   ├── css/             # Stylesheets
-│   └── js/              # JavaScript application logic
-├── migrations/           # Database migration scripts
-├── alembic.ini          # Database migration configuration
-└── requirements.txt     # Python dependencies
-🔧 Prerequisites
-
+Prerequisites
 Python: 3.9 or higher
 Redis: Local instance or cloud service
 Database: SQLite (development) / PostgreSQL (production)
@@ -43,7 +28,7 @@ slowapi
 uvicorn
 redis
 
-🚀 Quick Start
+Quick Start
 For Authorized Collaborators only 
 
 Clone and Setup
@@ -57,8 +42,10 @@ source venv/bin/activate  # Windows: venv\Scripts\activate
 # Install dependencies
 pip install -r requirements.txt
 
+
 Environment Configuration
 bashcp .env.example .env
+
 Update your .env file:
 envPYTT_ENV=development
 DATABASE_URL=sqlite:///./development.db
@@ -67,17 +54,21 @@ REDIS_URL=redis://localhost:6379/0
 CORS_ORIGINS=["http://localhost:8000"]
 RATE_LIMITS=["100/minute", "1000/day"]
 
+
 Database Setup
 bash# Run migrations (development only)
 alembic upgrade head
 
+
 Launch Application
 bashuvicorn app:app --host 0.0.0.0 --port 8000 --reload
+
 
 Access the Application
 Web Interface: http://localhost:8000/static/index.html
 API Documentation: http://localhost:8000/docs
 Health Check: http://localhost:8000/health
+
 
 Using Psychic-Tribble
 Web Interface
@@ -87,6 +78,7 @@ Navigate to the web interface and:
   c) View Calendar for visual event planning
   d) Get Calendar Feed URL for external calendar sync
 
+
 API Access
 Authentication
 bash
@@ -95,6 +87,7 @@ POST /token
   "email": "your-email@example.com",
   "password": "your-password"
 }
+
 
 Available Endpoints
 /users - User management
@@ -134,19 +127,23 @@ envPYTT_ENV=production
 DATABASE_URL=postgresql://user:password@localhost:5432/psychic_tribble
 REDIS_URL=redis://your-redis-instance:6379/0
 CORS_ORIGINS=["https://yourdomain.com"]
-Deployment Options
-Option 1: Uvicorn
-bashuvicorn app:app --host 0.0.0.0 --port 8000 --workers 4
-Option 2: Gunicorn
-bashgunicorn --worker-class uvicorn.workers.UvicornWorker --workers 4 app:app --bind 0.0.0.0:8000
-Recommended Platforms
 
+Deployment Options
+Option 1: 
+Uvicorn
+bashuvicorn app:app --host 0.0.0.0 --port 8000 --workers 4
+
+Option 2: 
+Gunicorn
+bashgunicorn --worker-class uvicorn.workers.UvicornWorker --workers 4 app:app --bind 0.0.0.0:8000
+
+Recommended Platforms
 Render - Easy deployment with built-in PostgreSQL
 Heroku - Quick setup with Redis add-ons
 AWS - Full control with ECS/Lambda deployment
 DigitalOcean - App Platform for simple deployment
 
-📱 Roadmap
+Roadmap to App
 Psychic-Tribble is designed as a web-first platform with mobile expansion planned:
 
 Phase 1: ✅ Web interface with FastAPI backend
