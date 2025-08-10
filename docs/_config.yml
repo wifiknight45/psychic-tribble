@@ -1,0 +1,11 @@
+title: Psychic-Tribble
+description: Simplify your time with AI-powered scheduling.
+baseurl: ""              # or "/psychic-tribble" if you’re using project pages
+url: "https://wifiknight45.github.io/psychic-tribble/"
+theme: minima            # or your custom layouts in _layouts
+markdown: kramdown
+
+plugins:
+  - jekyll-feed
+  - jekyll-seo-tag
+
