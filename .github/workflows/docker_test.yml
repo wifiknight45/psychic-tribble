@@ -1,0 +1,20 @@
+jobs:
+  test-with-docker:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v3
+
+      - name: Set up Docker Compose
+        uses: docker/setup-buildx-action@v2
+
+      - name: Build and start services
+        run: docker-compose up -d --build
+
+      - name: Run tests
+        run: docker-compose exec web pytest
+
+      - name: Tear down
+        if: always()
+        run: docker-compose down
