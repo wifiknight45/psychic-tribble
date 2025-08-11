@@ -1,5 +1,9 @@
-version: 3.8
+version: '3.8'
 
+services:
+  web:
+    build:
+      context: .
       dockerfile: Dockerfile
     ports:
       - "8000:8000"
@@ -22,8 +26,11 @@ version: 3.8
         condition: service_healthy
     command: >
       sh -c "alembic upgrade head && 
-             uvicorn app:app --host 0.0.0.0 --port 8000 
-             ${PYTT_ENV:-production} == 'development' && --reload || --workers 4 --log-level info"
+             if [ \"${PYTT_ENV:-production}\" = \"development\" ]; then 
+               uvicorn app:app --host 0.0.0.0 --port 8000 --reload; 
+             else 
+               uvicorn app:app --host 0.0.0.0 --port 8000 --workers 4 --log-level info; 
+             fi"
 
   redis:
     image: redis:7
@@ -52,3 +59,4 @@ version: 3.8
 volumes:
   postgres_data:
   redis_data:
+
