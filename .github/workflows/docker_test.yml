@@ -1,3 +1,7 @@
+name: Docker Test
+
+on: [push, pull_request]
+
 jobs:
   test-with-docker:
     runs-on: ubuntu-latest
@@ -6,15 +10,27 @@ jobs:
       - name: Checkout code
         uses: actions/checkout@v3
 
-      - name: Set up Docker Compose
+      - name: Set up Docker Buildx
         uses: docker/setup-buildx-action@v2
 
-      - name: Build and start services
+      - name: Start containers in background
         run: docker-compose up -d --build
 
-      - name: Run tests
-        run: docker-compose exec web pytest
+      - name: Wait for container healthcheck or manual delay
+        run: |
+          echo "Waiting for services to be ready..."
+          docker ps
+          sleep 10
+          docker-compose ps
 
-      - name: Tear down
+      - name: Run tests in 'web' container
+        run: |
+          docker-compose exec -T web pytest
+
+      - name: Capture logs on failure
+        if: failure()
+        run: docker-compose logs
+
+      - name: Tear down containers
         if: always()
         run: docker-compose down
