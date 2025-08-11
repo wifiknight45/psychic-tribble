@@ -13,7 +13,7 @@
 
 These changes bring your backend in line with the updated frontend you shared and make the ICS feed usable by external calendar apps.
 
-### How this aligns with your frontend
+### How this aligns with the frontend
 - `/register`: Your frontend’s `Auth.signup()` now has a real endpoint to call.
 - `/token`: Returns `access_token` and `refresh_token` as expected by your JS.
 - `/refresh`: Matches your frontend’s JSON POST to rotate tokens.
