@@ -1,7 +1,8 @@
 # Changelog
 
 ## 2025-08-12 04:57
-updated workflow/file github.com/wifiknight45/psychic-tribble/.github/workflows/
+updated workflow/file github.com/wifiknight45/psychic-tribble/.github/workflows/docker_test.yml
+
 Pre-test Docker checks: Added docker info and docker-compose version to confirm runner environment.
 
 Robust container readiness:
