@@ -1,5 +1,191 @@
 # Changelog
 
+## 2025-08-12 05:09 
+preparing to refactor filepaths, current structure:
+
+MERMAID DIAGRAM OF FILEPATHS
+flowchart TD
+  R[psychic-tribble/]
+
+  R --> n_alembic[alembic.ini]
+  R --> n_branch_rules[branch_protection_ruleset.json]
+  R --> n_changelog[CHANGELOG.md]
+  R --> n_config[config.py]
+  R --> n_dockerfile[dockerfile]
+  R --> n_index[index.html]
+  R --> n_license[LICENSE]
+  R --> n_models[models.py]
+  R --> n_pyproject[pyproject.toml]
+  R --> n_readme[README.md]
+  R --> n_req_dev[requirements-dev.txt]
+  R --> n_req[requirements.txt]
+  R --> n_security[SECURITY.md]
+  R --> n_setup[setup.py]
+
+  R --> d_core[core/]
+  d_core --> n_core_app[app.py]
+  d_core --> n_core_auth[auth.py]
+  d_core --> n_core_init[__init__.py]
+  d_core --> n_core_utils[utils.py]
+  d_core --> d_core_routers[routers/]
+  d_core_routers --> n_core_r_auth[auth.py]
+  d_core_routers --> n_core_r_calendar[calendar.py]
+  d_core_routers --> n_core_r_health[health.py]
+
+  R --> d_docs[docs/]
+  d_docs --> n_docs_base[base.html]
+  d_docs --> n_docs_config[_config.yml]
+  d_docs --> n_docs_readme[README.md]
+  d_docs --> d_docs_static[static/]
+  d_docs_static --> n_docs_cal[calendar.html]
+  d_docs_static --> d_docs_css[css/]
+  d_docs_css --> n_docs_css_styles[styles.css]
+  d_docs_static --> n_docs_index[index.html]
+  d_docs_static --> d_docs_js[js/]
+  d_docs_js --> n_docs_js_app[app.js]
+
+  R --> d_github[.github/]
+  d_github --> n_dependabot[dependabot.yml]
+  d_github --> d_workflows[workflows/]
+  d_workflows --> n_wf_build[build-test.yml]
+  d_workflows --> n_wf_docker[docker_test.yml]
+  d_workflows --> n_wf_jekyll[jekyll-gh-pages.yml]
+  d_workflows --> n_wf_static[static.yml]
+
+  R --> d_nlp[nlp/]
+  d_nlp --> n_nlp_cal_repl[calendar_repl_prototype.py]
+  d_nlp --> n_nlp_heuristics[heuristics.py]
+  d_nlp --> n_nlp_init[__init__.py]
+  d_nlp --> n_nlp_prompts[llm_prompts.py]
+  d_nlp --> n_nlp_parser[parser.py]
+  d_nlp --> n_nlp_reclaim[reclaim_automations_duckly]
+
+  R --> d_pkg[psychic_tribble/]
+  d_pkg --> n_pkg_compose[docker-compose.yml]
+
+  R --> d_routes[routes/]
+  d_routes --> n_routes_calendar[calendar.py]
+  d_routes --> n_routes_events[events.py]
+  d_routes --> n_routes_init[__init__.py]
+  d_routes --> n_routes_timeslots[timeslots.py]
+  d_routes --> n_routes_users[users.py]
+
+  R --> d_schemas[schemas/]
+  d_schemas --> n_schema_assignment[assignment.py]
+  d_schemas --> n_schema_event[event.py]
+  d_schemas --> n_schema_timeslot[timeslot.py]
+  d_schemas --> n_schema_user[user.py]
+
+  R --> d_services[services/]
+  d_services --> n_svc_calendar[calendar_service.py]
+  d_services --> n_svc_event[event_service.py]
+  d_services --> n_svc_init[__init__.py]
+  d_services --> n_svc_timeslot[timeslot_service.py]
+  d_services --> n_svc_user[user_service.py]
+
+  R --> d_tests[tests/]
+  d_tests --> n_tests_conftest[conftest.py]
+  d_tests --> d_tests_api[api/]
+  d_tests_api --> d_tests_api_v1[v1/]
+  d_tests_api_v1 --> n_t_api_cal[test_calendar.py]
+  d_tests_api_v1 --> n_t_api_events[test_events.py]
+  d_tests_api_v1 --> n_t_api_timeslots[test_timeslots.py]
+  d_tests_api_v1 --> n_t_api_users[test_users.py]
+  d_tests --> d_tests_core[core/]
+  d_tests_core --> n_t_core_utils[test_utils.py]
+  d_tests --> d_tests_db[db/]
+  d_tests_db --> n_t_db_models[test_models.py]
+  d_tests --> d_tests_services[services/]
+  d_tests_services --> n_t_svc_user[test_user_service.py]
+
+and the tree which grew rapidly into this:
+./
+├── alembic.ini
+├── branch_protection_ruleset.json
+├── CHANGELOG.md
+├── config.py
+├── core/
+│   ├── app.py
+│   ├── auth.py
+│   ├── __init__.py
+│   ├── routers/
+│   │   ├── auth.py
+│   │   ├── calendar.py
+│   │   └── health.py
+│   └── utils.py
+├── dockerfile
+├── docs/
+│   ├── base.html
+│   ├── _config.yml
+│   ├── README.md
+│   └── static/
+│       ├── calendar.html
+│       ├── css/
+│       │   └── styles.css
+│       ├── index.html
+│       └── js/
+│           └── app.js
+├── .github/
+│   ├── dependabot.yml
+│   └── workflows/
+│       ├── build-test.yml
+│       ├── docker_test.yml
+│       ├── jekyll-gh-pages.yml
+│       └── static.yml
+├── index.html
+├── LICENSE
+├── models.py
+├── nlp/
+│   ├── calendar_repl_prototype.py
+│   ├── heuristics.py
+│   ├── __init__.py
+│   ├── llm_prompts.py
+│   ├── parser.py
+│   └── reclaim_automations_duckly
+├── psychic_tribble/
+│   └── docker-compose.yml
+├── pyproject.toml
+├── README.md
+├── requirements-dev.txt
+├── requirements.txt
+├── routes/
+│   ├── calendar.py
+│   ├── events.py
+│   ├── __init__.py
+│   ├── timeslots.py
+│   └── users.py
+├── schemas/
+│   ├── assignment.py
+│   ├── event.py
+│   ├── timeslot.py
+│   └── user.py
+├── SECURITY.md
+├── services/
+│   ├── calendar_service.py
+│   ├── event_service.py
+│   ├── __init__.py
+│   ├── timeslot_service.py
+│   └── user_service.py
+├── setup.py
+└── tests/
+    ├── api/
+    │   └── v1/
+    │       ├── test_calendar.py
+    │       ├── test_events.py
+    │       ├── test_timeslots.py
+    │       └── test_users.py
+    ├── conftest.py
+    ├── core/
+    │   └── test_utils.py
+    ├── db/
+    │   └── test_models.py
+    └── services/
+        └── test_user_service.py
+
+20 directories, 62 files
+
+
+
 ## 2025-08-12 04:57
 updated workflow/file github.com/wifiknight45/psychic-tribble/.github/workflows/docker_test.yml
 
