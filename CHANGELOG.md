@@ -1,5 +1,25 @@
 # Changelog
 
+## 2025-08-12 04:57
+updated workflow/file github.com/wifiknight45/psychic-tribble/.github/workflows/
+Pre-test Docker checks: Added docker info and docker-compose version to confirm runner environment.
+
+Robust container readiness:
+
+Introduced healthcheck polling with fallback to manual delay.
+
+Gracefully handles missing or unhealthy web container.
+
+Detailed startup diagnostics: Injected docker-compose ps and selective logs after container launch.
+
+Improved failure logging:
+
+Captures service status and targeted web logs.
+
+Includes fallback logging from all containers.
+
+Cleanup improvements: Ensures removal of volumes and orphaned containers via docker-compose down --volumes --remove-orphans.
+
 ## 2025-08-11 18:00
 
 new docker_test.yml updates:
