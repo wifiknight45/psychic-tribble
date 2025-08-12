@@ -2,7 +2,7 @@
 
 ## 2025-08-11 07:03
 
-- Added proper refresh-token support to match your frontend: `/token` now returns both `access_token` and `refresh_token`, and a new `/refresh` endpoint issues rotated tokens.
+- Added proper refresh-token support to match the frontend (webstack): `/token` now returns both `access_token` and `refresh_token`, and a new `/refresh` endpoint issues rotated tokens.
 - Made the iCalendar feed accessible to calendar clients by supporting a `?token=` query parameter (so they don’t need Authorization headers). It accepts an access token for now.
 - Prevented CORS misconfiguration: using `allow_credentials=True` with `*` is invalid. Now we auto-tune credentials based on origins, with friendly dev defaults.
 - Made static mounting resilient when the `static/` directory doesn’t exist.
@@ -62,11 +62,11 @@ If you want to step up ICS security later, we can add a dedicated, revocable `ic
 A well-organized Python project structure for the `psychic_tribble` application, designed for modularity and scalability. Below is the directory layout with descriptions for each component.
 
 #### Root Directory
-- `psychic_tribble/`: Main project directory containing the core application code.
-- `static/`: Stores static assets like CSS, JavaScript, and images.
-- `templates/`: Contains HTML templates for the web interface.
-- `tests/`: Houses test files for unit and integration testing.
-- `requirements.txt`: Lists Python dependencies for the project.
+- `psychic_tribble/`: Main project directory (aka root or main) containing the core application code.
+- `static/`: Stores static assets like CSS, JavaScript, and images (aka frontend or webstack)
+- `templates/`: Contains HTML templates for the web interface. (these are for templates/jekyll pages I have yet to setup)
+- `tests/`: Houses test files for unit and integration testing. (fuzzing, linting and other bullshit)
+- `requirements.txt`: Lists Python dependencies for the project. (this will have to be updated before prod, a prod + dev file paths exist, .env files need to be added to a vault. 
 - `Dockerfile`: Defines the Docker container setup for the application.
 - `.env.example`: Sample environment variable configuration file.
 
@@ -136,7 +136,7 @@ A well-organized Python project structure for the `psychic_tribble` application,
 
 ## 2025-08-03 06:09
 
-```
+template for root directory/filepaths
 psychic_tribble/
 ├── psychic_tribble/
 │   ├── __init__.py
