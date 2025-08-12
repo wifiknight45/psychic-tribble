@@ -1,5 +1,29 @@
 # Changelog
 
+## 2025-08-11 18:00
+
+new docker_test.yml updates:
+
+a) HEALTH_TIMEOUT 
+previously listed "180" as a string, new version lists 180 as an integer. Both versions are acceptable in bash but string quoting might be safer in YAML and more consistent with .env formats which are already in first stage of dev (before staging/testing).
+b) Quoting of env vars
+old vers "${WEB_SERVICE}" vs new ${WEB_SERVICE} wrapping in quotes avoids bash misinterpretation if value has spaces.
+c) exit - re: conditions and container inspect logic
+explicit update for true and if guards
+d) comments trimmed for clarity 
+
+structural parity between most recent docker_test.yml updates
+i) Docker Compose v2 usage (docker compose, not docker-compose)
+
+ii) Full service health checks with fallback if missing
+
+iii) Per-service log capture and artifact upload
+
+iv) Clean teardown with volume/orphan removal
+
+v) Security-conscious job permissions (contents: read)
+
+
 ## 2025-08-11 07:03
 
 - Added proper refresh-token support to match the frontend (webstack): `/token` now returns both `access_token` and `refresh_token`, and a new `/refresh` endpoint issues rotated tokens.
