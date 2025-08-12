@@ -6,7 +6,7 @@ pre-commit==3.8.0           # Manages Git hooks for linting/formatting
 tox==4.22.0                 # Tests across Python versions
 build==1.2.2                # Builds source/wheel distributions
 setuptools==74.1.2          # Packaging utilities
-wheel==0.44.0               # Generates wheel packages
+wheel==0.45.1               # Generates wheel packages
 twine==6.1.0                # Uploads packages to PyPI
 bump2version==1.0.1         # Automates version bumps
 ipython==9.4.0              # Interactive shell for debugging
