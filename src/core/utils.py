@@ -1,4 +1,3 @@
-# psychic_tribble/utils.py
 
 import os
 import traceback
