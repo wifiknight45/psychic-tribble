@@ -2,43 +2,82 @@
 <html lang="en">
 <head>
   <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <meta name="description" content="Effortless time management with Psychic Tribble's sleek calendar and event planner.">
-  <meta name="keywords" content="calendar, time management, event planner, Psychic Tribble, productivity">
+  <meta
+    name="viewport"
+    content="width=device-width, initial-scale=1"
+  >
+  <meta
+    name="description"
+    content="Effortless time management with Psychic Tribble's sleek calendar and event planner."
+  >
   <meta name="author" content="Psychic Tribble">
   <title>Psychic Tribble</title>
+
+  <!-- Security and privacy -->
+  <meta
+    http-equiv="Content-Security-Policy"
+    content="default-src 'self'; script-src 'self' https://cdn.jsdelivr.net; style-src 'self' https://fonts.googleapis.com https://cdn.jsdelivr.net; font-src https://fonts.gstatic.com; img-src 'self' data:; connect-src 'self'; frame-ancestors 'none'; base-uri 'self'; form-action 'self'; upgrade-insecure-requests"
+  >
+  <meta name="referrer" content="strict-origin-when-cross-origin">
+  <meta name="color-scheme" content="light dark">
+
   <link rel="icon" type="image/png" href="./static/images/favicon.png">
-  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;700&family=Space+Grotesk:wght@400;700&display=swap" rel="stylesheet" rel="noopener">
-  <link href="https://cdn.jsdelivr.net/npm/fullcalendar@6.1.8/main.min.css" rel="stylesheet" rel="noopener">
+
+  <!-- Performance hints for fonts -->
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+
+  <!-- Fonts and styles -->
+  <link
+    href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;700&family=Space+Grotesk:wght@400;700&display=swap"
+    rel="stylesheet"
+  >
+  <link
+    href="https://cdn.jsdelivr.net/npm/fullcalendar@6.1.8/main.min.css"
+    rel="stylesheet"
+  >
   <link rel="stylesheet" href="./static/css/style.css">
 </head>
 <body>
+  <a class="skip-link" href="#main">Skip to main content</a>
+
   <header>
     <h1 class="app-title">🔮 Psychic Tribble</h1>
-    <nav role="navigation" aria-label="Main navigation">
+    <nav aria-label="Main">
       <ul>
         <li><a href="/" aria-current="page">Home</a></li>
         <li><a href="#events">Events</a></li>
-        <li><a href="#calendar" id="nav-calendar">Calendar</a></li>
+        <li><a href="#calendar-view" id="nav-calendar">Calendar</a></li>
         <li><a href="#profile" id="nav-profile">Profile</a></li>
       </ul>
     </nav>
   </header>
 
-  <div id="statusContainer" aria-live="polite"></div>
+  <div id="statusContainer" role="status" aria-live="polite"></div>
 
-  <main class="main-container">
+  <main id="main" class="main-container">
     <div class="calendar-container">
       <h2 id="calendar-heading">Calendar</h2>
       <div id="calendar-view" aria-label="Monthly calendar view"></div>
-      <a id="ics-url" href="#" aria-label="Subscribe to calendar feed" target="_blank">Log in to get your calendar feed URL.</a>
+      <a
+        id="ics-url"
+        href="#"
+        aria-label="Subscribe to calendar feed"
+        target="_blank"
+        rel="noopener noreferrer"
+      >Log in to get your calendar feed URL.</a>
     </div>
 
     <div class="side-panel">
-      <div class="panel-section" id="create-event" style="display: none;">
+      <section class="panel-section" id="create-event" hidden>
         <h2 id="create-event-heading">New Event</h2>
-        <form id="event-form" aria-describedby="event-instructions">
+        <form
+          id="event-form"
+          aria-describedby="event-instructions"
+          autocomplete="off"
+        >
           <p id="event-instructions">Add a new event to your schedule.</p>
+
           <label for="event-title">Title</label>
           <input
             type="text"
@@ -48,7 +87,9 @@
             placeholder="e.g., Project Deadline"
             required
             aria-required="true"
+            autocomplete="off"
           >
+
           <label for="event-desc">Description</label>
           <textarea
             class="form-input"
@@ -56,8 +97,10 @@
             name="description"
             placeholder="e.g., Finalize project report..."
             aria-describedby="event-desc-hint"
+            autocomplete="off"
           ></textarea>
           <p id="event-desc-hint">Optional: Add event details.</p>
+
           <label for="event-start">Start Time</label>
           <input
             type="datetime-local"
@@ -67,6 +110,7 @@
             required
             aria-required="true"
           >
+
           <label for="event-end">End Time</label>
           <input
             type="datetime-local"
@@ -76,29 +120,31 @@
             required
             aria-required="true"
           >
+
           <button type="submit">Add Event</button>
         </form>
-      </div>
+      </section>
 
-      <div class="panel-section" id="events">
+      <section class="panel-section" id="events">
         <h2 id="events-heading">Your Events</h2>
         <div class="event-grid" aria-live="polite"></div>
-      </div>
+      </section>
 
-      <div class="panel-section" id="profile" style="display: none;">
+      <section class="panel-section" id="profile" hidden>
         <h2 id="profile-heading">Profile</h2>
         <p id="profile-info">Loading profile...</p>
-        <button id="logout-button">Logout</button>
-      </div>
+        <button id="logout-button" type="button">Logout</button>
+      </section>
     </div>
   </main>
 
-  <div class="modal-overlay" id="authModal">
+  <div class="modal-overlay" id="authModal" role="dialog" aria-modal="true" aria-labelledby="modalTitle">
     <div class="modal">
-      <span class="close-modal" role="button" tabindex="0" aria-label="Close modal">&times;</span>
+      <button class="close-modal" type="button" aria-label="Close modal">&times;</button>
       <h2 id="modalTitle">Login</h2>
-      <form id="authForm" aria-describedby="auth-instructions">
+      <form id="authForm" aria-describedby="auth-instructions" autocomplete="on">
         <p id="auth-instructions">Sign in or sign up to manage your schedule.</p>
+
         <label for="authEmail">Email</label>
         <input
           type="email"
@@ -107,7 +153,12 @@
           placeholder="you@example.com"
           required
           aria-required="true"
+          autocomplete="email"
+          inputmode="email"
+          autocapitalize="none"
+          spellcheck="false"
         >
+
         <label for="authPassword">Password</label>
         <input
           type="password"
@@ -116,23 +167,30 @@
           placeholder="••••••••"
           required
           aria-required="true"
+          autocomplete="current-password"
         >
+
         <button type="submit">
-          <span id="authSpinner" class="spinner" style="display: none;"></span>
+          <span id="authSpinner" class="spinner" hidden></span>
           <span id="authSubmitText">Login</span>
         </button>
       </form>
-      <p style="text-align: center; margin-top: 16px;">
-        <a href="#" id="toggleAuth" style="color: var(--accent-color);">Sign up instead</a>
+      <p class="muted-link-row">
+        <a href="#" id="toggleAuth" class="accent-link">Sign up instead</a>
       </p>
     </div>
   </div>
 
-  <footer role="contentinfo">
+  <footer>
     <p>&copy; 2025 Psychic Tribble. Simplify your time.</p>
   </footer>
+
+  <noscript>
+    JavaScript is required for Psychic Tribble to function. Please enable JavaScript and reload.
+  </noscript>
 
   <script src="https://cdn.jsdelivr.net/npm/fullcalendar@6.1.8/main.min.js" defer></script>
   <script src="./static/js/app.js" defer></script>
 </body>
 </html>
+
