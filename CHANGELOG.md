@@ -1,6 +1,79 @@
 # Changelog
 
+## 2025-09-05 00:31
+
+1. Centralized Logging for Authentication Events
+What: Introduced Python logging in all authentication flows, including login failures, revocation events, and suspicious activity.
+
+Why: Monitoring login attempts, failures, and revocations is critical for post-breach forensics and incident response. Log aggregation, as recommended for SecOps, enables rapid detection of brute force attempts or token misuse.
+
+Improvement: Stronger observability and traceability for defensive operations.
+
+2. Dependency Injection for All External Resources
+What: All database sessions (Session), settings (settings), and the Redis client for token revocation and rate limiting are injected using FastAPI’s dependency system.
+
+Why: This aligns with modularity principles, decoupling creation and consumption, which makes functions easier to test, mock, and maintain at scale.
+
+Improvement: Enhances testability, maintainability, and follow SOLID dev patterns.
+
+3. Secure, Extensible Password Hashing with Passlib/bcrypt
+What: Wrapped all password hashing/verification using Passlib’s CryptContext with bcrypt.
+
+Why: Bcrypt is battle-tested, slow (by design for brute force resistance), and highly recommended over legacy hashing schemes or plain salted hashes. Passlib auto-generates the bcrypt salt for each password, ensuring unique hashes even for repeated passwords3.
+
+Improvement: Maximizes password resilience; future algorithms can be swapped in the context easily.
+
+4. JWT Generation: Auditable and Unique Token IDs
+What: Every access and refresh token embeds a UUID-based JTI (jti claim), which is used for blacklist/revocation operations.
+
+Why: JWTs are stateless by design; introducing unique IDs per token allows for selective revocation and refresh, a standard in modern token-based auth.
+
+Improvement: Supports granular token revoke; closes the “stateless token can’t be revoked” gap.
+
+5. Token Revocation and Blacklisting via Redis
+What: Implements blacklisting by storing revoked token JTIs in Redis with a TTL corresponding to token expiration.
+
+Why: This solves the industry-famous stateless JWT logout problem, as tokens can be instantly revoked on logout or admin action. Redis provides low-latency, ephemeral key-value storage ideal for this purpose6.
+
+Improvement: Ensures that revoked tokens are rejected API-wide, not just client-side.
+
+6. Rate Limiting on Login Attempts per User
+What: Leverages Redis as a counter per username to limit login attempts, with automatic expiry window enforcement.
+
+Why: Reduces brute-force and credential stuffing attack viability, and is in line with OWASP and production security guidance on rate limiting for authentication endpoints.
+
+Improvement: Prevents account lockout by attack, and shields the API from attacks with negligible user impact.
+
+7. Strict Exception Handling and Security Codes
+What: All JWT decoding and sensitive flows raise FastAPI HTTPException with standard error codes, never leaking internal details.
+
+Why: Ensures predictable client error handling while not revealing internal validation logic to an attacker (defense in depth).
+
+Improvement: Security by design, minimizes exposure of secret information.
+
+8. Refresh Token Management
+What: Introduces explicit functions for refresh token creation, revocation, and TTL-based blacklist.
+
+Why: Following dual-token model (short-lived access, long-lived refresh) is highly recommended by security frameworks due to improved compromise window control and robust “single logout” functionality.
+
+Improvement: Enables best-in-class authentication flows, account lockout, and device/session management.
+
+9. Startup Lifecycle Redis Client Initialization
+What: Singleton Redis connection set up via async function; shared/reused via dependency injections.
+
+Why: Prevents connection leaks, maximizes async performance, and conforms to FastAPI app/lifecycle patterns.
+
+Improvement: High reliability and resource efficiency.
+
+10. Security-First Design, Modular Architecture
+What: Strict separation between password logic, token logic, user loading, and external dependencies; no global state.
+
+Why: Promotes readability, separation of concerns, and clearer unit/functional testing. Allows each module to evolve with minimal coupling.
+
+Improvement: SecOps-friendly and future-proof.
+
 ## 2025-09-05 00:24
+main.py refactor etc
 1. Project Modularization and Layered Imports
 Change: Replaced all logic from main.py except architecture bootstrapping. Moved:
 
