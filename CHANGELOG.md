@@ -1,4 +1,48 @@
 # Changelog
+## 2025-09-05 04:20 
+1. Updated uvicorn target
+
+Before: uvicorn app:app assumed app.py at project root.
+
+After: Changed to uvicorn main:app to match the refactor where the FastAPI instance now lives in main.py.
+
+Impact: Prevents startup errors due to incorrect import paths.
+
+2. Fixed curl in healthcheck
+
+Before: Healthcheck used curl, but python:3.11-slim doesn’t include it by default.
+
+After: Added curl to runtime dependencies in the final stage.
+
+Impact: Healthcheck now works reliably without manual intervention.
+
+3. Optimized build caching
+
+Before: Copied all source files before installing dependencies, causing cache invalidation on every code change.
+
+After: Copied only requirements.txt before pip install, so dependency layers are reused unless requirements change.
+
+Impact: Faster rebuilds during development and CI/CD.
+
+4. Maintained a clean, minimal image
+
+Used --no-install-recommends to avoid unnecessary packages.
+
+Removed apt cache and lists after installs to reduce image size.
+
+Installed build tools (gcc, libpq-dev) only in the builder stage, not in the final runtime image.
+
+5. Preserved non‑root execution
+
+Created appuser and switched to it for better security.
+
+Ensured /app ownership is correct for runtime writes.
+
+6. Environment variable hygiene
+
+Consolidated PATH update into ENV so installed Python packages are available without modifying shell profiles.
+
+Kept PYTHONDONTWRITEBYTECODE and PYTHONUNBUFFERED for predictable Python behavior in containers.
 
 ## 2025-09-05 00:31 
 database.py refactor post main.py update 
