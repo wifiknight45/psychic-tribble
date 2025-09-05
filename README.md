@@ -1,6 +1,6 @@
 Psychic-Tribble 
 A secure, intuitive calendar and event management platform built for modern teams and individuals. Psychic-Tribble offers seamless scheduling, calendar synchronization, and a powerful API—all wrapped in a fast, scalable FastAPI backend.
-
+ 
 ⚠️ Proprietary Software Notice ⚠️ 
 This codebase is proprietary and confidential. Unauthorized use, copying, modification, or distribution is prohibited. For access or licensing inquiries, contact the development team.
 
