@@ -1,4 +1,37 @@
 # Changelog
+
+## 2025-09-05 04:26
+dockerfile.cicd ie CI/CD Enhancements
+1. Added build metadata for traceability
+
+New: ARG BUILD_DATE, ARG VCS_REF, and ARG VERSION allow your CI/CD pipeline to inject build date, Git commit hash, and version tag.
+
+Impact: Every image is self‑describing — you can run docker inspect to see exactly when and from which commit it was built.
+
+2. Added OCI‑compliant labels
+
+New: Labels like org.opencontainers.image.source and org.opencontainers.image.revision make the image registry‑friendly and searchable.
+
+Impact: Improves maintainability and auditability in multi‑service environments.
+
+3. Kept caching optimizations
+
+Still copies requirements.txt before the rest of the code to avoid reinstalling dependencies on every code change.
+
+4. Maintained runtime minimalism
+
+Build tools (gcc, libpq-dev) remain in the builder stage only.
+
+Final image contains only runtime essentials (libpq5, curl).
+
+5. CI/CD‑friendly naming
+
+Suggested Dockerfile.cicd so your pipeline can explicitly target it without affecting local dev builds.
+
+6. Healthcheck reliability
+
+Ensures curl is present so healthchecks work in all environments, including staging and production.
+
 ## 2025-09-05 04:20 
 1. Updated uvicorn target
 
