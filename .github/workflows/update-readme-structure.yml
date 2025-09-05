@@ -1,0 +1,36 @@
+name: Update README Structure
+
+on:
+  push:
+    branches:
+      - main
+
+jobs:
+  update-readme:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v3
+
+      - name: Generate file tree
+        run: |
+          echo "\`\`\`" > structure.txt
+          tree -I 'venv|__pycache__|.git|.github|*.pyc|*.log' >> structure.txt
+          echo "\`\`\`" >> structure.txt
+
+      - name: Update README.md
+        run: |
+          awk '
+            BEGIN {in_block=0}
+            /<!-- START STRUCTURE -->/ {print; system("cat structure.txt"); in_block=1; next}
+            /<!-- END STRUCTURE -->/ {in_block=0}
+            !in_block {print}
+          ' README.md > README.new
+          mv README.new README.md
+
+      - name: Commit changes
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "github-actions[bot]@users.noreply.github.com"
+          git add README.md
+          git commit -m "chore: update file structure in README [skip ci]" || echo "No changes to commit"
+          git push
