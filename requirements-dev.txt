@@ -17,3 +17,4 @@ uvicorn                     # ASGI server for FastAPI
 sqlalchemy                  # ORM for database access
 bcrypt                      # Password hashing
 python-jose[crypto]         # JWT creation/verification
+
