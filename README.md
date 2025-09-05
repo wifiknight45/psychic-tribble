@@ -36,13 +36,13 @@ FastAPI
 Required dependencies (see Installation section)
 
 Installation
-Clone the repository
-bash
-git clone https://github.com/yourusername/psychic-tribble.git
+step 1: Clone the repository
+# bash
+git clone https://github.com/wifiknight45/psychic-tribble.git
 cd psychic-tribble
 
-Create a virtual environment
-bash
+step 2: Create a virtual environment
+# bash
 python -m venv venv
 source venv/bin/activate  # On Windows: venv\Scripts\activate
 
@@ -75,16 +75,15 @@ ReDoc: http://localhost:8000/redoc
 Health Check: http://localhost:8000/
 
 Production Deployment
-For production deployment, consider using:
-bash# Using Gunicorn with Uvicorn workers
+# bash method 1--> Using Gunicorn with Uvicorn workers
 gunicorn psychic_tribble.main:app -w 4 -k uvicorn.workers.UvicornWorker --bind 0.0.0.0:8000
 
-# Or with Docker (create appropriate Dockerfile)
+# bash method 2--> Or with Docker (Dockerfile)
 docker build -t psychic-tribble .
 docker run -p 8000:8000 psychic-tribble
 
 Project Structure
-add more here
+add more here my file directory is complex af rn
 
 API Endpoints
 The application provides a modular API structure. Key endpoints include:
@@ -111,7 +110,7 @@ DEFAULT_RATE_LIMIT="100/minute"
 CORS Protection
 Configurable cross-origin resource sharing:
 python# Allow specific origins
-ALLOWED_CORS_ORIGINS=["https://psychic-tribble_domain.com"]
+ALLOWED_CORS_ORIGINS=["https://INPUTcoolWebSiteHEREbruh.com"]
 Security Headers
 Custom middleware adds security headers to all responses for enhanced protection against common web vulnerabilities.
 Error Handling
@@ -123,21 +122,18 @@ Rate Limit Exceptions: Graceful handling of rate limit violations
 Structured Error Responses: Consistent error response format
 
 Monitoring & Logging
-Logging
-
 Structured logging with configurable levels
 Request/response logging
 Error tracking with stack traces
 Performance monitoring
 
 Metrics
-
 Built-in metrics collection
 Performance monitoring
 Health check endpoints
 Custom metric support
 
-Contributing
+Authorized Developer Collaborators:
 
 Fork the repository
 Create a feature branch (git checkout -b feature/amazing-feature)
@@ -146,7 +142,6 @@ Push to the branch (git push origin feature/amazing-feature)
 Open a Pull Request
 
 Development Guidelines
-
 Follow PEP 8 style guidelines
 Add type hints to all functions
 Write comprehensive tests
@@ -154,7 +149,8 @@ Update documentation for new features
 Ensure all security middleware remains intact
 
 Testing
-bash# Run tests
+# bash 
+Run tests
 pytest
 
 # Run with coverage
@@ -166,12 +162,12 @@ License
 This project is licensed under the MIT License - see the LICENSE file for details.
 Support
 
-Email: support@psychictribble.com
-Website: https://psychictribble.com/contact
+Email: wifiknight45@proton.me
+Website tbd after front end dev
+
 Documentation: Available at /docs when running the application
 
-Roadmap
-
+Roadmap (subject to change)
  Add authentication and authorization
  Implement task CRUD operations
  Add user management system
@@ -182,8 +178,6 @@ Roadmap
  Docker containerization
  CI/CD pipeline setup
 
-
-Built with ❤️ using FastAPI and modern Python practices.
 Development
 Robert Hodgkiss 
 wifiknight45@proton.me
@@ -192,8 +186,10 @@ Business and Marketing
 Crystal Andrews 
 andrews.crystal@gmail.com
 
-For questions, bug reports, or feature requests, please reach out to the development team.
+For questions, bug reports, or feature requests, please reach out to the development team at wifiknight45@proton.me
 
 Psychic-Tribble - Seamless event planning for the modern world
 Copyright © 2025 Psychic Tribble. All rights reserved.
 This software is proprietary and confidential. Unauthorized use is prohibited without written permission from the authors.
+
+Built with ❤️ using FastAPI and modern Python practices.
