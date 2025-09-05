@@ -4,154 +4,186 @@ A secure, intuitive calendar and event management platform built for modern team
 ⚠️ Proprietary Software Notice ⚠️ 
 This codebase is proprietary and confidential. Unauthorized use, copying, modification, or distribution is prohibited. For access or licensing inquiries, contact the development team.
 
+
+
+Psychic-Tribble is a modern task management application that provides a robust backend API with enterprise-grade security features, comprehensive monitoring, and scalable architecture. The platform is designed to handle task management operations with built-in rate limiting, CORS support, and comprehensive error handling.
+
 Features
-Secure Authentication - Email/password login with JWT token-based security
-Event Management - Create, view, edit, and delete events with an intuitive interface
-Interactive Calendar - Visual calendar view for easy event planning and overview
-Calendar Sync - iCalendar feed integration for Google Calendar, Outlook, and other apps
-High Performance - Built with FastAPI for speed and scalability
-Rate Limiting - Redis-powered API protection and request throttling
-Cross-Platform Ready - Web interface foundation for future mobile apps
+SecDevOps approach
+HTTPS Redirect: Automatic redirection to secure connections
+CORS Protection: Configurable cross-origin resource sharing
+Security Headers: Custom security middleware for enhanced protection
+Rate Limiting: Built-in request throttling to prevent abuse
+
+Monitoring & Observability
+Comprehensive Logging: Structured logging with configurable levels
+Metrics Integration: Built-in performance and health monitoring
+Error Tracking: Global exception handling with detailed logging
+
+Performance & Scalability
+FastAPI Framework: High-performance async Python web framework
+Modular Architecture: Clean separation of concerns with organized routing
+Middleware Pipeline: Optimized request processing chain
+
+Developer Experience
+Auto-generated Documentation: Interactive API docs at /docs and /redoc
+OpenAPI Specification: Complete API specification available at /openapi.json
+Type Safety: Full type hints throughout the codebase
 
 Prerequisites
-Python: 3.9 or higher
-Redis: Local instance or cloud service
-Database: SQLite (development) / PostgreSQL (production)
+Python 3.8+
+FastAPI
+Required dependencies (see Installation section)
 
-Core Dependencies
-fastapi
-sqlalchemy
-alembic
-passlib [bcrypt]
-python-jose
-slowapi
-uvicorn
-redis
-
-Quick Start
-For Authorized Collaborators only 
-
-Clone and Setup
-bashgit clone https://github.com/wifiknight45/psychic-tribble/
+Installation
+Clone the repository
+bash
+git clone https://github.com/yourusername/psychic-tribble.git
 cd psychic-tribble
 
-# Create virtual environment
+Create a virtual environment
+bash
 python -m venv venv
-source venv/bin/activate  # Windows: venv\Scripts\activate
+source venv/bin/activate  # On Windows: venv\Scripts\activate
 
-# Install dependencies
-pip install -r requirements.txt
+Install dependencies
+bashpip install -r requirements.txt
 
+Set up environment variables
+Create a .env file in the project root:
+env# CORS Configuration
+ALLOWED_CORS_ORIGINS=["http://localhost:3000", "https://yourdomain.com"]
 
-Environment Configuration
-bashcp .env.example .env
+# Security Settings
+ENABLE_HTTPS_REDIRECT=false  # Set to true in production
 
-Update your .env file:
-envPYTT_ENV=development
-DATABASE_URL=sqlite:///./development.db
-SECRET_KEY=your_secret_key_here
-REDIS_URL=redis://localhost:6379/0
-CORS_ORIGINS=["http://localhost:8000"]
-RATE_LIMITS=["100/minute", "1000/day"]
+# Rate Limiting
+DEFAULT_RATE_LIMIT="100/minute"
 
-
-Database Setup
-bash# Run migrations (development only)
-alembic upgrade head
+# Add other configuration variables as needed
 
 
-Launch Application
-bashuvicorn app:app --host 0.0.0.0 --port 8000 --reload
+Usage
+Development Server
+Start the development server:
+bashuvicorn psychic_tribble.main:app --reload --host 0.0.0.0 --port 8000
+The API will be available at:
 
-
-Access the Application
-Web Interface: http://localhost:8000/static/index.html
-API Documentation: http://localhost:8000/docs
-Health Check: http://localhost:8000/health
-
-
-Using Psychic-Tribble
-Web Interface
-Navigate to the web interface and:
-  a) Login with your email and password
-  b) Manage Events in the Events section
-  c) View Calendar for visual event planning
-  d) Get Calendar Feed URL for external calendar sync
-
-
-API Access
-Authentication
-bash
-POST /token
-{
-  "email": "your-email@example.com",
-  "password": "your-password"
-}
-
-
-Available Endpoints
-/users - User management
-/events - Event CRUD operations
-/timeslots - Timeslot scheduling
-/calendar - Calendar operations
-/calendar/feed.ics - iCalendar feed download
-
-
-Calendar Integration
-Copy your personal iCalendar feed URL from the web interface and add it to:
-  a) Google Calendar
-  b) Outlook
-  c) Apple Calendar
-  d) Any iCalendar-compatible application
-
-Development
-Development Mode
-bash# Enable debug mode and auto-migrations
-export PYTT_ENV=development
-
-Security Features
-Password Hashing: bcrypt for secure password storage
-JWT Authentication: Stateless token-based authentication
-Rate Limiting: Redis-backed request throttling
-
-Testing
-bash
-# Create tests directory and add pytest tests
-mkdir tests
-pip install pytest
-pytest
+API Base: http://localhost:8000
+Interactive Docs: http://localhost:8000/docs
+ReDoc: http://localhost:8000/redoc
+Health Check: http://localhost:8000/
 
 Production Deployment
-Environment Setup
-envPYTT_ENV=production
-DATABASE_URL=postgresql://user:password@localhost:5432/psychic_tribble
-REDIS_URL=redis://your-redis-instance:6379/0
-CORS_ORIGINS=["https://yourdomain.com"]
+For production deployment, consider using:
+bash# Using Gunicorn with Uvicorn workers
+gunicorn psychic_tribble.main:app -w 4 -k uvicorn.workers.UvicornWorker --bind 0.0.0.0:8000
 
-Deployment Options
-Option 1: 
-Uvicorn
-bashuvicorn app:app --host 0.0.0.0 --port 8000 --workers 4
+# Or with Docker (create appropriate Dockerfile)
+docker build -t psychic-tribble .
+docker run -p 8000:8000 psychic-tribble
 
-Option 2: 
-Gunicorn
-bashgunicorn --worker-class uvicorn.workers.UvicornWorker --workers 4 app:app --bind 0.0.0.0:8000
+Project Structure
+add more here
 
-Recommended Platforms
-Render - Easy deployment with built-in PostgreSQL
-Heroku - Quick setup with Redis add-ons
-AWS - Full control with ECS/Lambda deployment
-DigitalOcean - App Platform for simple deployment
+API Endpoints
+The application provides a modular API structure. Key endpoints include:
 
-Roadmap to App
-Psychic-Tribble is designed as a web-first platform with mobile expansion planned:
+GET / - Health check and API status
+GET /docs - Interactive API documentation
+GET /redoc - Alternative API documentation
+GET /openapi.json - OpenAPI specification
 
-Phase 1: ✅ Web interface with FastAPI backend
-Phase 2: 🔄 Docker containerization for cloud-native deployment
-Phase 3: 📱 Android app (Kotlin) via Google Play
-Phase 4: 🍎 iOS app (Swift) via App Store
+Additional endpoints are defined in the modular API routers.
+Configuration
+The application uses a settings-based configuration system. Key configuration options:
 
-Contact & Support
+CORS Origins: Configure allowed cross-origin domains
+HTTPS Redirect: Enable/disable automatic HTTPS redirection
+Rate Limiting: Set default rate limits for API endpoints
+Logging Level: Configure application logging verbosity
+
+Security Features
+Rate Limiting
+Built-in protection against API abuse with configurable rate limits:
+python# Default: 100 requests per minute per IP
+DEFAULT_RATE_LIMIT="100/minute"
+CORS Protection
+Configurable cross-origin resource sharing:
+python# Allow specific origins
+ALLOWED_CORS_ORIGINS=["https://psychic-tribble_domain.com"]
+Security Headers
+Custom middleware adds security headers to all responses for enhanced protection against common web vulnerabilities.
+Error Handling
+The application includes comprehensive error handling:
+
+Global Exception Handler: Catches and logs all unhandled exceptions
+Custom Exception Handlers: Specific handling for different error types
+Rate Limit Exceptions: Graceful handling of rate limit violations
+Structured Error Responses: Consistent error response format
+
+Monitoring & Logging
+Logging
+
+Structured logging with configurable levels
+Request/response logging
+Error tracking with stack traces
+Performance monitoring
+
+Metrics
+
+Built-in metrics collection
+Performance monitoring
+Health check endpoints
+Custom metric support
+
+Contributing
+
+Fork the repository
+Create a feature branch (git checkout -b feature/amazing-feature)
+Commit your changes (git commit -m 'Add amazing feature')
+Push to the branch (git push origin feature/amazing-feature)
+Open a Pull Request
+
+Development Guidelines
+
+Follow PEP 8 style guidelines
+Add type hints to all functions
+Write comprehensive tests
+Update documentation for new features
+Ensure all security middleware remains intact
+
+Testing
+bash# Run tests
+pytest
+
+# Run with coverage
+pytest --cov=psychic_tribble
+
+# Run specific test file
+pytest tests/test_main.py
+License
+This project is licensed under the MIT License - see the LICENSE file for details.
+Support
+
+Email: support@psychictribble.com
+Website: https://psychictribble.com/contact
+Documentation: Available at /docs when running the application
+
+Roadmap
+
+ Add authentication and authorization
+ Implement task CRUD operations
+ Add user management system
+ WebSocket support for real-time updates
+ Database integration
+ Caching layer implementation
+ Comprehensive test suite
+ Docker containerization
+ CI/CD pipeline setup
+
+
+Built with ❤️ using FastAPI and modern Python practices.
 Development
 Robert Hodgkiss 
 wifiknight45@proton.me
