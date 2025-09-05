@@ -1,5 +1,220 @@
 # Changelog
 
+## 2025-09-05 00:24
+1. Project Modularization and Layered Imports
+Change: Replaced all logic from main.py except architecture bootstrapping. Moved:
+
+Auth, DB, service logic, and routers to submodules (psychic_tribble/api/, psychic_tribble/security/, etc.)
+
+Configuration & DI to config.py and dependencies/
+
+Security and observability code to their respective modules
+
+Justification: A flat or monolithic main.py quickly becomes unmaintainable as complexity grows. Adopting a modular file/folder structure—with clear segregation of config, routers, services, exception handlers, utility code, and middleware—ensures architectural clarity and supports team-scale development.
+
+Encourages single responsibility principle
+
+Greatly boosts testability and onboarding ease2
+
+2. Settings Management with Pydantic
+Change: Loading all configuration (e.g., secrets, CORS, JWT, rate limits, DB URIs) via a get_settings() dependency that wraps a Pydantic BaseSettings class (likely in config.py). Defaults are overridden by environment variables or .env. Core configs are never hardcoded.
+
+Justification: Centralized, type-safe configuration with Pydantic makes the API more robust, secure, and 12-factor compliant. It eliminates hardcoded secrets, supports container/Docker deployment, and speeds up both local testing and CI/CD integration.
+
+Guards against leaking secrets or credentials into repos
+
+Enables seamless staging/production/multi-tenancy switch
+
+Can support advanced features like validation, secrets files, and config inheritance5
+
+3. API Documentation and Metadata
+Change:
+
+Explicitly set API title, version, description, contact, and license_info in FastAPI constructor
+
+Custom docs URLs (/docs, /redoc, /openapi.json)
+
+Justification: Boosts discoverability for both internal and external users. FastAPI's auto-documentation is a competitive advantage in API-first platforms for both security (by surfacing/whitelisting endpoints openly) and DevOps automation.
+
+Helps clients, bots, and test automation discover endpoints
+
+Lays the groundwork for OpenAPI-driven codegen or docs export8
+
+4. Logging and Application Monitoring Integration
+Change:
+
+Early call to configure_logging(settings), which sets up a robust, rotating log handler, with structured, environment-specific log formats.
+
+Call to init_metrics(app), which integrates metrics via Prometheus/OpenTelemetry (as implemented in the monitoring module).
+
+Justification: Attack detection, performance bottleneck detection, and general post-mortem analysis all rely critically on robust application-level logging and monitoring.
+
+Logging format and level should be environment-configurable
+
+Prometheus/OpenTelemetry allows for Grafana dashboards, alerts, operational visibility
+
+Supports tracing, APM tooling, and fast incident response11
+
+5. CORS, HTTPS Redirection, Security Headers Middleware
+Change:
+
+Enforced CORS policies using origins resolved at runtime from environment or config
+
+Conditionally enabled HTTPS redirect middleware based on settings
+
+Added global security headers middleware; all headers (CSP, HSTS, X-Frame-Options, etc.) set using the Saml/SecWeb/Starlette pattern
+
+Justification:
+
+Prevents CSRF and XSS attacks from unauthorized domains
+
+HSTS and security headers prevent clickjacking, sniffing and browser downgrade attacks
+
+HTTPS only is industry minimum in 2025 and is painless with automatic redirect tools14
+
+6. JWT Authentication (Access, Refresh, Revocation)
+Change:
+
+JWT Authentication logic is moved out of main.py into its own submodule (e.g., psychic_tribble/security/). The main file only bootstraps the routers/dependencies.
+
+Security tokens are always signed with strong, non-default secrets, loaded via environment (not hardcoded).
+
+Supports both access token (short-lived) and refresh token (longer-lived) endpoints with built-in revocation/denylisting.
+
+Password hashing uses bcrypt or Argon2 (via passlib context) with salt per user.
+
+Token validation is done using dependency injection, with the option to scope rate limits per-user for authenticated users.
+
+Justification:
+
+No secret is ever hardcoded
+
+Token refresh extends usability, while revocation/blacklist guards against token theft/replays
+
+Secure password hashing is a minimum baseline
+
+Secure dependency patterns keep critical auth logic testable and changeable
+
+The move to "auth as router/service layer" ensures code testability and separation of business/security logic1719
+
+7. Rate Limiting: Per-IP and Per-User via SlowAPI
+Change:
+
+Integrated the slowapi library to globally and/or route-specifically enforce rate limits, configurable per environment.
+
+Global rate limit configured at the application level with the ability to override per endpoint using @limiter.limit.
+
+Key function (key_func) uses request IP for anonymous users, and, if available, authenticated JWT subject (user ID/email) for logged-in users.
+
+Justification:
+
+Prevents both brute force (auth endpoints) and DoS (resource endpoints) attacks.
+
+Ensures fairness among users and discourages abuse from a single actor.
+
+Library is ASGI-first, non-blocking, and production-hardened.
+
+429 responses offer clarity and can include headers to aid client-side retry logic.22
+
+8. Custom Exception Handling
+Change:
+
+All exceptions (including HTTP exceptions, authorization errors, and validation errors) handled via a dedicated module (dependencies/exception_handlers.py), registered globally from main.py.
+
+A global fallback handler logs all unhandled exceptions at ERROR with stack traces and returns a generic JSON error.
+
+Justification:
+
+Ensures that all errors are logged for incident response and analytics.
+
+Prevents leakage of sensitive internal errors to external clients.
+
+Can be extended to support Sentry or external error tracking.
+
+Clean separation supports testability and adherence to DRY for error responses.25
+
+9. Include Modular Routers/scoped Endpoints Only
+Change:
+
+All endpoints, whether for users, authentication, tasks, or other domain logic, are registered via modular routers (api_router), not by direct code in main.py..
+
+Justification:
+
+Ensures scalability as your API surface expands.
+
+Decouples endpoint logic for easier unit and integration testing.
+
+Promotes route grouping by feature/concern.
+
+10. Async-First Patterns and Database Session Management
+Change:
+
+Promoted use of fully async endpoints (when interacting with DB or networks).
+
+Database session management is done via dependency injection using async session pools (e.g., SQLAlchemy’s async_sessionmaker), managed in a dedicated db.py/services module, not in the entry point.
+
+All blocking IO calls are firewalled to background tasks or explicit offloading.
+
+Justification:
+
+True non-blocking IO is required for high concurrency.
+
+Async session pools improve throughput and eliminate deadlock risks.
+
+Dependency injection supports proper transaction-scoped DB sessions and rollback on errors.2830
+
+11. DevSecOps: CI/CD, SAST, and Runtime Security Foundations
+Change:
+
+All settings support override via environment/config for CI and container deployments
+
+Logging/monitoring support integrates with centralized log/metrics systems.
+
+Code is structure-ready for automated testing and security scanning via CI (pytest, SAST, Docker, SCA).
+
+Application secrets are never stored in codebase or static settings.
+
+Justification:
+
+Early, automated security and quality gates improve resilience, speed, and compliance.
+
+Centralization and modularity make SAST (Static Analysis), SCA (Composition Scanning), and runtime container scanning easy to enforce.
+
+Foundation for secret management, threat modeling, and “shift left” security culture.333537
+
+12. Automated Testing Ready
+Change:
+
+Project structure is intentionally compatible with standard FastAPI and Pytest workflows, including dependency overrides for test DBs, test tokens, etc.
+
+Encourages separation of integration and unit test layers.
+
+Code is organized so that API endpoints, services, and database access are all mockable or replaceable in tests.
+
+Justification:
+
+Enables CI/CD pipelines to run full test coverage quickly and securely
+
+Testing security critical features (auth, token expiry, error handling, etc.) is made feasible and reliable
+
+Supports both functional and security regression testing with minimal boilerplate37
+
+Further Recommendations for Next Iterations
+1. Advanced Security: Consider supporting OAuth 3.0 (or OpenID Connect) where external integration or SSO is required, with PKCE enforcement and dynamic JWT key retrieval.
+
+2. Observability: Integrate log correlation IDs for request tracing and enhance Prometheus/Grafana dashboards for latency, error rates, and breaker circuits.
+
+3. Zero Trust Enhancements:
+
+Implement per-route permission/role checks with scope-based requirements in route decorators.
+
+Integrate with a secrets manager (e.g., HashiCorp Vault) instead of .env files for prod.
+
+4. Static and Dynamic Analysis:
+
+Use SAST tools (like Bandit) and dependency analysis (Safety, Snyk, Trivy) in pre-merge checks to detect code and dependency-level vulnerabilities.
+
+5. Containerization: Optimize Dockerfiles and deployment manifests to follow minimal base images, avoid "latest" tags, and enable non-root runtime users.
 ## 2025-08-12 05:09 
 preparing to refactor filepaths, current structure:
 
