@@ -13,6 +13,7 @@ pydantic==2.9.2             # Data validation for FastAPI and settings
 python-jose[cryptography]==3.3.0  # JWT authentication for /token, /refresh
 passlib[bcrypt]==1.7.4      # Password hashing for authentication
 structlog==24.4.0           # Structured JSON logging for debugging
-python-multipart==0.0.12    # Handles form data for OAuth2 password flow
+python-multipart                # Handles form data for OAuth2 password flow
 aiosqlite==0.20.0           # async interface to sqlite databases
 starlette==0.47.3           # a lightweight ASGI framework/toolkit, which is ideal for building async web services
+slowapi==0.1.9             # Rate limiting for FastAPI
