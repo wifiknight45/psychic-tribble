@@ -1,13 +1,5 @@
-
-version: 2k
+version: 2
 updates:
-  # Daily npm updates
-  - package-ecosystem: "npm"
-    directory: "/"
-    schedule:
-      interval: "daily"
-    open-pull-requests-limit: 5
-
   # Weekly Python updates (including transitive deps)
   - package-ecosystem: "pip"
     directory: "/"
@@ -15,3 +7,10 @@ updates:
       interval: "weekly"
     allow:
       - dependency-type: "all"
+    open-pull-requests-limit: 5
+
+  # Optional: Keep GitHub Actions workflows up-to-date
+  - package-ecosystem: "github-actions"
+    directory: "/"
+    schedule:
+      interval: "weekly"
