@@ -10,9 +10,6 @@ import json
 from pathlib import Path
 from unittest.mock import patch
 
-# Add src to path for imports
-sys.path.insert(0, str(Path(__file__).parent.parent / "src"))
-
 from psychic_tribble.cli.main import parse_expression, extract_title, format_human_readable
 
 
