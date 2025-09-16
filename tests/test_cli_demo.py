@@ -70,7 +70,8 @@ def test_parse_expression_output(capsys):
 def test_cli_help_output():
     """Test that the CLI help displays correctly."""
     
-    with patch('sys.argv', ['main.py']):
+    # Use a realistic CLI invocation pattern: script name only, no arguments
+    with patch('sys.argv', ['psychic-tribble']):
         from psychic_tribble.cli.main import main
         
         # Capture stdout
