@@ -9,8 +9,8 @@ parsing and management functionality, building upon the existing REPL prototype.
 # Install with: pip install click rich
 
 try:
-    from .main import cli
-    __all__ = ['cli']
+    from .main import main
+    __all__ = ['main']
 except ImportError:
     print("CLI dependencies not available. Install with: pip install click rich")
     __all__ = []
