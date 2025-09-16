@@ -79,8 +79,7 @@ def launch_interactive():
     
     try:
         # Import the actual REPL if available
-        sys.path.append(str(Path(__file__).parent.parent))
-        from nlp.calendar_repl_prototype import CalendarREPL
+        from ..nlp.calendar_repl_prototype import CalendarREPL
         repl = CalendarREPL()
         repl.run()
     except ImportError:
