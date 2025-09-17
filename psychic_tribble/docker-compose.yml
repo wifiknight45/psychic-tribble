@@ -1,62 +1,86 @@
-version: '3.8'
+name: Docker Test
 
-services:
-  web:
-    build:
-      context: .
-      dockerfile: Dockerfile
-    ports:
-      - "8000:8000"
-    environment:
-      - PYTT_ENV=${PYTT_ENV:-production}
-      - DATABASE_URL=${DATABASE_URL:-postgresql://user:password@postgres:5432/psychic_tribble}
-      - REDIS_URL=${REDIS_URL:-redis://redis:6379/0}
-      - SECRET_KEY=${SECRET_KEY:-your-secure-secret-key}
-      - ALEMBIC_INI=${ALEMBIC_INI:-alembic.ini}
-      - CORS_ORIGINS=${CORS_ORIGINS:-["http://localhost:8000"]}
-    volumes:
-      - ./psychic_tribble:/app/psychic_tribble
-      - ./static:/app/static
-      - ./templates:/app/templates
-      - ./.env:/app/.env
-    depends_on:
-      postgres:
-        condition: service_healthy
-      redis:
-        condition: service_healthy
-    command: >
-      sh -c "alembic upgrade head && 
-             if [ \"${PYTT_ENV:-production}\" = \"development\" ]; then 
-               uvicorn app:app --host 0.0.0.0 --port 8000 --reload; 
-             else 
-               uvicorn app:app --host 0.0.0.0 --port 8000 --workers 4 --log-level info; 
-             fi"
+on: [push, pull_request]
 
-  redis:
-    image: redis:7
-    volumes:
-      - redis_data:/data
-    healthcheck:
-      test: ["CMD", "redis-cli", "ping"]
-      interval: 10s
-      timeout: 5s
-      retries: 5
+jobs:
+  test-with-docker:
+    runs-on: ubuntu-latest
 
-  postgres:
-    image: postgres:15
-    environment:
-      - POSTGRES_USER=${POSTGRES_USER:-user}
-      - POSTGRES_PASSWORD=${POSTGRES_PASSWORD:-password}
-      - POSTGRES_DB=${POSTGRES_DB:-psychic_tribble}
-    volumes:
-      - postgres_data:/var/lib/postgresql/data
-    healthcheck:
-      test: ["CMD-SHELL", "pg_isready -U ${POSTGRES_USER:-user}"]
-      interval: 10s
-      timeout: 5s
-      retries: 5
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v3
 
-volumes:
-  postgres_data:
-  redis_data:
+      - name: Set up Docker Buildx
+        uses: docker/setup-buildx-action@v2
+
+      - name: Check Docker setup
+        run: |
+          docker info
+          docker compose version
+
+      - name: Start containers in background
+        run: docker compose up -d --build
+
+      - name: Wait for web service to be ready (healthcheck-aware)
+        run: |
+          set -euo pipefail
+          echo "Waiting for services to be ready..."
+          docker ps
+          CID="$(docker compose ps -q web || true)"
+          if [ -z "${CID}" ]; then
+            echo "Could not find container for service 'web'. Ensure a 'web' service exists in docker-compose.yml."
+            docker compose ps
+            exit 1
+          fi
+
+          # Poll for health if defined; otherwise ensure container is running and give a short grace period
+          READY=0
+          for i in {1..30}; do
+            STATE="$(docker inspect --format='{{.State.Status}}' "$CID" || echo unknown)"
+            HEALTH="$(docker inspect --format='{{if .State.Health}}{{.State.Health.Status}}{{else}}none{{end}}' "$CID" || echo unknown)"
+            echo "Attempt ${i}: state=${STATE} health=${HEALTH}"
+            if [ "${STATE}" = "running" ]; then
+              if [ "${HEALTH}" = "healthy" ]; then
+                READY=1
+                break
+              elif [ "${HEALTH}" = "none" ]; then
+                # No healthcheck defined; wait a bit for app-level readiness
+                sleep 10
+                READY=1
+                break
+              fi
+            fi
+            sleep 2
+          done
+
+          if [ "${READY}" -ne 1 ]; then
+            echo "Container did not become ready in time."
+            docker compose ps
+            docker compose logs web || true
+            exit 1
+          fi
+
+      - name: Inspect containers post-startup
+        run: |
+          docker compose ps
+          docker compose logs --tail=100 web || true
+
+      - name: Run tests in 'web' container
+        run: |
+          set -e
+          docker compose exec -T web pytest
+
+      - name: Capture logs on failure
+        if: failure()
+        run: |
+          echo "===== docker compose ps ====="
+          docker compose ps || true
+          echo "===== web logs ====="
+          docker compose logs web || true
+          echo "===== all service logs ====="
+          docker compose logs || true
+
+      - name: Tear down containers
+        if: always()
+        run: docker compose down --volumes --remove-orphans
 
