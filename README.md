@@ -1,17 +1,265 @@
 Psychic-Tribble 
 A secure, intuitive calendar and event management platform built for modern teams and individuals. Psychic-Tribble offers seamless scheduling, calendar synchronization, and a powerful API—all wrapped in a fast, scalable FastAPI backend.
 <!-- START STRUCTURE -->
+## Project Structure
 
+### Directory Tree
 
+```
+psychic-tribble/
+├── CHANGELOG.md
+├── LICENSE
+├── README.md
+├── SECURITY.md
+├── auth.py
+├── branch_protection_ruleset.json
+├── config.py
+├── core
+│   ├── __init__.py
+│   └── routers
+│       ├── auth.py
+│       ├── calendar.py
+│       └── health.py
+├── database.py
+├── dockerfile
+├── dockerfile.cicd
+├── docs
+│   ├── README.md
+│   ├── _config.yml
+│   ├── base.html
+│   └── static
+│       ├── calendar.html
+│       ├── css
+│       │   └── styles.css
+│       ├── index.html
+│       └── js
+│           └── app.js
+├── index.html
+├── psychic_tribble
+│   └── docker-compose.yml
+├── pyproject.toml
+├── requirements-dev.txt
+├── requirements.txt
+├── scripts
+│   ├── config.json
+│   └── generate_structure.py
+├── setup.py
+├── src
+│   └── psychic_tribble
+│       ├── api
+│       │   └── routers
+│       │       ├── __init__.py
+│       │       ├── calendar.py
+│       │       ├── events.py
+│       │       ├── timeslots.py
+│       │       └── users.py
+│       ├── app
+│       │   └── main.py
+│       ├── core
+│       │   ├── auth.py
+│       │   └── utils.py
+│       ├── domain
+│       │   ├── models.py
+│       │   └── schemas
+│       │       ├── assignment.py
+│       │       ├── event.py
+│       │       ├── timeslot.py
+│       │       └── user.py
+│       ├── nlp
+│       │   ├── __init__.py
+│       │   ├── calendar_repl_prototype.py
+│       │   ├── heuristics.py
+│       │   ├── llm_prompts.py
+│       │   ├── parser.py
+│       │   └── reclaim_automations_duckly.py
+│       └── services
+│           ├── __init__.py
+│           ├── calendar.py
+│           ├── event.py
+│           ├── service.py
+│           └── user_service.py
+├── tests
+│   ├── __pycache__
+│   ├── api
+│   │   └── v1
+│   │       ├── test_calendar.py
+│   │       ├── test_events.py
+│   │       ├── test_timeslots.py
+│   │       └── test_users.py
+│   ├── conftest.py
+│   ├── core
+│   │   └── test_utils.py
+│   ├── db
+│   │   └── test_models.py
+│   └── services
+│       └── test_user_service.py
+└── tools
+    └── migrations
+        └── alembic.ini
+```
 
+### File Descriptions
 
+| Path | Type | Description |
+|------|------|-------------|
+| CHANGELOG\.md | File | Markdown documentation file |
+| LICENSE | File | File |
+| README\.md | File | Markdown documentation file |
+| SECURITY\.md | File | Markdown documentation file |
+| auth\.py | File | Python source file |
+| branch\_protection\_ruleset\.json | File | JSON data file |
+| config\.py | File | Python source file |
+| core | Directory | Core application logic |
+| core/\_\_init\_\_\.py | File | Python source file |
+| core/routers | Directory | Directory |
+| core/routers/auth\.py | File | Python source file |
+| core/routers/calendar\.py | File | Python source file |
+| core/routers/health\.py | File | Python source file |
+| database\.py | File | Python source file |
+| dockerfile | File | File |
+| dockerfile\.cicd | File | File |
+| docs | Directory | Documentation files |
+| docs/README\.md | File | Markdown documentation file |
+| docs/\_config\.yml | File | YAML configuration file |
+| docs/base\.html | File | HTML template file |
+| docs/static | Directory | Static assets \(CSS, JS, images\) |
+| docs/static/calendar\.html | File | HTML template file |
+| docs/static/css | Directory | Directory |
+| docs/static/css/styles\.css | File | Cascading Style Sheets file |
+| docs/static/index\.html | File | HTML template file |
+| docs/static/js | Directory | Directory |
+| docs/static/js/app\.js | File | JavaScript file |
+| index\.html | File | HTML template file |
+| psychic\_tribble | Directory | Directory |
+| psychic\_tribble/docker\-compose\.yml | File | YAML configuration file |
+| pyproject\.toml | File | Python project configuration file |
+| requirements\-dev\.txt | File | Text file |
+| requirements\.txt | File | Text file |
+| scripts | Directory | Utility and automation scripts |
+| scripts/config\.json | File | JSON data file |
+| scripts/generate\_structure\.py | File | Python source file |
+| setup\.py | File | Python source file |
+| src | Directory | Source code directory |
+| src/psychic\_tribble | Directory | Directory |
+| src/psychic\_tribble/api | Directory | API route definitions |
+| src/psychic\_tribble/api/routers | Directory | Directory |
+| src/psychic\_tribble/api/routers/\_\_init\_\_\.py | File | Python source file |
+| src/psychic\_tribble/api/routers/calendar\.py | File | Python source file |
+| src/psychic\_tribble/api/routers/events\.py | File | Python source file |
+| src/psychic\_tribble/api/routers/timeslots\.py | File | Python source file |
+| src/psychic\_tribble/api/routers/users\.py | File | Python source file |
+| src/psychic\_tribble/app | Directory | Directory |
+| src/psychic\_tribble/app/main\.py | File | Python source file |
+| src/psychic\_tribble/core | Directory | Core application logic |
+| src/psychic\_tribble/core/auth\.py | File | Python source file |
+| ... | ... | ... and 39 more items |
 
+### API Endpoints
 
+| Method | Path | Function | File |
+|--------|------|----------|------|
+| GET | /calendar | view_calendar | src/psychic_tribble/api/routers/calendar.py |
+| POST | /events | create_event | src/psychic_tribble/api/routers/events.py |
+| POST | /events/<event_id>/timeslots | add_timeslot | src/psychic_tribble/api/routers/timeslots.py |
+| POST | /timeslots/<ts_id>/assign | assign_to_slot | src/psychic_tribble/api/routers/timeslots.py |
+| POST | /users | create_user | src/psychic_tribble/api/routers/users.py |
 
+### Structure Diagram
 
+```mermaid
+flowchart TD
+  R[psychic-tribble/]
 
-
-
+  R --> n2(CHANGELOG.md)
+  R --> n3(LICENSE)
+  R --> n4(README.md)
+  R --> n5(SECURITY.md)
+  R --> n6(auth.py)
+  R --> n7(branch_protection_ruleset.json)
+  R --> n8(config.py)
+  R --> n9[core/]
+  n9 --> n10(__init__.py)
+  n9 --> n11[routers/]
+  n11 --> n12(auth.py)
+  n11 --> n13(calendar.py)
+  n11 --> n14(health.py)
+  R --> n15(database.py)
+  R --> n16(dockerfile)
+  R --> n17(dockerfile.cicd)
+  R --> n18[docs/]
+  n18 --> n19(README.md)
+  n18 --> n20(_config.yml)
+  n18 --> n21(base.html)
+  n18 --> n22[static/]
+  n22 --> n23(calendar.html)
+  n22 --> n24[css/]
+  n24 --> n25(styles.css)
+  n22 --> n26(index.html)
+  n22 --> n27[js/]
+  n27 --> n28(app.js)
+  R --> n29(index.html)
+  R --> n30[psychic_tribble/]
+  n30 --> n31(docker-compose.yml)
+  R --> n32(pyproject.toml)
+  R --> n33(requirements-dev.txt)
+  R --> n34(requirements.txt)
+  R --> n35[scripts/]
+  n35 --> n36(config.json)
+  n35 --> n37(generate_structure.py)
+  R --> n38(setup.py)
+  R --> n39[src/]
+  n39 --> n40[psychic_tribble/]
+  n40 --> n41[api/]
+  n41 --> n42[routers/]
+  n42 --> n43(__init__.py)
+  n42 --> n44(calendar.py)
+  n42 --> n45(events.py)
+  n42 --> n46(timeslots.py)
+  n42 --> n47(users.py)
+  n40 --> n48[app/]
+  n48 --> n49(main.py)
+  n40 --> n50[core/]
+  n50 --> n51(auth.py)
+  n50 --> n52(utils.py)
+  n40 --> n53[domain/]
+  n53 --> n54(models.py)
+  n53 --> n55[schemas/]
+  n55 --> n56(assignment.py)
+  n55 --> n57(event.py)
+  n55 --> n58(timeslot.py)
+  n55 --> n59(user.py)
+  n40 --> n60[nlp/]
+  n60 --> n61(__init__.py)
+  n60 --> n62(calendar_repl_prototype.py)
+  n60 --> n63(heuristics.py)
+  n60 --> n64(llm_prompts.py)
+  n60 --> n65(parser.py)
+  n60 --> n66(reclaim_automations_duckly.py)
+  n40 --> n67[services/]
+  n67 --> n68(__init__.py)
+  n67 --> n69(calendar.py)
+  n67 --> n70(event.py)
+  n67 --> n71(service.py)
+  n67 --> n72(user_service.py)
+  R --> n73[tests/]
+  n73 --> n74[__pycache__/]
+  n73 --> n75[api/]
+  n75 --> n76[v1/]
+  n76 --> n77(test_calendar.py)
+  n76 --> n78(test_events.py)
+  n76 --> n79(test_timeslots.py)
+  n76 --> n80(test_users.py)
+  n73 --> n81(conftest.py)
+  n73 --> n82[core/]
+  n82 --> n83(test_utils.py)
+  n73 --> n84[db/]
+  n84 --> n85(test_models.py)
+  n73 --> n86[services/]
+  n86 --> n87(test_user_service.py)
+  R --> n88[tools/]
+  n88 --> n89[migrations/]
+  n89 --> n90(alembic.ini)
+```
 
 <!-- END STRUCTURE -->
 

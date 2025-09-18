@@ -1,0 +1,34 @@
+{
+  "exclude_patterns": [
+    "\\.git.*",
+    "__pycache__.*",
+    "\\.env.*",
+    ".*\\.pyc$",
+    ".*\\.log$",
+    "venv.*",
+    "node_modules.*",
+    "\\.pytest_cache.*",
+    ".*\\.egg-info.*",
+    "dist/.*",
+    "build/.*",
+    ".*\\.tmp$",
+    ".*\\.cache$"
+  ],
+  "include_extensions": [
+    ".py",
+    ".md",
+    ".yml",
+    ".yaml",
+    ".json",
+    ".txt",
+    ".toml",
+    ".dockerfile",
+    ".sh",
+    ".sql"
+  ],
+  "max_file_size": 1048576,
+  "enable_api_discovery": true,
+  "enable_mermaid": true,
+  "enable_tree": true,
+  "enable_descriptions": true
+}
