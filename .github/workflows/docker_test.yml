@@ -83,8 +83,7 @@ jobs:
       - name: Tear down containers
         if: always()
         run: docker-compose down --volumes --remove-orphans
--
-jobs:
+
   docker-test:
     runs-on: ubuntu-latest
     steps:
