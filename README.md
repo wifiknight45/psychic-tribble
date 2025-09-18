@@ -79,7 +79,6 @@ psychic-tribble/
 │           ├── service.py
 │           └── user_service.py
 ├── tests
-│   ├── __pycache__
 │   ├── api
 │   │   └── v1
 │   │       ├── test_calendar.py
@@ -91,8 +90,9 @@ psychic-tribble/
 │   │   └── test_utils.py
 │   ├── db
 │   │   └── test_models.py
-│   └── services
-│       └── test_user_service.py
+│   ├── services
+│   │   └── test_user_service.py
+│   └── test_generate_structure.py
 └── tools
     └── migrations
         └── alembic.ini
@@ -242,20 +242,20 @@ flowchart TD
   n67 --> n71(service.py)
   n67 --> n72(user_service.py)
   R --> n73[tests/]
-  n73 --> n74[__pycache__/]
-  n73 --> n75[api/]
-  n75 --> n76[v1/]
-  n76 --> n77(test_calendar.py)
-  n76 --> n78(test_events.py)
-  n76 --> n79(test_timeslots.py)
-  n76 --> n80(test_users.py)
-  n73 --> n81(conftest.py)
-  n73 --> n82[core/]
-  n82 --> n83(test_utils.py)
-  n73 --> n84[db/]
-  n84 --> n85(test_models.py)
-  n73 --> n86[services/]
-  n86 --> n87(test_user_service.py)
+  n73 --> n74[api/]
+  n74 --> n75[v1/]
+  n75 --> n76(test_calendar.py)
+  n75 --> n77(test_events.py)
+  n75 --> n78(test_timeslots.py)
+  n75 --> n79(test_users.py)
+  n73 --> n80(conftest.py)
+  n73 --> n81[core/]
+  n81 --> n82(test_utils.py)
+  n73 --> n83[db/]
+  n83 --> n84(test_models.py)
+  n73 --> n85[services/]
+  n85 --> n86(test_user_service.py)
+  n73 --> n87(test_generate_structure.py)
   R --> n88[tools/]
   n88 --> n89[migrations/]
   n89 --> n90(alembic.ini)
