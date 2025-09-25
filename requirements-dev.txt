@@ -10,6 +10,7 @@ wheel==0.44.0               # Generates wheel packages
 twine==6.1.0                # Uploads packages to PyPI
 bump2version==1.0.1         # Automates version bumps
 ipython==9.4.0              # Interactive shell for debugging
+python-jose>=3.4.0
 
 # --- Enhanced CLI dependencies ---
 click>=8.0.0               # Professional CLI framework

@@ -1,4 +1,4 @@
-fastapi[standard]==0.116.1  # FastAPI with interactive docs, JSON Schema, performance extras
+fastapi[standard]==0.111.0  # FastAPI with interactive docs, JSON Schema, performance extras
 uvicorn[standard]==0.35.0   # ASGI server with HTTP/1.1, HTTP/2, WebSockets, auto-reload
 gunicorn==23.0.0            # Production WSGI server for running uvicorn workers
 sqlalchemy==2.0.35          # SQL toolkit and ORM for database operations
@@ -13,6 +13,7 @@ pydantic==2.9.2             # Data validation for FastAPI and settings
 python-jose[cryptography]==3.3.0  # JWT authentication for /token, /refresh
 passlib[bcrypt]==1.7.4      # Password hashing for authentication
 structlog==24.4.0           # Structured JSON logging for debugging
-python-multipart==0.0.12    # Handles form data for OAuth2 password flow
+python-multipart>=0.0.18    # Handles form data for OAuth2 password flow, now allowing newer versions
 aiosqlite==0.20.0           # async interface to sqlite databases
-starlette==0.47.3           # a lightweight ASGI framework/toolkit, which is ideal for building async web services
+starlette>=0.37.2,<0.38.0   # a lightweight ASGI framework/toolkit, which is ideal for building async web services
+python-jose>=3.4.0

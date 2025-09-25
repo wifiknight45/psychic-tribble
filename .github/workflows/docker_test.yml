@@ -3,83 +3,69 @@ name: Docker Test
 on: [push, pull_request]
 
 jobs:
-  test-with-docker:
+  docker-test:
     runs-on: ubuntu-latest
 
     steps:
       - name: Checkout code
-        uses: actions/checkout@v3
+        uses: actions/checkout@v4
 
       - name: Set up Docker Buildx
-        uses: docker/setup-buildx-action@v2
+        uses: docker/setup-buildx-action@v3
 
-      - name: Check Docker setup
+      - name: Verify Docker and Docker Compose
         run: |
-          docker info
-          docker-compose version
+          docker version
+          docker compose version
 
-      - name: Start containers in background
-        run: docker-compose up -d --build
+      - name: Change to project directory
+        run: cd psychic_tribble
 
-      - name: Wait for web service to be ready (healthcheck-aware)
+      - name: Build and start all services
+        working-directory: ./psychic_tribble
         run: |
-          set -euo pipefail
-          echo "Waiting for services to be ready..."
-          docker ps
-          CID="$(docker-compose ps -q web || true)"
-          if [ -z "${CID}" ]; then
-            echo "Could not find container for service 'web'. Ensure a 'web' service exists in docker-compose.yml."
-            docker-compose ps
-            exit 1
-          fi
+          docker compose up -d --build
 
-          # Poll for health if defined; otherwise ensure container is running and give a short grace period
-          READY=0
-          for i in {1..30}; do
-            STATE="$(docker inspect --format='{{.State.Status}}' "$CID" || echo unknown)"
-            HEALTH="$(docker inspect --format='{{if .State.Health}}{{.State.Health.Status}}{{else}}none{{end}}' "$CID" || echo unknown)"
-            echo "Attempt ${i}: state=${STATE} health=${HEALTH}"
-            if [ "${STATE}" = "running" ]; then
-              if [ "${HEALTH}" = "healthy" ]; then
-                READY=1
-                break
-              elif [ "${HEALTH}" = "none" ]; then
-                # No healthcheck defined; wait a bit for app-level readiness
-                sleep 10
-                READY=1
-                break
-              fi
-            fi
-            sleep 2
-          done
-
-          if [ "${READY}" -ne 1 ]; then
-            echo "Container did not become ready in time."
-            docker-compose ps
-            docker-compose logs web || true
-            exit 1
-          fi
-
-      - name: Inspect containers post-startup
+      - name: Wait for services to be healthy
+        working-directory: ./psychic_tribble
         run: |
-          docker-compose ps
-          docker-compose logs --tail=100 web || true
+          echo "Waiting for all services to be healthy..."
+          
+          # Wait for postgres to be healthy
+          echo "Waiting for PostgreSQL..."
+          timeout 60s bash -c 'until docker compose exec -T postgres pg_isready -U user; do sleep 2; done'
+          
+          # Wait for redis to be healthy
+          echo "Waiting for Redis..."
+          timeout 60s bash -c 'until docker compose exec -T redis redis-cli ping; do sleep 2; done'
+          
+          # Wait for web service to be ready
+          echo "Waiting for web service..."
+          timeout 120s bash -c 'until curl -f http://localhost:8000/health || docker compose exec -T web curl -f http://localhost:8000/health; do sleep 5; done' || true
+          
+          # Show final status
+          docker compose ps
 
-      - name: Run tests in 'web' container
+      - name: Run tests in web container
+        working-directory: ./psychic_tribble
         run: |
-          set -e
-          docker-compose exec -T web pytest
+          docker compose exec -T web pytest -v
 
-      - name: Capture logs on failure
+      - name: Show service logs on failure
         if: failure()
+        working-directory: ./psychic_tribble
         run: |
-          echo "===== docker-compose ps ====="
-          docker-compose ps || true
-          echo "===== web logs ====="
-          docker-compose logs web || true
-          echo "===== all service logs ====="
-          docker-compose logs || true
+          echo "=== Container Status ==="
+          docker compose ps
+          echo "=== PostgreSQL Logs ==="
+          docker compose logs postgres
+          echo "=== Redis Logs ==="
+          docker compose logs redis
+          echo "=== Web Service Logs ==="
+          docker compose logs web
 
-      - name: Tear down containers
+      - name: Cleanup
         if: always()
-        run: docker-compose down --volumes --remove-orphans
+        working-directory: ./psychic_tribble
+        run: |
+          docker compose down --volumes --remove-orphans
