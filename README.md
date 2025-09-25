@@ -394,7 +394,7 @@ pytest --cov=psychic_tribble
 # Run specific test file
 pytest tests/test_main.py
 License
-This project is licensed under the MIT License - see the LICENSE file for details.
+No public licensing, this is a private repo designed for enterprise applications and individual use. 
 Support
 Email: wifiknight45@proton.me
 Website tbd after front end dev
