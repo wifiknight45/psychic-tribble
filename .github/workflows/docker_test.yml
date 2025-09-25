@@ -18,40 +18,54 @@ jobs:
           docker version
           docker compose version
 
-      - name: Build and start services
+      - name: Change to project directory
+        run: cd psychic_tribble
+
+      - name: Build and start all services
+        working-directory: ./psychic_tribble
         run: |
           docker compose up -d --build
-          
-      - name: Wait for services to be ready
-        run: |
-          echo "Waiting for services to start..."
-          sleep 30
-          docker compose ps
-          
-      - name: Check service health
-        run: |
-          # Check if web service is running
-          if ! docker compose ps web | grep -q "Up"; then
-            echo "Web service is not running"
-            docker compose logs web
-            exit 1
-          fi
 
-      - name: Run tests
+      - name: Wait for services to be healthy
+        working-directory: ./psychic_tribble
+        run: |
+          echo "Waiting for all services to be healthy..."
+          
+          # Wait for postgres to be healthy
+          echo "Waiting for PostgreSQL..."
+          timeout 60s bash -c 'until docker compose exec -T postgres pg_isready -U user; do sleep 2; done'
+          
+          # Wait for redis to be healthy
+          echo "Waiting for Redis..."
+          timeout 60s bash -c 'until docker compose exec -T redis redis-cli ping; do sleep 2; done'
+          
+          # Wait for web service to be ready
+          echo "Waiting for web service..."
+          timeout 120s bash -c 'until curl -f http://localhost:8000/health || docker compose exec -T web curl -f http://localhost:8000/health; do sleep 5; done' || true
+          
+          # Show final status
+          docker compose ps
+
+      - name: Run tests in web container
+        working-directory: ./psychic_tribble
         run: |
           docker compose exec -T web pytest -v
 
-      - name: Show logs on failure
+      - name: Show service logs on failure
         if: failure()
+        working-directory: ./psychic_tribble
         run: |
           echo "=== Container Status ==="
           docker compose ps
+          echo "=== PostgreSQL Logs ==="
+          docker compose logs postgres
+          echo "=== Redis Logs ==="
+          docker compose logs redis
           echo "=== Web Service Logs ==="
           docker compose logs web
-          echo "=== All Service Logs ==="
-          docker compose logs
 
       - name: Cleanup
         if: always()
+        working-directory: ./psychic_tribble
         run: |
           docker compose down --volumes --remove-orphans
