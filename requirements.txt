@@ -15,4 +15,4 @@ passlib[bcrypt]==1.7.4      # Password hashing for authentication
 structlog==24.4.0           # Structured JSON logging for debugging
 python-multipart>=0.0.18    # Handles form data for OAuth2 password flow, now allowing newer versions
 aiosqlite==0.20.0           # async interface to sqlite databases
-starlette>=0.37.2,<0.38.0           # a lightweight ASGI framework/toolkit, which is ideal for building async web services
+starlette>=0.37.2,<0.38.0   # a lightweight ASGI framework/toolkit, which is ideal for building async web services
