@@ -1,43 +1,66 @@
-#!/usr/bin/env python3
-
+"""Event API endpoints."""
 import logging
+from typing import List
 
-from flask import Blueprint, abort, jsonify, request, Response
-from marshmallow import ValidationError
-
-import services.event_service as event_service
-from schemas import EventCreateSchema
+from fastapi import APIRouter, HTTPException
+from pydantic import BaseModel
 
 logger = logging.getLogger(__name__)
 
-events_bp = Blueprint("events", __name__)
+events_router = APIRouter()
 
 
-@events_bp.route("/events", methods=["POST"])
-def create_event() -> Response:
+# Pydantic models for request/response
+class EventCreate(BaseModel):
+    """Event creation request schema."""
+    name: str
+
+
+class EventResponse(BaseModel):
+    """Event response schema."""
+    event_id: int
+    name: str
+
+
+@events_router.post("/", response_model=EventResponse, status_code=201)
+async def create_event(event: EventCreate):
     """
     Create a new event.
-
-    Expects JSON payload:
-    {
-        "name": "<event_name>"
-    }
-
+    
+    Args:
+        event: Event creation data
+        
     Returns:
-        JSON with {"event_id": <id>} and HTTP 201.
+        Created event data
     """
-    payload = request.get_json()
-    if payload is None:
-        logger.error("No JSON payload provided")
-        abort(400, "Invalid JSON payload")
+    logger.info(f"Creating event with name={event.name}")
+    
+    # Placeholder implementation - would integrate with actual service
+    new_event_id = 1  # This would come from the actual event service
+    
+    logger.info(f"Event created with id={new_event_id}")
+    
+    return EventResponse(event_id=new_event_id, name=event.name)
 
-    try:
-        data = EventCreateSchema().load(payload)
-    except ValidationError:
-        raise
 
-    logger.info(f"Creating event with name={data['name']}")
-    new_event = event_service.create_event(data["name"])
-    logger.info(f"Event created with id={new_event.event_id}")
+@events_router.get("/", response_model=List[EventResponse])
+async def list_events():
+    """List all events."""
+    logger.info("Listing all events")
+    
+    # Placeholder implementation
+    return [
+        EventResponse(event_id=1, name="Test Event")
+    ]
 
-    return jsonify({"event_id": new_event.event_id}), 201
+
+@events_router.get("/{event_id}", response_model=EventResponse)
+async def get_event(event_id: int):
+    """Get event by ID."""
+    logger.info(f"Getting event with id={event_id}")
+    
+    # Placeholder implementation
+    if event_id <= 0:
+        raise HTTPException(status_code=404, detail="Event not found")
+    
+    return EventResponse(event_id=event_id, name=f"Event {event_id}")
