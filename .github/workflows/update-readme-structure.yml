@@ -4,33 +4,126 @@ on:
   push:
     branches:
       - main
+  pull_request:
+    branches:
+      - main
 
 jobs:
   update-readme:
     runs-on: ubuntu-latest
+    permissions:
+      contents: write
+      pull-requests: write
+    
     steps:
-      - uses: actions/checkout@v3
+      - name: Checkout repository
+        uses: actions/checkout@v4
+        with:
+          token: ${{ secrets.GITHUB_TOKEN }}
+          fetch-depth: 0
 
-      - name: Generate file tree
-        run: |
-          echo "\`\`\`" > structure.txt
-          tree -I 'venv|__pycache__|.git|.github|*.pyc|*.log' >> structure.txt
-          echo "\`\`\`" >> structure.txt
+      - name: Set up Python
+        uses: actions/setup-python@v4
+        with:
+          python-version: '3.11'
 
-      - name: Update README.md
+      - name: Install dependencies
         run: |
-          awk '
-            BEGIN {in_block=0}
-            /<!-- START STRUCTURE -->/ {print; system("cat structure.txt"); in_block=1; next}
-            /<!-- END STRUCTURE -->/ {in_block=0}
-            !in_block {print}
-          ' README.md > README.new
-          mv README.new README.md
+          python -m pip install --upgrade pip
+          pip install pathlib ast typing dataclasses
 
-      - name: Commit changes
+      - name: Security scan - Check for secrets
         run: |
-          git config user.name "github-actions[bot]"
-          git config user.email "github-actions[bot]@users.noreply.github.com"
+          echo "Checking for secrets in the structure generator..."
+          if grep -r -i "password\|secret\|key\|token" scripts/generate_structure.py; then
+            echo "Warning: Potential secrets found in generator script"
+            exit 1
+          fi
+          echo "No secrets detected in generator script"
+
+      - name: Validate script permissions
+        run: |
+          # Ensure script has appropriate permissions
+          chmod +x scripts/generate_structure.py
+          
+          # Validate script syntax
+          python -m py_compile scripts/generate_structure.py
+          echo "Script validation completed successfully"
+
+      - name: Generate dynamic project structure
+        run: |
+          echo "Generating project structure documentation..."
+          python scripts/generate_structure.py \
+            --config-file scripts/config.json \
+            --output-file README.md \
+            --base-path . \
+            --verbose
+
+      - name: Validate generated content
+        run: |
+          echo "Validating generated README content..."
+          
+          # Check that markers are still present
+          if ! grep -q "<!-- START STRUCTURE -->" README.md; then
+            echo "Error: START STRUCTURE marker missing"
+            exit 1
+          fi
+          
+          if ! grep -q "<!-- END STRUCTURE -->" README.md; then
+            echo "Error: END STRUCTURE marker missing"
+            exit 1
+          fi
+          
+          # Check that content was generated
+          if ! grep -q "## Project Structure" README.md; then
+            echo "Error: Project structure section not found"
+            exit 1
+          fi
+          
+          echo "Generated content validation passed"
+
+      - name: Check for changes
+        id: changes
+        run: |
+          if git diff --quiet README.md; then
+            echo "changed=false" >> $GITHUB_OUTPUT
+            echo "No changes detected in README.md"
+          else
+            echo "changed=true" >> $GITHUB_OUTPUT
+            echo "Changes detected in README.md"
+          fi
+
+      - name: Commit and push changes
+        if: steps.changes.outputs.changed == 'true'
+        run: |
+          git config --local user.name "github-actions[bot]"
+          git config --local user.email "github-actions[bot]@users.noreply.github.com"
+          
           git add README.md
-          git commit -m "chore: update file structure in README [skip ci]" || echo "No changes to commit"
+          git commit -m "chore: auto-update project structure documentation
+          
+          - Updated directory tree
+          - Refreshed file descriptions  
+          - Updated API endpoints discovery
+          - Regenerated Mermaid diagram
+          
+          [skip ci]"
+          
           git push
+
+      - name: Create summary
+        run: |
+          echo "## Project Structure Update Summary" >> $GITHUB_STEP_SUMMARY
+          echo "" >> $GITHUB_STEP_SUMMARY
+          
+          if [[ "${{ steps.changes.outputs.changed }}" == "true" ]]; then
+            echo "✅ README.md updated with latest project structure" >> $GITHUB_STEP_SUMMARY
+            echo "" >> $GITHUB_STEP_SUMMARY
+            echo "### Changes Made:" >> $GITHUB_STEP_SUMMARY
+            echo "- Dynamic directory tree generation" >> $GITHUB_STEP_SUMMARY
+            echo "- File descriptions based on naming conventions" >> $GITHUB_STEP_SUMMARY
+            echo "- Auto-discovered API endpoints" >> $GITHUB_STEP_SUMMARY
+            echo "- Generated Mermaid structure diagram" >> $GITHUB_STEP_SUMMARY
+          else
+            echo "ℹ️ No changes needed - project structure is up to date" >> $GITHUB_STEP_SUMMARY
+          fi
