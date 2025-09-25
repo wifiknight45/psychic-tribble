@@ -1,74 +1,364 @@
-Your task is to "onboard" this repository to Copilot coding agent by adding a .github/copilot-instructions.md file in the repository that contains information describing how a coding agent seeing it for the first time can work most efficiently.
+# Psychic-Tribble Repository - Copilot Coding Agent Instructions
 
-You will do this task only one time per repository and doing a good job can SIGNIFICANTLY improve the quality of the agent's work, so take your time, think carefully, and search thoroughly before writing the instructions.
+## Repository Overview
 
-<Goals>
-- Reduce the likelihood of a coding agent pull request getting rejected by the user due to
-generating code that fails the continuous integration build, fails a validation pipeline, or
-having misbehavior.
-- Minimize bash command and build failures.
-- Allow the agent to complete its task more quickly by minimizing the need for exploration using grep, find, str_replace_editor, and code search tools.
-</Goals>
+**Psychic-Tribble** is a secure, scalable calendar and event management platform built with FastAPI. It provides seamless scheduling, calendar synchronization, and a powerful API backend. The project follows modern Python practices with comprehensive security features, monitoring, and enterprise-grade architecture.
 
-<Limitations>
-- Instructions must be no longer than 2 pages.
-- Instructions must not be task specific.
-</Limitations>
+### High-Level Repository Information
 
-<WhatToAdd>
+- **Project Type**: FastAPI-based web application with API backend
+- **Primary Language**: Python 3.8+ (developed/tested on Python 3.12)
+- **Architecture**: Modular FastAPI application with async/await patterns
+- **Database**: SQLAlchemy with async support (SQLite for development, PostgreSQL for production)
+- **Key Frameworks**: FastAPI, SQLAlchemy, Alembic, Redis, Pydantic
+- **Target Runtime**: Production deployment via Docker, Uvicorn/Gunicorn
+- **Repository Size**: Medium-complexity project with ~50+ source files
+- **Code Organization**: Standard Python src/ layout with comprehensive test coverage
 
-Add the following high level details about the codebase to reduce the amount of searching the agent has to do to understand the codebase each time:
-<HighLevelDetails>
+## Build and Validation Instructions
 
-- A summary of what the repository does.
-- High level repository information, such as the size of the repo, the type of the project, the languages, frameworks, or target runtimes in use.
-</HighLevelDetails>
+### Environment Setup - CRITICAL REQUIREMENTS
 
-Add information about how to build and validate changes so the agent does not need to search and find it each time.
-<BuildInstructions>
+**Always run these steps before any development work:**
 
-- For each of bootstrap, build, test, run, lint, and any other scripted step, document the sequence of steps to take to run it successfully as well as the versions of any runtime or build tools used.
-- Each command should be validated by running it to ensure that it works correctly as well as any preconditions and postconditions.
-- Try cleaning the repo and environment and running commands in different orders and document errors and and misbehavior observed as well as any steps used to mitigate the problem.
-- Run the tests and document the order of steps required to run the tests.
-- Make a change to the codebase. Document any unexpected build issues as well as the workarounds.
-- Document environment setup steps that seem optional but that you have validated are actually required.
-- Document the time required for commands that failed due to timing out.
-- When you find a sequence of commands that work for a particular purpose, document them in detail.
-- Use language to indicate when something should always be done. For example: "always run npm install before building".
-- Record any validation steps from documentation.
-</BuildInstructions>
+1. **Python Version**: Requires Python 3.8+ (3.12 recommended)
+2. **Virtual Environment**: Always create and activate a virtual environment
+3. **Environment Variables**: Copy `.env.example` to `.env` and configure
 
-List key facts about the layout and architecture of the codebase to help the agent find where to make changes with minimal searching.
-<ProjectLayout>
+```bash
+# Essential setup sequence - run in this exact order
+python3 -m venv venv
+source venv/bin/activate  # On Windows: venv\Scripts\activate
+pip install --upgrade pip
+```
 
-- A description of the major architectural elements of the project, including the relative paths to the main project files, the location
-of configuration files for linting, compilation, testing, and preferences.
-- A description of the checks run prior to check in, including any GitHub workflows, continuous integration builds, or other validation pipelines.
-- Document the steps so that the agent can replicate these itself.
-- Any explicit validation steps that the agent can consider to have further confidence in its changes.
-- Dependencies that aren't obvious from the layout or file structure.
-- Finally, fill in any remaining space with detailed lists of the following, in order of priority: the list of files in the repo root, the
-contents of the README, the contents of any key source files, the list of files in the next level down of directories, giving priority to the more structurally important and snippets of code from key source files, such as the one containing the main method.
-</ProjectLayout>
-</WhatToAdd>
+### Dependency Installation - SEQUENTIAL APPROACH REQUIRED
 
-<StepsToFollow>
-- Perform a comprehensive inventory of the codebase. Search for and view:
-- README.md, CONTRIBUTING.md, and all other documentation files.
-- Search the codebase for build steps and indications of workarounds like 'HACK', 'TODO', etc.
-- All scripts, particularly those pertaining to build and repo or environment setup.
-- All build and actions pipelines.
-- All project files.
-- All configuration and linting files.
-- For each file:
-- think: are the contents or the existence of the file information that the coding agent will need to implement, build, test, validate, or demo a code change?
-- If yes:
-   - Document the command or information in detail.
-   - Explicitly indicate which commands work and which do not and the order in which commands should be run.
-   - Document any errors encountered as well as the steps taken to workaround them.
-- Document any other steps or information that the agent can use to reduce time spent exploring or trying and failing to run bash commands.
-- Finally, explicitly instruct the agent to trust the instructions and only perform a search if the information in the instructions is incomplete or found to be in error.
-</StepsToFollow>
-   - Document any errors encountered as well as the steps taken to work-around them.
+**IMPORTANT**: Install dependencies in this specific order due to package conflicts:
+
+```bash
+# Step 1: Install core runtime dependencies first
+pip install -r requirements.txt
+
+# Step 2: Install development dependencies
+pip install -r requirements-dev.txt
+
+# Step 3: Install package in editable mode
+pip install -e .
+```
+
+**Known Issues**: 
+- Network timeouts may occur during pip install - retry if needed
+- `python-jose` version conflicts exist - requirements.txt has been fixed
+- Some packages require compilation (psycopg2-binary) - may need build tools
+
+### Environment Configuration - MANDATORY
+
+**Always copy and configure environment variables:**
+
+```bash
+cp .env.example .env
+# Edit .env file with appropriate values for your environment
+```
+
+**Critical Environment Variables:**
+- `SECRET_KEY`: Must be changed in production (minimum 64 characters)
+- `DATABASE_URL`: SQLite for development, PostgreSQL for production
+- `ENV`: Set to "development", "testing", "staging", or "production"
+- `REDIS_URL`: Required for rate limiting and caching
+
+### Database Setup and Migrations
+
+**Database migrations using Alembic:**
+
+```bash
+# Initialize database (development)
+alembic upgrade head
+
+# For testing with specific database
+DATABASE_URL=sqlite+aiosqlite:///./test.db alembic upgrade head
+```
+
+**Migration files location**: `tools/migrations/`
+**Configuration**: `tools/migrations/alembic.ini`
+
+### Running the Application
+
+**Development Server:**
+```bash
+# Standard development server with auto-reload
+uvicorn src.psychic_tribble.app.main:app --reload --host 0.0.0.0 --port 8000
+
+# Alternative entry point (if main app is in root)
+uvicorn psychic_tribble.main:app --reload --host 0.0.0.0 --port 8000
+```
+
+**Production Server:**
+```bash
+# Using Gunicorn with Uvicorn workers
+gunicorn src.psychic_tribble.app.main:app -w 4 -k uvicorn.workers.UvicornWorker --bind 0.0.0.0:8000
+```
+
+**Application Endpoints:**
+- API Base: `http://localhost:8000`
+- Interactive Docs: `http://localhost:8000/docs`
+- Alternative Docs: `http://localhost:8000/redoc` 
+- Health Check: `http://localhost:8000/health`
+- API v1 Routes: `http://localhost:8000/v1/*`
+
+### Testing - COMPREHENSIVE APPROACH
+
+**Test Execution Order:**
+
+```bash
+# 1. Run unit tests with coverage
+pytest tests/ --cov=src/psychic_tribble --cov-report=xml -v
+
+# 2. Run specific test files
+pytest tests/api/v1/test_events.py -v
+
+# 3. Run tests with database services (requires Docker/services)
+pytest tests/ --cov=psychic_tribble --cov-report=xml --maxfail=1 -v --disable-warnings
+```
+
+**Test Configuration:**
+- Test config: `tests/conftest.py`
+- Test database: In-memory SQLite
+- Test environment: `ENV=testing`
+- Coverage reports: Generated in `coverage.xml`
+
+**Required Services for Integration Tests:**
+- Redis (localhost:6379)
+- PostgreSQL (localhost:5432) for full CI tests
+
+### Linting and Code Quality
+
+**Primary Linter: Ruff (replaces flake8, black, isort)**
+
+```bash
+# Run Ruff linter
+ruff check src/ tests/
+
+# Run Ruff formatter
+ruff format src/ tests/
+```
+
+**Legacy Linting (GitHub CI uses this):**
+```bash
+# Critical lint checks (exits on error)
+flake8 src tests --count --select=E9,F63,F7,F82 --show-source --statistics --exclude=venv,__pycache__
+
+# Full lint checks (warnings only)
+flake8 src tests --count --exit-zero --max-complexity=10 --max-line-length=127 --statistics --exclude=venv,__pycache__
+```
+
+**Pre-commit Hooks:**
+```bash
+# Install pre-commit hooks
+pre-commit install
+
+# Run pre-commit on all files
+pre-commit run --all-files
+```
+
+### Docker Build and Deployment
+
+**Development Docker Build:**
+```bash
+# Build Docker image
+docker build -t psychic-tribble .
+
+# Run container
+docker run -p 8000:8000 --env-file .env psychic-tribble
+```
+
+**CI/CD Docker Build:**
+```bash
+# Production build with build metadata
+docker build -f dockerfile.cicd -t psychic-tribble:latest --build-arg BUILD_DATE=$(date -u +'%Y-%m-%dT%H:%M:%SZ') .
+```
+
+**Docker Compose (if available):**
+```bash
+cd psychic_tribble/
+docker-compose up -d
+```
+
+### Build Validation - COMPLETE WORKFLOW
+
+**Execute this sequence to validate your environment:**
+
+```bash
+# 1. Clean environment setup
+rm -rf venv/ *.db
+python3 -m venv venv && source venv/bin/activate
+
+# 2. Install dependencies
+pip install --upgrade pip
+pip install -r requirements.txt
+pip install -r requirements-dev.txt
+pip install -e .
+
+# 3. Configure environment
+cp .env.example .env
+
+# 4. Database setup
+alembic upgrade head
+
+# 5. Run tests
+pytest tests/ -v
+
+# 6. Run linting
+ruff check src/ tests/
+
+# 7. Start development server (test in another terminal)
+uvicorn src.psychic_tribble.app.main:app --reload --port 8000
+
+# 8. Validate endpoints
+curl http://localhost:8000/health
+curl http://localhost:8000/docs
+```
+
+**Expected build time**: 2-5 minutes depending on network speed
+**Expected test time**: 30-60 seconds for full test suite
+
+## Project Layout and Architecture
+
+### Directory Structure
+
+```
+psychic-tribble/                 # Root directory
+├── src/psychic_tribble/         # Main source code (NEW architecture)
+│   ├── app/main.py             # FastAPI application entry point
+│   ├── api/routers/            # API route definitions (v1 versioning)
+│   ├── core/                   # Core business logic and utilities
+│   ├── domain/models.py        # SQLAlchemy data models
+│   ├── domain/schemas/         # Pydantic schemas for validation
+│   ├── services/               # Business logic services
+│   ├── nlp/                    # Natural language processing modules
+│   └── config.py               # Enhanced configuration management
+├── core/routers/               # Legacy route definitions
+├── tests/                      # Comprehensive test suite
+│   ├── api/v1/                 # API endpoint tests
+│   ├── core/                   # Core functionality tests
+│   ├── db/                     # Database model tests
+│   └── conftest.py             # Test configuration
+├── docs/                       # Documentation and static assets
+├── scripts/                    # Utility scripts
+├── tools/migrations/           # Alembic database migrations
+├── .github/workflows/          # CI/CD pipeline definitions
+├── requirements.txt            # Production dependencies
+├── requirements-dev.txt        # Development dependencies
+├── pyproject.toml             # Python project configuration
+├── .env.example               # Environment variable template
+└── dockerfile                 # Production Docker configuration
+```
+
+### Key Architectural Components
+
+**Main Application**: `src/psychic_tribble/app/main.py`
+- FastAPI application factory
+- Middleware configuration (CORS, security headers, rate limiting)
+- API versioning with `/v1/` prefix
+- Request ID correlation for distributed tracing
+- Environment-based configuration
+
+**Configuration**: `src/psychic_tribble/config.py`
+- Environment-specific settings (development, testing, staging, production)
+- Secrets management integration (Vault, AWS Secrets Manager)
+- Validation for production security requirements
+- Database connection pooling configuration
+
+**Database Models**: `src/psychic_tribble/domain/models.py`
+- SQLAlchemy async models
+- Migration support via Alembic
+
+**API Routes**: `src/psychic_tribble/api/routers/`
+- Versioned API endpoints (`/v1/`)
+- Modular route organization
+- Authentication and authorization decorators
+
+### CI/CD and Validation Pipeline
+
+**GitHub Actions Workflows** (`.github/workflows/`):
+
+1. **build-test.yml**: Main CI pipeline
+   - Lint checking with flake8
+   - Unit and integration tests with pytest
+   - PostgreSQL and Redis service containers
+   - Coverage reporting
+   - Package building
+   - Template rendering tests
+
+2. **docker_test.yml**: Docker build validation
+3. **static.yml**: Static site generation  
+4. **jekyll-gh-pages.yml**: Documentation publishing
+
+**Pre-commit Configuration**: `.github/workflows/.pre-commit-config.yaml`
+- Code formatting (Black, isort)
+- Linting (flake8, ruff)
+- Security scanning (bandit, detect-secrets)
+- Type checking (mypy)
+
+### Security and Dependencies
+
+**Security Features**:
+- JWT authentication with configurable expiration
+- Rate limiting with Redis backend
+- CORS protection with configurable origins
+- Security headers middleware
+- HTTPS redirect capability
+- Secrets management for production
+
+**Critical Dependencies**:
+- `fastapi[standard]`: Web framework
+- `uvicorn[standard]`: ASGI server
+- `sqlalchemy`: Async ORM
+- `alembic`: Database migrations
+- `redis`: Rate limiting and caching
+- `passlib[bcrypt]`: Password hashing
+- `python-jose[cryptography]`: JWT handling
+- `slowapi`: Rate limiting middleware
+
+**Development Dependencies**:
+- `pytest`: Testing framework
+- `pytest-asyncio`: Async test support
+- `pytest-cov`: Coverage measurement
+- `ruff`: Fast linting and formatting
+- `pre-commit`: Git hooks management
+
+### Important Notes for Coding Agents
+
+1. **Always use absolute imports** when referencing modules within the project
+2. **Environment-based configuration** is critical - check `ENV` variable for behavior
+3. **Database operations must be async** - use `await` with SQLAlchemy operations
+4. **API versioning is enforced** - new endpoints should use `/v1/` prefix
+5. **Security middleware order matters** - see `main.py` for correct sequence
+6. **Rate limiting is Redis-dependent** - ensure Redis is available for full functionality
+7. **Tests require database setup** - run `alembic upgrade head` before testing
+8. **Docker builds use multi-stage approach** - see `dockerfile` for optimization
+
+### Validation Commands Quick Reference
+
+```bash
+# Environment check
+python --version && pip --version
+
+# Dependency check  
+pip list | grep -E "(fastapi|uvicorn|sqlalchemy)"
+
+# Database check
+alembic current
+
+# Service check
+curl -f http://localhost:8000/health || echo "Server not running"
+
+# Test check
+pytest tests/ --tb=short -q
+
+# Lint check
+ruff check src/ --quiet || echo "Linting issues found"
+```
+
+**IMPORTANT**: Always trust these instructions and only search for additional information if these instructions are incomplete or contain errors. This repository uses a complex but well-documented architecture that requires following the specific setup and build sequences outlined above.
 
