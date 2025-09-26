@@ -1,16 +1,82 @@
-version: 2
+version: 3
 updates:
-  # Weekly Python updates (including transitive deps)
+  # Python dependencies
   - package-ecosystem: "pip"
     directory: "/"
     schedule:
       interval: "weekly"
+      day: "monday"
+      time: "09:00"
+    open-pull-requests-limit: 10
+    reviewers:
+      - "wifiknight45"
+    assignees:
+      - "wifiknight45"
+    commit-message:
+      prefix: "security"
+      prefix-development: "dev-deps"
+      include: "scope"
+    labels:
+      - "dependencies"
+      - "security"
     allow:
+      # Allow all dependency types
       - dependency-type: "all"
-    open-pull-requests-limit: 5
+    # Security updates get higher priority
+    priority: 1
+    # Group related updates
+    groups:
+      fastapi-ecosystem:
+        patterns:
+          - "fastapi*"
+          - "uvicorn*"
+          - "starlette*"
+      sqlalchemy-ecosystem:
+        patterns:
+          - "sqlalchemy*"
+          - "alembic*"
+          - "psycopg*"
+      testing-tools:
+        patterns:
+          - "pytest*"
+          - "coverage*"
+          - "factory-boy*"
+      security-tools:
+        patterns:
+          - "bandit*"
+          - "safety*"
+          - "semgrep*"
 
-  # Optional: Keep GitHub Actions workflows up-to-date
+  # GitHub Actions dependencies
   - package-ecosystem: "github-actions"
     directory: "/"
     schedule:
       interval: "weekly"
+      day: "monday" 
+      time: "10:00"
+    open-pull-requests-limit: 5
+    reviewers:
+      - "wifiknight45"
+    commit-message:
+      prefix: "ci"
+      include: "scope"
+    labels:
+      - "ci-cd"
+      - "dependencies"
+
+  # Docker dependencies
+  - package-ecosystem: "docker"
+    directory: "/"
+    schedule:
+      interval: "weekly"
+      day: "tuesday"
+      time: "09:00"
+    open-pull-requests-limit: 3
+    reviewers:
+      - "wifiknight45"
+    commit-message:
+      prefix: "docker"
+      include: "scope"
+    labels:
+      - "docker"
+      - "dependencies"
