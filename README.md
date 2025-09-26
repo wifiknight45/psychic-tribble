@@ -1,3 +1,14 @@
+![Psychic Tribble](https://img.shields.io/badge/psychic--tribble-FastAPI%20App-blueviolet.svg?style=flat&logo=python)
+![Architecture](https://img.shields.io/badge/architecture-modular-green.svg?style=flat)
+![Async Ready](https://img.shields.io/badge/async-ready-success.svg?style=flat&logo=python&logoColor=white)
+![Production Ready](https://img.shields.io/badge/production-ready-brightgreen.svg?style=flat&logo=docker)
+![API](https://img.shields.io/badge/API-REST-blue.svg?style=flat)
+![OpenAPI](https://img.shields.io/badge/OpenAPI-3.0-6BA539.svg?style=flat&logo=openapi-initiative&logoColor=white)
+![Async](https://img.shields.io/badge/async-await-brightgreen.svg?style=flat&logo=python&logoColor=white)
+![Docker](https://img.shields.io/badge/Docker-enabled-0db7ed.svg?style=flat&logo=docker&logoColor=white)
+![Uvicorn](https://img.shields.io/badge/Uvicorn-0.24+-purple.svg?style=flat&logo=uvicorn&logoColor=white)
+![Alembic](https://img.shields.io/badge/Alembic-migrations-yellow.svg?style=flat&logo=alembic&logoColor=black)
+
 Psychic-Tribble 
 A secure, intuitive calendar and event management platform built for modern teams and individuals. Psychic-Tribble offers seamless scheduling, calendar synchronization, and a powerful API—all wrapped in a fast, scalable FastAPI backend.
 <!-- START STRUCTURE -->
