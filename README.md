@@ -70,7 +70,7 @@ The application follows a modern, modular architecture:
 
 1. **Clone the repository**
    ```bash
-   git clone https://github.com/yourusername/psychic-tribble.git
+   git clone https://github.com/wifiknight45/psychic-tribble.git
    cd psychic-tribble
    ```
 
@@ -246,7 +246,9 @@ This project maintains high code quality standards:
 
 
 ## 📞 Support & Contact
-- **Email**: wifiknight45@proton.me
+**Email**
+- For business related inquiries please email --> andrews.crystal@gmail.com <--
+- For SecDevOps please email --> wifiknight45@proton.me <--
 
 
 ## 🙏 Acknowledgments
@@ -527,4 +529,4 @@ flowchart TD
 This codebase is proprietary and confidential. Unauthorized use, copying, modification, or distribution is prohibited. For access or licensing inquiries, contact the development team.
 Copyright © 2025 Psychic Tribble. All rights reserved.
 This software is proprietary and confidential. Unauthorized use is prohibited without written permission from the authors.
-Built with ❤️ using FastAPI and modern Python practices.
+Built with ❤️ in California using FastAPI and modern Python practices.
