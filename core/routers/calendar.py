@@ -1,3 +1,29 @@
+from fastapi import APIRouter, Depends, Response
+from sqlalchemy.ext.asyncio import AsyncSession
+from icalendar import Calendar, Event
+from src.psychic_tribble.dependencies import get_db, get_current_user
+from src.psychic_tribble.crud.task import get_tasks_for_user
+
+router = APIRouter(prefix="/v1/calendar", tags=["calendar"])
+
+@router.get("/ics", summary="Export tasks as iCalendar feed")
+async def export_ics(db: AsyncSession = Depends(get_db), user = Depends(get_current_user)):
+    tasks = await get_tasks_for_user(db, user.id)
+    cal = Calendar()
+    cal.add("prodid", "-//Psychic-Tribble//")
+    cal.add("version", "2.0")
+
+    for t in tasks:
+        ev = Event()
+        ev.add("uid", f"{t.id}@psychic-tribble")
+        ev.add("summary", t.title)
+        if t.due_date:
+            ev.add("dtstart", t.due_date)
+        ev.add("description", t.description or "")
+        ev.add("status", "CONFIRMED" if not t.completed else "CANCELLED")
+        cal.add_component(ev)
+
+    return Response(content=cal.to_ical(), media_type="text/calendar")
 
 
 from datetime import datetime
