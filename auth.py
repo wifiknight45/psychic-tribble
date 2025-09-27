@@ -1,5 +1,38 @@
 # auth.py
 
+from fastapi import APIRouter, Depends, HTTPException, status
+from datetime import datetime, timedelta
+from jose import jwt
+from sqlalchemy.ext.asyncio import AsyncSession
+from src.psychic_tribble.schemas.user import UserCreate, UserOut, Token
+from src.psychic_tribble.crud.user import get_user_by_email, create_user, verify_password
+from src.psychic_tribble.dependencies import get_db
+from src.psychic_tribble.settings import settings
+
+router = APIRouter(tags=["auth"])
+
+def create_access_token(subject: str, user_id: int, expires_delta: int | None = None) -> str:
+    expire = datetime.utcnow() + timedelta(minutes=(expires_delta or settings.ACCESS_TOKEN_EXPIRE_MINUTES))
+    to_encode = {"sub": subject, "id": user_id, "exp": expire}
+    return jwt.encode(to_encode, settings.SECRET_KEY, algorithm=settings.ALGORITHM)
+
+@router.post("/signup", response_model=UserOut, status_code=status.HTTP_201_CREATED)
+async def signup(user_in: UserCreate, db: AsyncSession = Depends(get_db)):
+    existing = await get_user_by_email(db, user_in.email)
+    if existing:
+        raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST, detail="Email already registered")
+    user = await create_user(db, user_in)
+    return user
+
+@router.post("/login", response_model=Token)
+async def login(form_data: UserCreate, db: AsyncSession = Depends(get_db)):
+    user = await get_user_by_email(db, form_data.email)
+    if not user or not verify_password(form_data.password, user.hashed_password):
+        raise HTTPException(status_code=status.HTTP_401_UNAUTHORIZED, detail="Invalid credentials")
+    token = create_access_token(user.email, user.id)
+    return {"access_token": token, "token_type": "bearer"}
+
+
 import time
 import json
 import logging
