@@ -7,7 +7,7 @@ from fastapi import HTTPException
 
 async def create_task(db: AsyncSession, owner_id: int, task_in: TaskCreate) -> Task:
     try:
-        task = Task(**task_in.model_dump(exclude_none=True), owner_id=owner_id)
+       task_in.model_dump(exclude_none=True), owner_id=owner_id)
         db.add(task)
         await db.commit()
         await db.refresh(task)
