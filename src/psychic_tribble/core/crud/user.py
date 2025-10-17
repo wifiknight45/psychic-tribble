@@ -4,7 +4,16 @@ from passlib.context import CryptContext
 from src.psychic_tribble.models.user import User
 from src.psychic_tribble.schemas.user import UserCreate
 
-pwd_context = CryptContext(schemes=["bcrypt"], deprecated="auto")
+# Inject via dependency or config
+from psychic_tribble.config import get_settings
+
+def get_password_context():
+    settings = get_settings()
+    return CryptContext(
+        schemes=["bcrypt"], 
+        deprecated="auto",
+        bcrypt__rounds=settings.bcrypt_rounds  # Configurable
+    )
 
 def verify_password(plain_password: str, hashed_password: str) -> bool:
     return pwd_context.verify(plain_password, hashed_password)
