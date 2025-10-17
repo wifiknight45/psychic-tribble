@@ -35,5 +35,9 @@ async def update_task(db: AsyncSession, task: Task, task_in: TaskUpdate) -> Task
     return task
 
 async def delete_task(db: AsyncSession, task: Task) -> None:
-    await db.delete(task)
-    await db.commit()
+    try:
+        await db.delete(task)
+        await db.commit()
+    except SQLAlchemyError:
+        await db.rollback()
+        raise
