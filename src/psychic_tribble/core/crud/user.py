@@ -16,9 +16,11 @@ def get_password_context():
     )
 
 def verify_password(plain_password: str, hashed_password: str) -> bool:
+    pwd_context = get_password_context()
     return pwd_context.verify(plain_password, hashed_password)
 
 def get_password_hash(password: str) -> str:
+    pwd_context = get_password_context()
     return pwd_context.hash(password)
 
 async def get_user_by_email(db: AsyncSession, email: str) -> User | None:
