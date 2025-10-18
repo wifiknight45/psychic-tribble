@@ -54,20 +54,3 @@ async def update_task(db: AsyncSession, task_id: int, owner_id: int, task_in: Ta
         await db.rollback()
         raise HTTPException(status_code=500, detail="Database error occurred")
 
-
-async def create_task(db: AsyncSession, owner_id: int, task_in: TaskCreate) -> Task:
-    try:
-        task = Task(**task_in.model_dump(exclude_none=True), owner_id=owner_id)
-        db.add(task)
-        await db.commit()
-        await db.refresh(task)
-        return task
-    except IntegrityError as e:
-        await db.rollback()
-        # Log the actual error for debugging
-        logger.error(f"IntegrityError creating task: {str(e)}")
-        raise HTTPException(status_code=400, detail="Task creation failed: duplicate or constraint violation")
-    except SQLAlchemyError as e:
-        await db.rollback()
-        logger.error(f"Database error creating task: {str(e)}")
-        raise HTTPException(status_code=500, detail="Database error occurred")
