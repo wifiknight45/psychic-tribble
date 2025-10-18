@@ -55,17 +55,19 @@ async def update_task(db: AsyncSession, task_id: int, owner_id: int, task_in: Ta
         raise HTTPException(status_code=500, detail="Database error occurred")
 
 
-async def delete_task(db: AsyncSession, task_id: int, owner_id: int) -> None:
-    """Delete a task with validation that it exists and belongs to the user."""
-    # Fetch the task to ensure it exists and belongs to the user
-    task = await get_task_for_user(db, task_id, owner_id)
-    
-    if not task:
-        raise HTTPException(status_code=404, detail="Task not found")
-    
+async def create_task(db: AsyncSession, owner_id: int, task_in: TaskCreate) -> Task:
     try:
-        await db.delete(task)
+        task = Task(**task_in.model_dump(exclude_none=True), owner_id=owner_id)
+        db.add(task)
         await db.commit()
+        await db.refresh(task)
+        return task
+    except IntegrityError as e:
+        await db.rollback()
+        # Log the actual error for debugging
+        logger.error(f"IntegrityError creating task: {str(e)}")
+        raise HTTPException(status_code=400, detail="Task creation failed: duplicate or constraint violation")
     except SQLAlchemyError as e:
         await db.rollback()
+        logger.error(f"Database error creating task: {str(e)}")
         raise HTTPException(status_code=500, detail="Database error occurred")
