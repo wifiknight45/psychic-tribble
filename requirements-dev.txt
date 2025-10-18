@@ -10,7 +10,8 @@ wheel==0.44.0               # Generates wheel packages
 twine==6.1.0                # Uploads packages to PyPI
 bump2version==1.0.1         # Automates version bumps
 ipython==9.4.0              # Interactive shell for debugging
-python-jose>=3.4.0
+sqlalchemy==2.0.35          # SQL toolkit and ORM for database operations
+python-jose>=3.4.0          # JOSE (JavaScript Object Signing and Encryption)
 
 # --- Application runtime dependencies ---
 fastapi                     # Web framework for building APIs
@@ -18,4 +19,3 @@ uvicorn                     # ASGI server for FastAPI
 sqlalchemy                  # ORM for database access
 bcrypt                      # Password hashing
 python-jose[crypto]         # JWT creation/verification
-
