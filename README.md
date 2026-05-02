@@ -245,10 +245,6 @@ This project maintains high code quality standards:
 ## 📄 License
 
 
-## 📞 Support & Contact
-**Email**
-- For business related inquiries please email --> andrews.crystal@gmail.com <--
-- For SecDevOps please email --> wifiknight45@proton.me <--
 
 
 ## 🙏 Acknowledgments
