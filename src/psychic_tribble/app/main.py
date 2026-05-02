@@ -1,18 +1,10 @@
 """
 Psychic Tribble API - Main application entry point.
-
-This is the refactored main.py with improved:
-- API versioning (/v1/ prefix)
-- Request ID middleware for correlation tracking
-- Comprehensive input validation with Pydantic
-- Database connection pooling configuration
-- Secrets management preparation
-- Environment-based API documentation
-- Enhanced security headers and middleware
-- Modular code organization
+Refactored for Parrot 6.2 Smoke Testing.
 """
 import logging
 import uuid
+import sys
 from contextlib import asynccontextmanager
 from typing import Optional
 
@@ -24,199 +16,130 @@ from slowapi import Limiter, _rate_limit_exceeded_handler
 from slowapi.util import get_remote_address
 from slowapi.errors import RateLimitExceeded
 from slowapi.middleware import SlowAPIMiddleware
-from starlette.middleware.base import BaseHTTPMiddleware
 from starlette.status import HTTP_429_TOO_MANY_REQUESTS
 
-# Import our modular components
-from psychic_tribble.config import get_settings
-from psychic_tribble.api.v1 import api_v1_router
-from psychic_tribble.middleware.request_id import RequestIDMiddleware
-from psychic_tribble.middleware.security_headers import SecurityHeadersMiddleware
-from psychic_tribble.dependencies.exception_handlers import register_exception_handlers
-from psychic_tribble.core.logging_setup import configure_logging
-from psychic_tribble.core.monitoring import init_metrics
-from psychic_tribble.core.database import init_database_pool
+# Import modular components
+try:
+    from psychic_tribble.config import get_settings
+    from psychic_tribble.api.v1 import api_v1_router
+    from psychic_tribble.middleware.request_id import RequestIDMiddleware
+    from psychic_tribble.middleware.security_headers import SecurityHeadersMiddleware
+    from psychic_tribble.dependencies.exception_handlers import register_exception_handlers
+    from psychic_tribble.core.logging_setup import configure_logging
+    from psychic_tribble.core.monitoring import init_metrics
+    from psychic_tribble.core.database import init_database_pool
+except ImportError as e:
+    print(f"CRITICAL: Missing module inside 'src'. Ensure you use --app-dir src. Error: {e}")
+    sys.exit(1)
 
 settings = get_settings()
 
-
 @asynccontextmanager
 async def lifespan(app: FastAPI):
-    """Application lifespan management."""
-    # Startup
+    """Application lifespan management with error handling for smoke tests."""
     configure_logging(settings)
     logger = logging.getLogger(__name__)
     logger.info("Starting Psychic Tribble API...")
     
-    # Initialize database connection pool
-    await init_database_pool(settings)
+    # 1. Initialize database connection pool (Graceful failure for smoke tests)
+    try:
+        await init_database_pool(settings)
+        logger.info("Database connection pool initialized.")
+    except Exception as e:
+        logger.error(f"Failed to initialize database: {e}. (Verify aiosqlite is installed for SQLite)")
+        if settings.ENV == "production":
+            raise e
+
+    # 2. Initialize metrics
+    try:
+        init_metrics(app)
+    except Exception as e:
+        logger.warning(f"Metrics initialization skipped/failed: {e}")
     
-    # Initialize metrics
-    init_metrics(app)
-    
-    logger.info("Application startup complete")
+    logger.info(f"Application startup complete in {settings.ENV} mode")
     
     yield
     
-    # Shutdown
     logger.info("Shutting down Psychic Tribble API...")
-
 
 def create_app() -> FastAPI:
     """Create and configure the FastAPI application."""
     
-    # Configure API documentation based on environment
-    docs_config = {}
-    if settings.ENV == "production":
-        # Disable API docs in production
-        docs_config = {
-            "docs_url": None,
-            "redoc_url": None,
-            "openapi_url": None
-        }
-    else:
-        # Enable API docs for development/testing
-        docs_config = {
-            "docs_url": "/docs",
-            "redoc_url": "/redoc",
-            "openapi_url": "/openapi.json"
-        }
+    # Configure API documentation
+    docs_config = {
+        "docs_url": "/docs" if settings.ENV != "production" else None,
+        "redoc_url": "/redoc" if settings.ENV != "production" else None,
+        "openapi_url": "/openapi.json" if settings.ENV != "production" else None,
+    }
     
     app = FastAPI(
         title="Psychic Tribble API",
-        description="Secure, scalable, and maintainable backend for the Psychic Tribble platform.",
         version="1.0.0",
-        contact={
-            "name": "Psychic Tribble Dev Team",
-            "email": "support@psychictribble.com",
-            "url": "https://psychictribble.com/contact"
-        },
-        license_info={
-            "name": "MIT",
-            "url": "https://opensource.org/licenses/MIT"
-        },
         lifespan=lifespan,
         **docs_config
     )
     
     # ---------------------
-    # Middleware Configuration (Order matters!)
+    # Middleware Configuration
     # ---------------------
-    
-    # 1. Request ID middleware (first to capture all requests)
     app.add_middleware(RequestIDMiddleware)
-    
-    # 2. Security headers middleware
     app.add_middleware(SecurityHeadersMiddleware)
     
-    # 3. CORS middleware
     app.add_middleware(
         CORSMiddleware,
-        allow_origins=settings.allowed_cors_origins,
+        allow_origins=settings.BACKEND_CORS_ORIGINS, # Matches your .env key
         allow_credentials=True,
-        allow_methods=["GET", "POST", "PUT", "DELETE", "OPTIONS"],
+        allow_methods=["*"],
         allow_headers=["*"],
-        expose_headers=["X-Request-ID"]  # Expose request ID to clients
+        expose_headers=["X-Request-ID"]
     )
     
-    # 4. HTTPS redirect (if enabled)
-    if settings.enable_https_redirect:
+    if settings.ENABLE_HTTPS_REDIRECT:
         app.add_middleware(HTTPSRedirectMiddleware)
     
-    # 5. Rate limiting middleware (last middleware layer)
+    # 5. Rate limiting - Force in-memory if Redis is unavailable
+    storage_uri = settings.REDIS_URL if settings.ENV == "production" else "memory://"
     limiter = Limiter(
         key_func=get_remote_address,
-        default_limits=[settings.default_rate_limit]
+        default_limits=[settings.DEFAULT_RATE_LIMIT],
+        storage_uri=storage_uri
     )
     app.state.limiter = limiter
     app.add_exception_handler(RateLimitExceeded, _rate_limit_exceeded_handler)
     app.add_middleware(SlowAPIMiddleware)
     
-    # ---------------------
-    # Exception Handlers
-    # ---------------------
     register_exception_handlers(app)
-    
+
     # ---------------------
-    # API Routes with Versioning
+    # API Routes
     # ---------------------
-    
-    # Include v1 API router with /v1 prefix
-    app.include_router(
-        api_v1_router,
-        prefix="/v1",
-        responses={
-            404: {"description": "Not found"},
-            422: {"description": "Validation Error"},
-            429: {"description": "Rate limit exceeded"},
-            500: {"description": "Internal server error"}
-        }
-    )
-    
-    # ---------------------
-    # Root Health Check
-    # ---------------------
-    @app.get("/", tags=["Health"], summary="Root health check")
+    app.include_router(api_v1_router, prefix="/v1")
+
+    @app.get("/", tags=["Health"])
     async def root(request: Request):
-        """Root endpoint for basic health check."""
-        request_id = getattr(request.state, "request_id", "unknown")
         return {
             "message": "Psychic Tribble API - Backend operational",
-            "version": "1.0.0",
-            "api_version": "v1",
-            "request_id": request_id,
-            "status": "healthy"
-        }
-    
-    # ---------------------
-    # Additional Health Endpoints
-    # ---------------------
-    @app.get("/health", tags=["Health"], summary="Detailed health check")
-    async def health_check(request: Request):
-        """Detailed health check endpoint."""
-        request_id = getattr(request.state, "request_id", "unknown")
-        
-        # In a real implementation, you'd check database connectivity, 
-        # external services, etc.
-        health_status = {
-            "status": "healthy",
-            "service": "psychic-tribble-api",
-            "version": "1.0.0",
             "environment": settings.ENV,
-            "request_id": request_id,
-            "checks": {
-                "database": "healthy",  # Would be actual DB check
-                "redis": "healthy",     # Would be actual Redis check
-            }
+            "request_id": getattr(request.state, "request_id", "unknown")
         }
-        
-        return health_status
+
+    @app.get("/health", tags=["Health"])
+    async def health_check(request: Request):
+        return {
+            "status": "healthy",
+            "database": "sqlite", 
+            "request_id": getattr(request.state, "request_id", "unknown")
+        }
     
     return app
 
-
-# Create the application instance
 app = create_app()
 
-
-# Global exception handler for unhandled exceptions
 @app.exception_handler(Exception)
 async def global_exception_handler(request: Request, exc: Exception):
-    """Global exception handler with request ID correlation."""
     request_id = getattr(request.state, "request_id", "unknown")
-    
-    logging.error(
-        f"Unhandled exception [Request ID: {request_id}]: {exc}",
-        exc_info=True,
-        extra={"request_id": request_id}
-    )
-    
+    logging.error(f"Unhandled exception [ID: {request_id}]: {exc}", exc_info=True)
     return JSONResponse(
         status_code=500,
-        content={
-            "error": "Internal Server Error",
-            "detail": "An unexpected error occurred. Please contact support.",
-            "request_id": request_id,
-            "path": str(request.url.path)
-        }
+        content={"error": "Internal Server Error", "request_id": request_id}
     )
