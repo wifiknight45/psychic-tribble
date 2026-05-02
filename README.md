@@ -521,8 +521,3 @@ flowchart TD
 <!-- END STRUCTURE -->
 
 
-⚠️ Proprietary Software Notice ⚠️ 
-This codebase is proprietary and confidential. Unauthorized use, copying, modification, or distribution is prohibited. For access or licensing inquiries, contact the development team.
-Copyright © 2025 Psychic Tribble. All rights reserved.
-This software is proprietary and confidential. Unauthorized use is prohibited without written permission from the authors.
-Built with ❤️ in California using FastAPI and modern Python practices.
