@@ -2,7 +2,7 @@ fastapi[standard]==0.111.0  # FastAPI with interactive docs, JSON Schema, perfor
 uvicorn[standard]==0.35.0   # ASGI server with HTTP/1.1, HTTP/2, WebSockets, auto-reload
 gunicorn==23.0.0            # Production WSGI server for running uvicorn workers
 sqlalchemy==2.0.35          # SQL toolkit and ORM for database operations
-psycopg2-binary==2.9.9      # PostgreSQL adapter for development (use psycopg in production)
+psycopg2-binary==2.9.12      # PostgreSQL adapter for development (use psycopg in production)
 psycopg==3.2.2              # Modern PostgreSQL adapter for production, supports async
 alembic==1.16.4             # Database migration tool for SQLAlchemy
 redis==5.0.8                # Python client for Redis, used for rate limiting and caching
